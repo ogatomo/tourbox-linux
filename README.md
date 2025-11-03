@@ -1,5 +1,9 @@
 # TourBox Elite Linux Driver
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Platform: Linux](https://img.shields.io/badge/platform-linux-lightgrey.svg)](https://www.linux.org/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+
 Linux driver for the TourBox Elite - a Bluetooth Low Energy (BLE) input device by TourBox Tech Inc. This driver translates BLE input events to Linux input events via evdev/uinput.
 
 > **⚠️ Important:** This driver is for **Bluetooth connections only**. It does **NOT** support USB connections.
