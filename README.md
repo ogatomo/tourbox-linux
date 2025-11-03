@@ -22,7 +22,7 @@ Linux driver for the TourBox Elite - a Bluetooth Low Energy (BLE) input device b
 - Linux (Debian/Ubuntu tested)
 - Python 3.9+
 - Bluetooth support (bluez)
-- Running on Wayland (for profile mode) or X11 (simple mode only)
+- Running on Wayland (for app-specific profiles) or X11 (default profile only)
 - **For profile mode (app-specific mappings):**
   - **KDE Plasma:** `kdotool` required (see installation below)
   - **GNOME:** [Focused Window D-Bus extension](https://extensions.gnome.org/extension/5592/focused-window-d-bus/) required
@@ -115,7 +115,7 @@ If you're using GNOME on Wayland and want profile mode (app-specific mappings), 
    # Should show: focused-window-dbus@flexagoon.com
    ```
 
-Without this extension, profile mode will not work on GNOME (you can still use simple mode with a single mapping for all apps).
+Without this extension, profile mode will not work on GNOME (the driver will use the default profile for all apps).
 
 **Note:** Sway and Hyprland users don't need any additional software.
 
