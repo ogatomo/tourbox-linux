@@ -365,6 +365,9 @@ class TourBoxConfigWindow(QMainWindow):
 
         self.statusBar().showMessage(f"Profile: {profile.name}")
 
+        # Clear any highlighted control from previous profile
+        self.controller_view.clear_highlight()
+
         # Load profile's controls into controls list (loads from saved data)
         self.controls_list.load_profile(profile)
 

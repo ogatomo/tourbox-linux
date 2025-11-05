@@ -14,7 +14,8 @@ Linux driver for the TourBox Elite - a Bluetooth Low Energy (BLE) input device b
 - ✅ **Full Button Mapping** - All buttons, knobs, scroll wheel, and dial supported
 - ✅ **Application Profiles** - Different button mappings per application (Wayland only)
 - ✅ **Systemd Integration** - Runs as a user service, starts on login
-- ✅ **Easy Configuration** - Simple INI-style config file
+- ✅ **Easy Configuration** - Simple INI-style config file or graphical GUI
+- ✅ **Configuration GUI** - Qt-based graphical interface for visual configuration
 - ✅ **Window Detection** - Automatic profile switching based on focused window (Wayland)
 
 ## Requirements
@@ -119,6 +120,32 @@ Without this extension, profile mode will not work on GNOME (the driver will use
 
 **Note:** Sway and Hyprland users don't need any additional software.
 
+## Configuration GUI
+
+The installation automatically includes a **graphical configuration tool** that makes it easy to configure button mappings without editing config files manually.
+
+### Running the GUI
+
+After installation, simply run:
+
+```bash
+tourbox-gui
+```
+
+That's it! The launcher script handles everything automatically.
+
+### What You Can Do with the GUI
+
+- **Visual Configuration** - See a diagram of your TourBox with clickable controls
+- **Profile Management** - Create, edit, and delete application-specific profiles
+- **Window Matching** - Use "Capture Active Window" to automatically detect window properties
+- **Test Mode** - Test your button mappings with the physical device before saving
+- **Easy Key Assignment** - Point-and-click interface for keyboard shortcuts and mouse wheel actions
+
+**📖 See the [Complete GUI User Guide](docs/GUI_USER_GUIDE.md) for detailed instructions, tutorials, and troubleshooting.**
+
+> **Note:** The GUI automatically stops the driver when you launch it and restarts it when you exit. This is because both cannot access the device simultaneously via Bluetooth.
+
 ## Manual Installation
 
 If you prefer manual setup:
@@ -127,8 +154,9 @@ If you prefer manual setup:
 # 1. Create virtual environment
 python3 -m venv venv
 
-# 2. Install the driver
+# 2. Install the driver and GUI dependencies
 ./venv/bin/pip install -e .
+./venv/bin/pip install -r tourboxelite/gui/requirements.txt
 
 # 3. Find your TourBox MAC address
 bluetoothctl devices
@@ -347,7 +375,8 @@ sudo usermod -a -G input $USER
 
 ## Documentation
 
-- [Detailed configuration guide](docs/CONFIG_GUIDE.md)
+- **[GUI User Guide](docs/GUI_USER_GUIDE.md)** - Complete guide for the graphical configuration tool
+- [Configuration guide](docs/CONFIG_GUIDE.md) - Manual config file editing
 - [Example configurations](tourboxelite/default_mappings.conf)
 - [Development guide](docs/DEVELOPMENT.md)
 

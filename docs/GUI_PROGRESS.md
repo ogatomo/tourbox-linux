@@ -25,7 +25,7 @@ Building a Qt-based GUI application for configuring TourBox Elite button mapping
 #### 1. Project Structure
 - Created `tourboxelite/gui/` directory with modular architecture
 - All GUI code is self-contained and doesn't modify existing driver
-- Can run with: `python -m tourboxelite.gui`
+- Can run with: `tourbox-gui` (launcher script) or `python -m tourboxelite.gui`
 
 **Files created:**
 ```
@@ -345,6 +345,10 @@ None known at this time.
 
 **GUI entry point:**
 ```bash
+# Using launcher script (installed to ~/.local/bin/)
+tourbox-gui
+
+# Or directly via Python module
 source venv/bin/activate
 python -m tourboxelite.gui
 ```

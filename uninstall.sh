@@ -64,11 +64,54 @@ if [ -f "$CONFIG_FILE" ]; then
     fi
 fi
 
-# Ask about PID file
+# Remove PID file
 PID_FILE="${XDG_RUNTIME_DIR:-/tmp}/tourbox.pid"
 if [ -f "$PID_FILE" ]; then
     rm "$PID_FILE"
     echo -e "${GREEN}✓${NC} PID file removed"
+fi
+
+# Remove GUI launcher script
+LAUNCHER_FILE="$HOME/.local/bin/tourbox-gui"
+if [ -f "$LAUNCHER_FILE" ]; then
+    echo "Removing GUI launcher..."
+    rm "$LAUNCHER_FILE"
+    echo -e "${GREEN}✓${NC} Launcher script removed"
+fi
+
+# Get installation directory
+INSTALL_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Ask about removing installation directory
+echo ""
+read -p "Remove installation directory ($INSTALL_DIR)? (y/N): " -n 1 -r
+echo ""
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "Scheduling directory removal..."
+
+    # Create a temporary cleanup script that will delete the installation directory
+    # We can't delete the directory while this script is running from it,
+    # so we create a separate script that runs after this one exits
+    CLEANUP_SCRIPT="/tmp/tourbox_cleanup_$$.sh"
+
+    cat > "$CLEANUP_SCRIPT" <<EOF
+#!/bin/bash
+# TourBox cleanup script - auto-generated
+sleep 1
+rm -rf "$INSTALL_DIR"
+rm -f "\$0"
+EOF
+
+    chmod +x "$CLEANUP_SCRIPT"
+
+    # Execute cleanup script in background
+    nohup "$CLEANUP_SCRIPT" >/dev/null 2>&1 &
+
+    echo -e "${GREEN}✓${NC} Installation directory will be removed"
+    REMOVING_DIR=true
+else
+    echo -e "${YELLOW}!${NC} Installation directory kept: $INSTALL_DIR"
 fi
 
 echo ""
@@ -76,9 +119,8 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${GREEN}✓ Uninstallation Complete!${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
-echo "Note: The driver files remain in:"
-echo "  $(dirname "${BASH_SOURCE[0]}")"
-echo ""
-echo "To remove completely:"
-echo "  rm -rf $(dirname "${BASH_SOURCE[0]}")"
-echo ""
+
+if [ "$REMOVING_DIR" = "true" ]; then
+    echo "The installation directory is being removed in the background."
+    echo ""
+fi

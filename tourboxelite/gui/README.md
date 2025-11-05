@@ -4,18 +4,10 @@ Graphical interface for configuring TourBox Elite button mappings and applicatio
 
 ## Installation
 
-### Prerequisites
-
-The GUI requires additional dependencies beyond the base driver:
+The GUI dependencies are **automatically installed** by the main `install.sh` script. If you performed a manual installation, ensure you have the GUI dependencies:
 
 ```bash
 pip install -r tourboxelite/gui/requirements.txt
-```
-
-Or install manually:
-
-```bash
-pip install PySide6 qasync
 ```
 
 ## Usage
@@ -23,8 +15,10 @@ pip install PySide6 qasync
 ### Running the GUI
 
 ```bash
-python -m tourboxelite.gui
+tourbox-gui
 ```
+
+The installer creates a launcher script in `~/.local/bin/tourbox-gui` that you can run from anywhere.
 
 ### What the GUI Does
 
@@ -52,9 +46,17 @@ python -m tourboxelite.gui
 - **Window Matching:** Capture active window for automatic profile switching
 - **Test Mode:** Restart driver to test your changes
 
+## Documentation
+
+**📖 [Complete User Guide](../../docs/GUI_USER_GUIDE.md)** - Comprehensive guide with tutorials, tips, and troubleshooting
+
+**Development Documentation:**
+- [PRD](../../docs/GUI_PRD.md) - Product requirements and specifications
+- [Progress](../../docs/GUI_PROGRESS.md) - Development status and implementation notes
+
 ## Development Status
 
-This GUI is currently in development. See the [PRD](../../docs/GUI_PRD.md) for complete feature specifications.
+**✅ Feature Complete** - The GUI is fully functional for configuring TourBox Elite button mappings and profiles. See [GUI_PROGRESS.md](../../docs/GUI_PROGRESS.md) for detailed implementation status.
 
 ## Architecture
 
