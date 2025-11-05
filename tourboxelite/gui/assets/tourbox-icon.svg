@@ -8,7 +8,7 @@
    version="1.1"
    id="svg1"
    inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
-   sodipodi:docname="app_icon.svg"
+   sodipodi:docname="tourbox-icon.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +24,7 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="1"
-     inkscape:cx="110"
+     inkscape:cx="109.5"
      inkscape:cy="135"
      inkscape:window-width="2560"
      inkscape:window-height="1412"
@@ -86,7 +86,7 @@
          ry="3.5710073"
          inkscape:label="knob_click small outline" />
       <path
-         style="display:inline;fill:#e5e5e7;fill-opacity:1;stroke:#000000;stroke-width:0.141111;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.141111;stroke-dasharray:none;stroke-opacity:1"
          id="rect37-1-8"
          width="1.4486159"
          height="8.5569239"
