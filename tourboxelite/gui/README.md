@@ -50,14 +50,6 @@ The installer creates a launcher script in `/usr/local/bin/tourbox-gui` that you
 
 **📖 [Complete User Guide](../../docs/GUI_USER_GUIDE.md)** - Comprehensive guide with tutorials, tips, and troubleshooting
 
-**Development Documentation:**
-- [PRD](../../docs/GUI_PRD.md) - Product requirements and specifications
-- [Progress](../../docs/GUI_PROGRESS.md) - Development status and implementation notes
-
-## Development Status
-
-**✅ Feature Complete** - The GUI is fully functional for configuring TourBox Elite button mappings and profiles. See [GUI_PROGRESS.md](../../docs/GUI_PROGRESS.md) for detailed implementation status.
-
 ## Architecture
 
 The GUI is built with:

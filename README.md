@@ -141,7 +141,7 @@ Without this extension, profile mode will not work on GNOME (the driver will use
 
 ## Configuration GUI
 
-The installation automatically includes a **graphical configuration tool** that makes it easy to configure button mappings without editing config files manually.
+The driver includes a **graphical configuration tool** that makes it easy to configure button mappings without editing config files manually.
 
 ![TourBox Elite Configuration GUI](docs/images/gui-screenshot.png)
 

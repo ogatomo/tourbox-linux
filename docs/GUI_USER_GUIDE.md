@@ -52,14 +52,11 @@ Simply run:
 tourbox-gui
 ```
 
-The installation creates a launcher script that automatically activates the virtual environment and starts the GUI. You can run this command from any directory.
-
 **What happens on launch:**
 
 1. The GUI automatically **stops the TourBox driver** (if running)
-2. Shows a progress dialog with status updates
-3. Loads your existing configuration from `~/.config/tourbox/mappings.conf`
-4. Displays all profiles and button mappings
+2. Loads your existing configuration from `~/.config/tourbox/mappings.conf`
+3. Displays all profiles and button mappings
 
 **On exit:**
 
@@ -170,7 +167,7 @@ The GUI has a 4-panel layout:
 4. A dialog appears asking if you would like to set up window matching rules:
    - Click **Yes** 
    - Click **"Capture Active Window"**
-   - I dialog box appears giving you 5 seconds - click on VS Code window
+   - A dialog box appears giving you 5 seconds to click on VS Code window
    - The GUI auto-fills the App ID and Window Class fields
    - Click **Apply**
 5. Customize button mappings for VS Code (see Task 1)
