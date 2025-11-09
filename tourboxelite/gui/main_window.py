@@ -33,7 +33,6 @@ class TourBoxConfigWindow(QMainWindow):
         self.setWindowTitle("TourBox Elite Configuration")
         self.setMinimumSize(1000, 700)
         self.resize(1280, 1024)
-        self.driver_was_running = False
 
         # Set window icon
         self._set_window_icon()
@@ -42,7 +41,6 @@ class TourBoxConfigWindow(QMainWindow):
         self.current_profile = None
         self.modified_mappings = {}  # control_name -> action_string
         self.is_modified = False
-        self.is_testing = False  # Track if we're in testing mode
         self.profile_original_names = {}  # Track original names of profiles (for renames)
 
         # Create menu bar
@@ -116,18 +114,10 @@ class TourBoxConfigWindow(QMainWindow):
         # Save action
         self.save_action = QAction("&Save", self)
         self.save_action.setShortcut(QKeySequence.Save)
-        self.save_action.setStatusTip("Save profile changes to configuration file")
+        self.save_action.setStatusTip("Save profile changes and apply configuration")
         self.save_action.triggered.connect(self._on_save)
         self.save_action.setEnabled(False)
         file_menu.addAction(self.save_action)
-
-        # Test action
-        self.test_action = QAction("&Test", self)
-        self.test_action.setShortcut(QKeySequence("Ctrl+T"))
-        self.test_action.setStatusTip("Start test mode - save and start driver to test with physical device")
-        self.test_action.triggered.connect(self._on_test)
-        self.test_action.setEnabled(False)
-        file_menu.addAction(self.test_action)
 
         file_menu.addSeparator()
 
@@ -145,9 +135,6 @@ class TourBoxConfigWindow(QMainWindow):
 
         # Add save button
         toolbar.addAction(self.save_action)
-
-        # Add test button
-        toolbar.addAction(self.test_action)
 
     def _set_window_icon(self):
         """Set the window icon from assets"""
@@ -175,96 +162,12 @@ class TourBoxConfigWindow(QMainWindow):
             return
         self._initialized = True
 
-        # Use QTimer to ensure window is fully rendered before showing dialog
-        QTimer.singleShot(100, self._perform_initialization)
-
-    def _perform_initialization(self):
-        """Perform initialization steps with visual feedback"""
-        # Create progress dialog
-        self.progress = QProgressDialog(
-            "Initializing...",
-            None,  # No cancel button
-            0, 0,  # Indeterminate progress (min=0, max=0)
-            self
-        )
-        self.progress.setWindowTitle("Initializing TourBox Configuration")
-        self.progress.setWindowModality(Qt.WindowModal)
-        self.progress.setMinimumDuration(0)  # Show immediately
-        self.progress.setAutoClose(False)  # Don't auto-close
-        self.progress.setAutoReset(False)  # Don't auto-reset
-        self.progress.setValue(0)
-        self.progress.show()
-
-        # Force the dialog to paint by processing events
-        QApplication.processEvents()
-
-        # Defer the actual work to allow dialog to fully render
-        QTimer.singleShot(50, self._check_driver_status)
-
-    def _check_driver_status(self):
-        """Step 1: Check driver status"""
-        self.progress.setLabelText("Checking driver status...")
-        QApplication.processEvents()
-
-        # Small delay to ensure message is visible
-        QTimer.singleShot(100, self._stop_driver_step)
-
-    def _stop_driver_step(self):
-        """Step 2: Stop driver"""
-        self.progress.setLabelText("Stopping TourBox driver service...")
-        QApplication.processEvents()
-
-        self._stop_driver()
-
-        # Continue to next step
-        QTimer.singleShot(50, self._load_profiles_step)
-
-    def _load_profiles_step(self):
-        """Step 3: Load profiles"""
-        self.progress.setLabelText("Loading configuration...")
-        QApplication.processEvents()
-
+        # Load profiles directly
         self._load_profiles()
 
-        # Finish initialization
-        QTimer.singleShot(50, self._finish_initialization)
-
-    def _finish_initialization(self):
-        """Step 4: Finish and close dialog"""
-        # Close progress dialog
-        self.progress.close()
-
-        # Update status bar with driver status
-        if self.driver_was_running:
-            self.statusBar().showMessage("Ready - Driver stopped (GUI has exclusive access)")
-        else:
-            self.statusBar().showMessage("Ready - Driver was not running")
-
+        # Update status bar
+        self.statusBar().showMessage("Ready")
         logger.info("Initialization complete")
-
-    def _stop_driver(self):
-        """Stop the TourBox driver service"""
-        # Check if driver is running
-        self.driver_was_running = DriverManager.is_running()
-
-        if not self.driver_was_running:
-            logger.info("Driver is not running, no need to stop")
-            return
-
-        logger.info("Stopping driver...")
-
-        success, message = DriverManager.stop_driver()
-
-        if success:
-            logger.info("Driver stopped successfully")
-        else:
-            logger.error(f"Failed to stop driver: {message}")
-            QMessageBox.warning(
-                self,
-                "Driver Stop Failed",
-                f"Failed to stop the TourBox driver:\n{message}\n\n"
-                "The GUI may not be able to connect to the device."
-            )
 
     def _load_profiles(self):
         """Load profiles from configuration file"""
@@ -386,9 +289,8 @@ class TourBoxConfigWindow(QMainWindow):
         self.is_modified = False
         self._update_window_title()
 
-        # Disable Save button, but enable Test button (can test saved config)
+        # Disable Save button
         self.save_action.setEnabled(False)
-        self.test_action.setEnabled(True)
 
         self.statusBar().showMessage(f"Profile: {profile.name}")
 
@@ -431,9 +333,8 @@ class TourBoxConfigWindow(QMainWindow):
         self.is_modified = False
         self._update_window_title()
 
-        # Disable Save button, enable Test button
+        # Disable Save button
         self.save_action.setEnabled(False)
-        self.test_action.setEnabled(True)
 
         self.statusBar().showMessage(f"Profile: {profile.name}")
 
@@ -488,9 +389,8 @@ class TourBoxConfigWindow(QMainWindow):
         self.is_modified = True
         self._update_window_title()
 
-        # Enable Save and Test buttons
+        # Enable Save button
         self.save_action.setEnabled(True)
-        self.test_action.setEnabled(True)
 
         # Convert action string to human-readable format
         readable_action = self._action_to_readable(action_str)
@@ -581,20 +481,37 @@ class TourBoxConfigWindow(QMainWindow):
             self.is_modified = False
             self._update_window_title()
 
-            # Disable Save button, keep Test enabled
+            # Disable Save button
             self.save_action.setEnabled(False)
-            self.test_action.setEnabled(True)
 
             # Clean up old backups
             cleanup_old_backups()
 
-            self.statusBar().showMessage("Profile saved successfully")
-            QMessageBox.information(
-                self,
-                "Save Successful",
-                f"Profile '{self.current_profile.name}' has been saved.\n\n"
-                "Use Test to restart the driver and try your changes."
-            )
+            # Send SIGHUP to driver to apply new configuration
+            logger.info("Applying configuration changes...")
+            reload_success, reload_message = DriverManager.reload_driver()
+
+            if reload_success:
+                logger.info("Configuration applied successfully")
+                self.statusBar().showMessage("Profile saved and configuration applied")
+                QMessageBox.information(
+                    self,
+                    "Save Successful",
+                    f"Profile '{self.current_profile.name}' has been saved.\n\n"
+                    "The new configuration has been applied.\n"
+                    "Switch to your application to test the new mappings."
+                )
+            else:
+                logger.warning(f"Failed to apply configuration: {reload_message}")
+                self.statusBar().showMessage("Profile saved (configuration not applied)")
+                QMessageBox.warning(
+                    self,
+                    "Save Successful (Apply Failed)",
+                    f"Profile '{self.current_profile.name}' has been saved.\n\n"
+                    f"However, failed to apply the configuration:\n{reload_message}\n\n"
+                    "You may need to manually restart the driver:\n"
+                    "  systemctl --user restart tourbox"
+                )
         else:
             self.statusBar().showMessage("Failed to save profile")
             QMessageBox.critical(
@@ -603,229 +520,6 @@ class TourBoxConfigWindow(QMainWindow):
                 f"Failed to save profile '{self.current_profile.name}'.\n\n"
                 "Check the logs for details."
             )
-
-    def _on_test(self):
-        """Handle Test/Stop Test action - toggle between testing and editing mode"""
-        if self.is_testing:
-            # Currently testing - stop the driver
-            self._stop_testing()
-        else:
-            # Currently editing - start testing
-            self._start_testing()
-
-    def _start_testing(self):
-        """Start testing mode - save, start driver, disable UI"""
-        if not self.current_profile:
-            QMessageBox.warning(self, "No Profile", "No profile is currently selected.")
-            return
-
-        # Save first if there are modifications (mappings or profile metadata)
-        if self.is_modified:
-            logger.info("Saving before test...")
-
-            # Check if profile exists in config (could be new, unsaved profile)
-            from .config_writer import profile_exists_in_config
-            original_name = self.profile_original_names.get(id(self.current_profile), self.current_profile.name)
-            profile_exists = profile_exists_in_config(original_name)
-
-            if not profile_exists:
-                # This is a new profile - create it
-                logger.info(f"Creating new profile before test: {self.current_profile.name}")
-                success = create_new_profile(self.current_profile)
-                # Update the original name tracker for the newly created profile
-                if success:
-                    self.profile_original_names[id(self.current_profile)] = self.current_profile.name
-            else:
-                # Existing profile - save metadata and mappings
-                # Determine if profile was renamed
-                old_name = original_name if original_name != self.current_profile.name else None
-
-                # Save profile metadata (name, window matching)
-                metadata_success = save_profile_metadata(self.current_profile, old_name)
-                # Update the original name tracker if profile was renamed
-                if old_name and metadata_success:
-                    self.profile_original_names[id(self.current_profile)] = self.current_profile.name
-
-                # Save control mappings
-                mappings_success = True
-                if self.modified_mappings:
-                    mappings_success = save_profile(self.current_profile, self.modified_mappings)
-
-                success = metadata_success and mappings_success
-
-            if not success:
-                QMessageBox.critical(
-                    self,
-                    "Save Failed",
-                    "Failed to save changes. Cannot test without saving."
-                )
-                return
-
-            # Reload profiles from config to sync in-memory state with saved state
-            logger.info("Reloading profiles from config after save...")
-            current_profile_name = self.current_profile.name  # Remember which profile we're testing
-            profiles = load_profiles()
-
-            # Update the profile_original_names tracking
-            self.profile_original_names = {id(profile): profile.name for profile in profiles}
-
-            # Find the current profile in the reloaded list
-            for profile in profiles:
-                if profile.name == current_profile_name:
-                    self.current_profile = profile
-                    break
-
-            # Update profile manager's profiles list
-            self.profile_manager.profiles = profiles
-
-            # Manually update profile manager's current profile and reselect
-            self.profile_manager.current_profile = self.current_profile
-            self.profile_manager._reload_profile_list()
-
-            # Reload controls list to show saved values
-            self.controls_list.load_profile(self.current_profile)
-
-            # Clear modified state
-            self.modified_mappings = {}
-            self.is_modified = False
-            self._update_window_title()
-            self.save_action.setEnabled(False)
-
-            # Clean up old backups
-            cleanup_old_backups()
-
-        # Show progress dialog
-        logger.info("Starting driver for testing...")
-        progress = QProgressDialog("Starting TourBox driver for testing...", None, 0, 0, self)
-        progress.setWindowTitle("Starting Test Mode")
-        progress.setWindowModality(Qt.WindowModal)
-        progress.setMinimumDuration(0)
-        progress.show()
-        QApplication.processEvents()
-
-        success, message = DriverManager.start_driver()
-
-        progress.close()
-
-        if success:
-            logger.info("Driver started successfully - entering test mode")
-
-            # Enter testing mode
-            self.is_testing = True
-
-            # Disable entire UI
-            self._set_ui_enabled(False)
-
-            # Change Test button to Stop Test and keep it enabled
-            self.test_action.setText("Stop Test")
-            self.test_action.setEnabled(True)
-
-            self.statusBar().showMessage("Testing mode - Driver running. Click 'Stop Test' when done.")
-
-            QMessageBox.information(
-                self,
-                "Test Mode Active",
-                "Driver is now running.\n\n"
-                "Test your button mappings with the physical TourBox device.\n\n"
-                "Click 'Stop Test' when you're done to continue editing."
-            )
-        else:
-            logger.error(f"Failed to start driver: {message}")
-            self.statusBar().showMessage("Failed to start driver")
-            QMessageBox.critical(
-                self,
-                "Start Failed",
-                f"Failed to start driver:\n{message}\n\n"
-                "You may need to start it manually:\n"
-                "  systemctl --user start tourbox"
-            )
-
-    def _stop_testing(self):
-        """Stop testing mode - stop driver, re-enable UI"""
-        # Create progress dialog
-        self.stop_progress = QProgressDialog(
-            "Preparing to stop driver...",
-            None,  # No cancel button
-            0, 0,  # Indeterminate progress (min=0, max=0)
-            self
-        )
-        self.stop_progress.setWindowTitle("Stopping Test Mode")
-        self.stop_progress.setWindowModality(Qt.WindowModal)
-        self.stop_progress.setMinimumDuration(0)  # Show immediately
-        self.stop_progress.setAutoClose(False)  # Don't auto-close
-        self.stop_progress.setAutoReset(False)  # Don't auto-reset
-        self.stop_progress.setValue(0)
-        self.stop_progress.show()
-
-        # Force the dialog to paint by processing events
-        QApplication.processEvents()
-
-        # Defer the actual work to allow dialog to fully render
-        QTimer.singleShot(50, self._stop_driver_progress)
-
-    def _stop_driver_progress(self):
-        """Step 1 of stop testing: Stop the driver"""
-        self.stop_progress.setLabelText("Stopping TourBox driver service...")
-        QApplication.processEvents()
-
-        logger.info("Stopping driver...")
-        success, message = DriverManager.stop_driver()
-
-        # Store result for next step
-        self.stop_driver_result = (success, message)
-
-        # Continue to next step
-        QTimer.singleShot(100, self._finish_stop_testing)
-
-    def _finish_stop_testing(self):
-        """Step 2 of stop testing: Finish and close dialog"""
-        success, message = self.stop_driver_result
-
-        # Close progress dialog
-        self.stop_progress.close()
-
-        if success:
-            logger.info("Driver stopped successfully - exiting test mode")
-
-            # Exit testing mode
-            self.is_testing = False
-
-            # Re-enable UI
-            self._set_ui_enabled(True)
-
-            # Change button back to Test and keep it enabled
-            self.test_action.setText("Test")
-            self.test_action.setEnabled(True)
-
-            self.statusBar().showMessage("Ready - Driver stopped (GUI has exclusive access)")
-        else:
-            logger.error(f"Failed to stop driver: {message}")
-            self.statusBar().showMessage("Failed to stop driver")
-            QMessageBox.critical(
-                self,
-                "Stop Failed",
-                f"Failed to stop driver:\n{message}\n\n"
-                "You may need to stop it manually:\n"
-                "  systemctl --user stop tourbox"
-            )
-
-    def _set_ui_enabled(self, enabled: bool):
-        """Enable or disable the entire UI (for testing mode)
-
-        Args:
-            enabled: True to enable UI, False to disable
-        """
-        # Disable/enable main components
-        self.profile_manager.setEnabled(enabled)
-        self.controls_list.setEnabled(enabled)
-        self.controller_view.setEnabled(enabled)
-        self.control_editor.setEnabled(enabled)
-
-        # Disable/enable Save action only if we have modifications
-        if enabled:
-            self.save_action.setEnabled(self.is_modified)
-        else:
-            self.save_action.setEnabled(False)
 
     def _action_to_readable(self, action_str: str) -> str:
         """Convert action string to human-readable format
@@ -943,13 +637,8 @@ class TourBoxConfigWindow(QMainWindow):
             super().keyPressEvent(event)
 
     def closeEvent(self, event):
-        """Handle window close event - restart driver if it was running"""
+        """Handle window close event"""
         logger.info("Main window closing")
-
-        # If in testing mode, stop the driver first
-        if self.is_testing:
-            logger.info("Closing while in test mode - stopping driver first")
-            self._stop_testing()
 
         # Check for unsaved changes
         if self.is_modified:
@@ -1007,34 +696,7 @@ class TourBoxConfigWindow(QMainWindow):
                 # Just log that we're discarding - changes will be lost on close
                 logger.info(f"Discarding changes to {self.current_profile.name} on close")
 
-        # Restart driver if it was running when we started
-        if self.driver_was_running:
-            logger.info("Restarting driver...")
-            self.statusBar().showMessage("Restarting driver...")
-
-            success, message = DriverManager.start_driver()
-
-            if success:
-                logger.info("Driver restarted successfully")
-            else:
-                logger.error(f"Failed to restart driver: {message}")
-                reply = QMessageBox.critical(
-                    self,
-                    "Driver Restart Failed",
-                    f"Failed to restart the TourBox driver:\n{message}\n\n"
-                    "You may need to restart it manually:\n"
-                    "  systemctl --user start tourbox\n\n"
-                    "Close anyway?",
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.No
-                )
-
-                if reply == QMessageBox.No:
-                    event.ignore()
-                    return
-        else:
-            logger.info("Driver was not running, not restarting")
-
+        # Accept close event
         event.accept()
 
 

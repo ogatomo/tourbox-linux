@@ -81,6 +81,42 @@ class DriverManager:
             return False, error_msg
 
     @staticmethod
+    def reload_driver() -> Tuple[bool, str]:
+        """Apply new configuration to the TourBox driver via SIGHUP
+
+        Sends SIGHUP signal to the driver process to reload its configuration
+        without restarting the service.
+
+        Returns:
+            Tuple of (success, message)
+        """
+        try:
+            # Use systemctl kill --signal=SIGHUP to send the signal
+            result = subprocess.run(
+                ['systemctl', '--user', 'kill', '--signal=SIGHUP', DriverManager.SERVICE_NAME],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            if result.returncode == 0:
+                logger.info("Configuration reload signal sent successfully")
+                return True, "Configuration applied"
+            else:
+                error_msg = f"Failed to apply configuration: {result.stderr}"
+                logger.error(error_msg)
+                return False, error_msg
+
+        except subprocess.TimeoutExpired:
+            error_msg = "Timeout applying configuration"
+            logger.error(error_msg)
+            return False, error_msg
+        except Exception as e:
+            error_msg = f"Error applying configuration: {e}"
+            logger.error(error_msg)
+            return False, error_msg
+
+    @staticmethod
     def restart_driver() -> Tuple[bool, str]:
         """Restart the TourBox driver service
 

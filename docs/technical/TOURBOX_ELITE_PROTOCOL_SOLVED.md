@@ -325,7 +325,7 @@ python3 ble_unlock_tourbox.py
    - Support all buttons and controls
    - Package as systemd service
 
-### Medium-term (Enhancement)
+### Long-term (Enhancement)
 
 1. **Configuration Support:**
    - Reverse engineer command protocol for:
@@ -343,23 +343,6 @@ python3 ble_unlock_tourbox.py
    - Create evdev driver for X11/Wayland
    - Add udev rules for automatic setup
    - Package for Debian/Ubuntu/Arch
-
-### Long-term (Community)
-
-1. **Collaboration:**
-   - Share findings with TourBoxForLinux project (rowan-mcalpin)
-   - Contribute to open-source TourBox drivers
-   - Document protocol publicly
-
-2. **Other Models:**
-   - Test if protocol works on TourBox Neo
-   - Try on TourBox Lite
-   - Compare with other TourBox models
-
-3. **Official Support:**
-   - Request official Linux support from TourBox Tech
-   - Share technical documentation
-   - Advocate for open protocol
 
 ---
 

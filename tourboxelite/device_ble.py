@@ -37,15 +37,21 @@ CONFIG_COMMANDS = [
 
 
 class GracefulKiller:
-    """Handle SIGINT and SIGTERM gracefully"""
+    """Handle SIGINT, SIGTERM, and SIGHUP gracefully"""
     kill_now = False
+    reload_config = False
 
     def __init__(self):
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
+        signal.signal(signal.SIGHUP, self.reload_gracefully)
 
     def exit_gracefully(self, *args):
         self.kill_now = True
+
+    def reload_gracefully(self, *args):
+        self.reload_config = True
+        logger.info("Received SIGHUP - will reload config")
 
 
 class TourBoxBLE:
@@ -165,6 +171,68 @@ class TourBoxBLE:
             )
             logger.debug(f"Virtual input device recreated: {self.controller.device.path}")
 
+    def reload_config_mappings(self):
+        """Reload configuration from file and update mappings
+
+        Called when SIGHUP is received. Reloads the config file and updates
+        the current profile's mappings without restarting the driver.
+        """
+        print("\n🔄 Reloading configuration...")
+        logger.info("Reloading configuration from file")
+
+        try:
+            # Remember current profile name
+            current_profile_name = self.current_profile.name if self.current_profile else 'default'
+
+            # Reload profiles from config
+            new_profiles = load_profiles(self.config_path)
+
+            if not new_profiles:
+                logger.error("Failed to reload config - no profiles found")
+                print("❌ Failed to reload: No profiles found in config")
+                return
+
+            self.profiles = new_profiles
+            logger.info(f"Reloaded {len(self.profiles)} profiles")
+
+            # Find the current profile in the new profiles
+            new_current_profile = next((p for p in self.profiles if p.name == current_profile_name), None)
+
+            if not new_current_profile:
+                # Current profile no longer exists, fall back to default or first profile
+                logger.warning(f"Profile '{current_profile_name}' not found after reload")
+                new_current_profile = next((p for p in self.profiles if p.name == 'default'), self.profiles[0])
+                print(f"⚠️  Profile '{current_profile_name}' not found, using '{new_current_profile.name}'")
+
+            # Update current profile and mapping
+            self.current_profile = new_current_profile
+            self.mapping = new_current_profile.mapping
+
+            # Check if capabilities changed
+            if new_current_profile.capabilities != self.capabilities:
+                logger.info("Capabilities changed - recreating virtual input device")
+                self.capabilities = new_current_profile.capabilities
+
+                # Close old controller
+                if self.controller:
+                    self.controller.close()
+
+                # Create new controller with updated capabilities
+                self.controller = UInput(
+                    self.capabilities,
+                    name='TourBox Elite',
+                    vendor=0xC251,
+                    product=0x2005
+                )
+                logger.debug(f"Virtual input device recreated: {self.controller.device.path}")
+
+            print(f"✅ Configuration reloaded successfully - using profile: {self.current_profile.name}")
+            logger.info(f"Configuration reload complete - active profile: {self.current_profile.name}")
+
+        except Exception as e:
+            logger.error(f"Error reloading config: {e}", exc_info=True)
+            print(f"❌ Error reloading config: {e}")
+
     async def on_window_change(self, window_info):
         """Handle window focus changes
 
@@ -225,6 +293,11 @@ class TourBoxBLE:
 
                 # Keep running until disconnected or killed
                 while not self.killer.kill_now and not self.disconnected:
+                    # Check if config reload was requested
+                    if self.killer.reload_config:
+                        self.reload_config_mappings()
+                        self.killer.reload_config = False
+
                     await asyncio.sleep(0.5)
 
                 # Check if user requested exit
@@ -318,6 +391,11 @@ class TourBoxBLE:
         # Connection loop with automatic reconnection
         try:
             while not self.killer.kill_now:
+                # Check if config reload was requested
+                if self.killer.reload_config:
+                    self.reload_config_mappings()
+                    self.killer.reload_config = False
+
                 should_retry = await self.run_connection(monitor_task)
 
                 if not should_retry:

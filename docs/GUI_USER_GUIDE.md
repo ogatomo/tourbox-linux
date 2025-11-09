@@ -22,8 +22,8 @@ The TourBox Elite Configuration GUI is a graphical application that lets you con
 
 - **Visually configure** all 20 controls (buttons, dials, scroll wheel, knob)
 - **Create application-specific profiles** that automatically switch based on the active window
-- **Test configurations** with your physical device before saving
 - **Manage multiple profiles** with an intuitive interface
+- **Test configurations** without leaving the Configuration GUI
 
 No more editing INI files by hand - everything is point-and-click!
 
@@ -54,16 +54,14 @@ tourbox-gui
 
 **What happens on launch:**
 
-1. The GUI automatically **stops the TourBox driver** (if running)
-2. Loads your existing configuration from `~/.config/tourbox/mappings.conf`
-3. Displays all profiles and button mappings
+1. Loads your existing configuration from `~/.config/tourbox/mappings.conf`
+2. Displays all profiles and button mappings
 
 **On exit:**
 
-- The GUI automatically **restarts the driver** (if it was running before)
 - Prompts you to save any unsaved changes
 
-> **Note:** The GUI and driver cannot run at the same time because they both need exclusive access to the TourBox device via Bluetooth.
+> **Note:** The driver continues running while the GUI is open. When you save changes, the configuration is automatically reloaded and applied without restarting the driver.
 
 ---
 
@@ -121,11 +119,10 @@ The GUI has a 4-panel layout:
 ### Menu Bar & Toolbar
 
 - **File Menu:**
-  - Save (Ctrl+S) - Write changes to config file
-  - Test (Ctrl+T) - Test configuration with physical device
+  - Save (Ctrl+S) - Write changes to config file and apply them
   - Quit - Exit the application
 
-- **Toolbar:** Quick access buttons for Save and Test
+- **Toolbar:** Quick access button for Save
 
 - **Status Bar:** Shows current status, profile name, and operation feedback
 
@@ -151,9 +148,10 @@ The GUI has a 4-panel layout:
 5. Click **"Save"** (toolbar or Ctrl+S)
    - Creates a timestamped backup of your config
    - Writes the changes to `~/.config/tourbox/mappings.conf`
+   - Automatically applies the new configuration
    - Success dialog confirms the save
 
-**Result:** The "side" button will now send Ctrl+C when pressed (after restarting the driver or clicking Test).
+**Result:** The "side" button now immediately sends Ctrl+C when pressed! The new configuration was applied automatically.
 
 ### Task 2: Create a New Application-Specific Profile
 
@@ -180,17 +178,15 @@ The GUI has a 4-panel layout:
 **Example:** Test button mappings with the physical device
 
 1. Make changes to button mappings (see Task 1)
-2. Click **"Test"** button (toolbar or Ctrl+T)
-   - Changes are automatically saved first
-   - Click **OK**
-   - GUI becomes disabled except for "Stop Test" button
-3. **Press buttons on your physical TourBox**
-   - Actions are sent to your system
-   - Test that mappings work as expected
-4. Click **"Stop Test"** when done
-   - GUI re-enables for further editing
+2. Click **"Save"** (toolbar or Ctrl+S)
+   - Changes are written to config and applied automatically
+3. **Switch to your target application** (e.g., text editor, browser)
+4. **Press buttons on your physical TourBox**
+   - Actions are sent immediately to your application
+   - Verify that mappings work as expected
+5. **Switch back to the GUI** to make further adjustments if needed
 
-**Result:** You can rapidly iterate: edit → test → edit → test without closing the GUI!
+**Result:** You can rapidly iterate: edit → save → test in app → edit → save without closing anything!
 
 ---
 
@@ -393,8 +389,7 @@ The control does nothing when pressed.
 
 Speed up your workflow with keyboard shortcuts:
 
-- **Ctrl+S** - Save changes
-- **Ctrl+T** - Test configuration
+- **Ctrl+S** - Save changes and apply configuration
 - **Arrow keys** - Navigate between controls in the list
 - **Tab** - Move between UI elements
 
@@ -402,9 +397,10 @@ Speed up your workflow with keyboard shortcuts:
 
 **Quick iteration:**
 1. Keep the GUI open during setup
-2. Use Test mode to try configurations
-3. Stop test → tweak → test again
-4. No need to restart the GUI
+2. Save changes to automatically apply them
+3. Switch to your application to test
+4. Switch back to GUI → tweak → save → test again
+5. No need to close the GUI or restart anything
 
 **Bulk editing:**
 1. Configure one profile completely
@@ -687,8 +683,7 @@ The GUI preserves comments and formatting when saving!
 ## Quick Reference Card
 
 ### Keyboard Shortcuts
-- **Ctrl+S** - Save changes
-- **Ctrl+T** - Test configuration
+- **Ctrl+S** - Save changes and apply configuration
 - **Arrow keys** - Navigate controls
 
 ### Workflow
@@ -696,8 +691,8 @@ The GUI preserves comments and formatting when saving!
 2. Click control
 3. Configure action
 4. Apply
-5. Save (Ctrl+S)
-6. Test (Ctrl+T)
+5. Save (Ctrl+S) - applies automatically
+6. Switch to app and test
 
 ### Action Types
 - **Keyboard** - Key combos (Ctrl+C, Alt+F4, etc.)
@@ -711,10 +706,11 @@ The GUI preserves comments and formatting when saving!
 - **Capture** - Auto-detect window info
 
 ### Testing
-1. Click "Test"
-2. Try physical buttons
-3. Click "Stop Test"
-4. Repeat as needed
+1. Click "Save"
+2. Switch to your app
+3. Try physical buttons
+4. Switch back to GUI to adjust
+5. Repeat as needed
 
 ---
 
