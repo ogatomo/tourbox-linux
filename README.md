@@ -13,6 +13,16 @@ Linux driver for the TourBox Elite and Elite Plus by TourBox Tech Inc. Supports 
 
 > **If you find this useful, please ⭐ star this repo (click the Star button in the top right) to help others discover it!**
 
+## Device Compatibility
+
+| Device | Status | Connection | Notes |
+|--------|--------|------------|-------|
+| TourBox Elite | ✅ Fully Tested | USB, Bluetooth | Full support |
+| TourBox Elite Plus | ✅ Fully Tested | USB, Bluetooth | Full support |
+| TourBox Neo | ❓ Untested | USB only | [Help us test!](https://github.com/AndyCappDev/tourboxelite/discussions) - May work, needs verification |
+
+> **Have a TourBox Neo?** We'd love your help testing compatibility! See our [GitHub Discussions](https://github.com/AndyCappDev/tourboxelite/discussions) for details.
+
 ## Features
 
 - ✅ **Graphical Configuration** - Full-featured GUI for visual configuration with live preview
