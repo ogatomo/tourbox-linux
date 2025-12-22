@@ -1045,7 +1045,7 @@ class TourBoxConfigWindow(QMainWindow):
         about_text = f"""
 <h2>TourBox Linux Driver</h2>
 <p>Version {__version__}</p>
-<p>A Linux driver for the TourBox Neo, Elite and Elite Plus controllers,<br>
+<p>A Linux driver for the TourBox Lite, Neo, Elite and Elite Plus controllers,<br>
 with full GUI configuration support.</p>
 <p><b>Author:</b> Scott Bowman (<a href="https://github.com/AndyCappDev">AndyCappDev</a>)</p>
 <p><a href="https://github.com/AndyCappDev/tourbox-linux">Project Homepage</a></p>

@@ -1,4 +1,4 @@
-# TourBox Neo / Elite / Elite Plus Linux Driver
+# TourBox Lite / Neo / Elite / Elite Plus Linux Driver
 
 **Version 2.3.1**
 
@@ -9,7 +9,7 @@
 **Author:** Scott Bowman ([AndyCappDev](https://github.com/AndyCappDev))
 **Original Repository:** [github.com/AndyCappDev/tourbox-linux](https://github.com/AndyCappDev/tourbox-linux)
 
-Linux driver for the TourBox Neo, Elite and Elite Plus by TourBox Tech Inc. Supports both **USB** and **Bluetooth LE** connections.
+Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc. Supports both **USB** and **Bluetooth LE** connections.
 
 > **If you find this useful, please ⭐ star this repo (click the Star button in the top right) to help others discover it!**
 
@@ -19,9 +19,12 @@ Linux driver for the TourBox Neo, Elite and Elite Plus by TourBox Tech Inc. Supp
 |--------|--------|------------|---------|-------|
 | TourBox Elite | ✅ Fully Tested | USB, Bluetooth | ✅ | Full support |
 | TourBox Elite Plus | ✅ Fully Tested | USB, Bluetooth | ✅ | Full support |
-| TourBox Neo | ❓ Untested | USB only | ❌ | [Help us test!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) - May work, needs verification |
+| TourBox Neo | 🔄 Expected to Work | USB only | ❌ | [Help verify!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) - Same protocol as Elite |
+| TourBox Lite | 🔄 Expected to Work | USB, Bluetooth* | ❌ | [Help verify!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) - Same protocol as Elite |
 
-> **Have a TourBox Neo?** We'd love your help testing compatibility! See our [call for testers](https://github.com/AndyCappDev/tourbox-linux/discussions/6) for details.
+\* Bluetooth available on Lite Bluetooth model only; wired Lite is USB only.
+
+> **Have a TourBox Neo or Lite?** We'd love your help testing compatibility! See our [call for testers](https://github.com/AndyCappDev/tourbox-linux/discussions/6) for details.
 
 ## Features
 
