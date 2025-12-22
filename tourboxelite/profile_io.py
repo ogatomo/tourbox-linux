@@ -264,6 +264,9 @@ def load_profile_from_file(filepath: Path):
         window_class = profile_section.get('window_class')
         window_title = profile_section.get('window_title')  # deprecated but supported
 
+        # Parse enabled state (defaults to True if not specified)
+        enabled = profile_section.get('enabled', 'true').lower() in ('true', 'yes', '1', 'on')
+
         # Parse global haptic settings from [profile] section
         haptic_config = HapticConfig()
         if 'haptic' in profile_section:
@@ -396,7 +399,8 @@ def load_profile_from_file(filepath: Path):
             modifier_base_actions=modifier_base_actions,
             mapping_comments=mapping_comments,
             modifier_combo_comments=modifier_combo_comments,
-            haptic_config=haptic_config
+            haptic_config=haptic_config,
+            enabled=enabled
         )
 
         logger.info(f"Loaded profile from file: {profile}")
@@ -438,6 +442,10 @@ def save_profile_to_file(profile, filepath: Path) -> bool:
             lines.append(f"app_id = {profile.app_id}")
         if profile.window_class:
             lines.append(f"window_class = {profile.window_class}")
+
+        # Only write enabled if False (True is the default)
+        if not profile.enabled:
+            lines.append("enabled = false")
 
         # Global haptic settings in profile section
         if profile.haptic_config.global_setting is not None:

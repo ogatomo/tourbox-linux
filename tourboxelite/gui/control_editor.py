@@ -112,6 +112,14 @@ SPECIAL_KEYS = {
     'F1': e.KEY_F1, 'F2': e.KEY_F2, 'F3': e.KEY_F3, 'F4': e.KEY_F4,
     'F5': e.KEY_F5, 'F6': e.KEY_F6, 'F7': e.KEY_F7, 'F8': e.KEY_F8,
     'F9': e.KEY_F9, 'F10': e.KEY_F10, 'F11': e.KEY_F11, 'F12': e.KEY_F12,
+    '--- Media Keys ---': None,
+    'Volume Up': e.KEY_VOLUMEUP,
+    'Volume Down': e.KEY_VOLUMEDOWN,
+    'Mute': e.KEY_MUTE,
+    'Play/Pause': e.KEY_PLAYPAUSE,
+    'Stop': e.KEY_STOPCD,
+    'Previous Track': e.KEY_PREVIOUSSONG,
+    'Next Track': e.KEY_NEXTSONG,
 }
 
 # All available controls

@@ -42,8 +42,15 @@ class Profile:
     # Haptic feedback configuration
     haptic_config: HapticConfig = field(default_factory=HapticConfig.default_off)
 
+    # Profile enabled state (disabled profiles are skipped during window matching)
+    enabled: bool = True
+
     def matches(self, window_info) -> bool:
         """Check if this profile matches the given window info"""
+        # Disabled profiles never match (except default which is always enabled)
+        if not self.enabled and self.name != 'default':
+            return False
+
         if not window_info:
             return False
 
@@ -142,6 +149,14 @@ KEY_NAMES = {
     'KEY_DOT': e.KEY_DOT,
     'KEY_SLASH': e.KEY_SLASH,
     'KEY_PERIOD': e.KEY_DOT,  # Alias for KEY_DOT
+    # Media keys
+    'KEY_VOLUMEUP': e.KEY_VOLUMEUP,
+    'KEY_VOLUMEDOWN': e.KEY_VOLUMEDOWN,
+    'KEY_MUTE': e.KEY_MUTE,
+    'KEY_PLAYPAUSE': e.KEY_PLAYPAUSE,
+    'KEY_STOPCD': e.KEY_STOPCD,
+    'KEY_PREVIOUSSONG': e.KEY_PREVIOUSSONG,
+    'KEY_NEXTSONG': e.KEY_NEXTSONG,
     # Letter keys
     **{f'KEY_{chr(i)}': getattr(e, f'KEY_{chr(i)}') for i in range(ord('A'), ord('Z') + 1)},
     # Number keys

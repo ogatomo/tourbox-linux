@@ -334,6 +334,22 @@ class ControlsList(QWidget):
             e.KEY_EQUAL: '=',
         }
 
+        # Preferred names for codes that have multiple KEY_ constants
+        # (e.g., KEY_MUTE and KEY_MIN_INTERESTING both = 113)
+        PREFERRED_NAMES = {
+            e.KEY_MUTE: 'Mute',
+            e.KEY_VOLUMEUP: 'Volume Up',
+            e.KEY_VOLUMEDOWN: 'Volume Down',
+            e.KEY_PLAYPAUSE: 'Play/Pause',
+            e.KEY_STOPCD: 'Stop',
+            e.KEY_PREVIOUSSONG: 'Previous',
+            e.KEY_NEXTSONG: 'Next',
+        }
+
+        # Check preferred names first
+        if key_code in PREFERRED_NAMES:
+            return PREFERRED_NAMES[key_code]
+
         # Check if it's a symbol key
         if key_code in SYMBOL_MAP:
             return SYMBOL_MAP[key_code]

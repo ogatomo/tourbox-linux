@@ -9,7 +9,7 @@ from typing import List, Optional
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
     QPushButton, QLabel, QMessageBox, QInputDialog, QDialog, QHeaderView,
-    QFileDialog
+    QFileDialog, QCheckBox
 )
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QFont
@@ -26,6 +26,10 @@ from .config_writer import (
     delete_profile, export_profile, import_profile, install_imported_profile,
     profile_exists_in_config
 )
+
+# Import profile I/O for saving and driver manager for reloading
+from tourboxelite.profile_io import save_profile_to_file, get_profile_filepath
+from .driver_manager import DriverManager
 
 # Import conflict dialog
 from .import_conflict_dialog import ImportConflictDialog
@@ -59,12 +63,13 @@ class ProfileManager(QWidget):
         header.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(header)
 
-        # Profile table (2 columns: Name, Window)
+        # Profile table (3 columns: Name, Window, Active)
         self.profile_table = QTableWidget()
-        self.profile_table.setColumnCount(2)
-        self.profile_table.setHorizontalHeaderLabels(["Name", "Window"])
+        self.profile_table.setColumnCount(3)
+        self.profile_table.setHorizontalHeaderLabels(["Name", "Window", "Active"])
         self.profile_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.profile_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.profile_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.profile_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.profile_table.setSelectionMode(QTableWidget.SingleSelection)
         self.profile_table.setEditTriggers(QTableWidget.NoEditTriggers)  # Read-only
@@ -125,16 +130,33 @@ class ProfileManager(QWidget):
         for row, profile in enumerate(displayed_profiles):
             self.profile_table.insertRow(row)
 
-            # Column 0: Profile name
-            name_item = QTableWidgetItem(profile.name)
-            name_item.setData(Qt.UserRole, profile)  # Store profile object
-            self.profile_table.setItem(row, 0, name_item)
+            # Column 0: Profile name (with warning icon if conflicts exist)
+            conflicts = self._get_conflicting_profiles(profile)
+            if conflicts:
+                conflict_names = ", ".join(c.name for c in conflicts)
+                tooltip = f"Conflict: Multiple active profiles match the same application.\nConflicts with: {conflict_names}\nOnly the first alphabetically will be used."
+                # Use a QLabel with HTML to color only the warning icon
+                label = QLabel(f'<span style="color: #ffaa00;">⚠</span> {profile.name}')
+                label.setToolTip(tooltip)
+                label.setContentsMargins(4, 0, 0, 0)  # Left padding to match other cells
+                # Store profile in a hidden item for data retrieval
+                name_item = QTableWidgetItem()
+                name_item.setData(Qt.UserRole, profile)
+                self.profile_table.setItem(row, 0, name_item)
+                self.profile_table.setCellWidget(row, 0, label)
+            else:
+                name_item = QTableWidgetItem(profile.name)
+                name_item.setData(Qt.UserRole, profile)
+                self.profile_table.setItem(row, 0, name_item)
 
             # Column 1: Window matching info
             match_text = self._get_window_match_text(profile)
             match_item = QTableWidgetItem(match_text)
             match_item.setData(Qt.UserRole, profile)  # Store profile object here too
             self.profile_table.setItem(row, 1, match_item)
+
+            # Column 2: Active checkbox
+            self._add_active_checkbox(row, profile)
 
             # Select default profile by default
             if profile.name == 'default':
@@ -187,16 +209,33 @@ class ProfileManager(QWidget):
         for row, profile in enumerate(displayed_profiles):
             self.profile_table.insertRow(row)
 
-            # Column 0: Profile name
-            name_item = QTableWidgetItem(profile.name)
-            name_item.setData(Qt.UserRole, profile)
-            self.profile_table.setItem(row, 0, name_item)
+            # Column 0: Profile name (with warning icon if conflicts exist)
+            conflicts = self._get_conflicting_profiles(profile)
+            if conflicts:
+                conflict_names = ", ".join(c.name for c in conflicts)
+                tooltip = f"Conflict: Multiple active profiles match the same application.\nConflicts with: {conflict_names}\nOnly the first alphabetically will be used."
+                # Use a QLabel with HTML to color only the warning icon
+                label = QLabel(f'<span style="color: #ffaa00;">⚠</span> {profile.name}')
+                label.setToolTip(tooltip)
+                label.setContentsMargins(4, 0, 0, 0)  # Left padding to match other cells
+                # Store profile in a hidden item for data retrieval
+                name_item = QTableWidgetItem()
+                name_item.setData(Qt.UserRole, profile)
+                self.profile_table.setItem(row, 0, name_item)
+                self.profile_table.setCellWidget(row, 0, label)
+            else:
+                name_item = QTableWidgetItem(profile.name)
+                name_item.setData(Qt.UserRole, profile)
+                self.profile_table.setItem(row, 0, name_item)
 
             # Column 1: Window matching info
             match_text = self._get_window_match_text(profile)
             match_item = QTableWidgetItem(match_text)
             match_item.setData(Qt.UserRole, profile)
             self.profile_table.setItem(row, 1, match_item)
+
+            # Column 2: Active checkbox
+            self._add_active_checkbox(row, profile)
 
             # Reselect the current profile
             if profile == current_profile:
@@ -479,6 +518,122 @@ class ProfileManager(QWidget):
             return f"app_id: {profile.app_id}"
         else:
             return ""
+
+    def _get_conflicting_profiles(self, profile: Profile) -> List[Profile]:
+        """Find other enabled profiles that match the same application
+
+        Args:
+            profile: Profile to check for conflicts
+
+        Returns:
+            List of conflicting Profile objects (excluding the profile itself)
+        """
+        if not profile.enabled or profile.name == 'default':
+            return []
+
+        # Get all matching values for this profile (window_class and/or app_id)
+        profile_values = {v.lower() for v in [profile.window_class, profile.app_id] if v}
+
+        # Skip profiles with no window matching
+        if not profile_values:
+            return []
+
+        conflicts = []
+        for other in self.profiles:
+            # Skip self, disabled profiles, and default
+            if other.name == profile.name or not other.enabled or other.name == 'default':
+                continue
+
+            # Get all matching values for the other profile
+            other_values = {v.lower() for v in [other.window_class, other.app_id] if v}
+
+            # Conflict if any values overlap
+            if profile_values & other_values:
+                conflicts.append(other)
+
+        return conflicts
+
+    def _add_active_checkbox(self, row: int, profile: Profile):
+        """Add active checkbox to a table row
+
+        Args:
+            row: Table row index
+            profile: Profile object
+        """
+        # Create a container widget to center the checkbox
+        container = QWidget()
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setAlignment(Qt.AlignCenter)
+
+        checkbox = QCheckBox()
+        checkbox.setChecked(profile.enabled)
+        checkbox.setProperty("profile_name", profile.name)
+
+        # Default profile is always enabled - disable the checkbox
+        if profile.name == 'default':
+            checkbox.setEnabled(False)
+            checkbox.setToolTip("Default profile is always active")
+        else:
+            checkbox.setToolTip("Enable/disable this profile for automatic window matching")
+            checkbox.stateChanged.connect(self._on_active_toggled)
+
+        layout.addWidget(checkbox)
+        self.profile_table.setCellWidget(row, 2, container)
+
+    def _on_active_toggled(self, state: int):
+        """Handle active checkbox state change
+
+        Args:
+            state: Qt.Checked or Qt.Unchecked
+        """
+        checkbox = self.sender()
+        if not checkbox:
+            return
+
+        profile_name = checkbox.property("profile_name")
+        enabled = state == Qt.Checked.value
+
+        # Find the profile
+        profile = None
+        for p in self.profiles:
+            if p.name == profile_name:
+                profile = p
+                break
+
+        if not profile:
+            logger.error(f"Could not find profile: {profile_name}")
+            return
+
+        # Update profile enabled state
+        profile.enabled = enabled
+        logger.info(f"Profile '{profile_name}' enabled: {enabled}")
+
+        # Save the profile
+        filepath = get_profile_filepath(profile_name)
+        if save_profile_to_file(profile, filepath):
+            logger.info(f"Saved profile: {profile_name}")
+
+            # Reload driver config via SIGHUP
+            success, message = DriverManager.reload_driver()
+            if success:
+                logger.info(f"Driver reloaded: {message}")
+            else:
+                logger.warning(f"Failed to reload driver: {message}")
+
+            # Refresh the profile list to update conflict warnings
+            self._reload_profile_list()
+        else:
+            logger.error(f"Failed to save profile: {profile_name}")
+            # Revert the checkbox state
+            checkbox.blockSignals(True)
+            checkbox.setChecked(not enabled)
+            checkbox.blockSignals(False)
+            QMessageBox.critical(
+                self,
+                "Save Failed",
+                f"Failed to save profile '{profile_name}'."
+            )
 
     def _update_button_states(self):
         """Update button enabled/disabled states"""

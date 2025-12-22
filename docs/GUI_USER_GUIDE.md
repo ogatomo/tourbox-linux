@@ -1,7 +1,7 @@
 # TourBox Configuration GUI - User Guide
 
-**Version:** 1.4
-**Last Updated:** 2025-12-15
+**Version:** 1.5
+**Last Updated:** 2025-12-22
 
 ## Table of Contents
 
@@ -91,9 +91,16 @@ The GUI has a 4-panel layout:
 
 ### 2. Profiles (Bottom-Left)
 
-- **List of all available profiles** with window matching rules
-- The **default profile** is always present and cannot be deleted
-- Shows which windows each profile applies to
+- **List of all available profiles** with three columns:
+  - **Name** - Profile name (with warning icon if conflicts exist)
+  - **Window** - Window matching rules (app_id or window_class)
+  - **Active** - Checkbox to enable/disable the profile
+- The **default profile** is always present, cannot be deleted, and is always active
+- **Active checkbox** - Controls whether a profile participates in automatic window matching:
+  - Checked: Profile will activate when its window rules match
+  - Unchecked: Profile is disabled and will be skipped during matching
+  - Changes take effect immediately (no save required)
+- **Conflict warning** - Profiles with an orange **⚠** icon have conflicting window rules with another active profile. Hover to see which profiles conflict. Only the first alphabetically will be used.
 - Buttons to **create**, **edit**, **delete**, **import**, and **export** profiles
 
 ### 3. Controls Configuration (Top-Right)
@@ -288,13 +295,48 @@ Profiles activate when the window properties match your rules. You can match by:
 
 > **Warning:** Deletion is permanent!
 
+### Enabling and Disabling Profiles
+
+Each profile has an **Active** checkbox that controls whether it participates in automatic window matching.
+
+**To enable/disable a profile:**
+1. Find the profile in the Profiles list
+2. Click the checkbox in the **Active** column
+3. The change takes effect immediately (driver reloads automatically)
+
+**Use cases for disabling profiles:**
+- **Multiple profiles for the same app** - Create variants (e.g., "VS Code - Editing" and "VS Code - Debugging") and enable only the one you want active
+- **Temporary disable** - Turn off a profile without deleting it
+- **Testing** - Disable app-specific profiles to test with the default profile
+
+> **Note:** The default profile is always active and cannot be disabled.
+
+### Profile Conflicts
+
+When two or more **active** profiles match the same application (same window_class or app_id), a conflict exists. The GUI warns you about this:
+
+- Conflicting profiles show an orange **⚠** icon next to their name
+- Hover over the profile name to see which profiles it conflicts with
+- Only the **first profile alphabetically** will be used when the application is focused
+
+**To resolve a conflict:**
+1. **Disable one profile** - Uncheck the Active box for profiles you don't want to use
+2. **Change window matching** - Edit one profile's app_id/window_class to be more specific
+3. **Rename** - If you want a different profile to take priority, rename it to sort first alphabetically
+
+**Example conflict:**
+- "VS Code" profile with `window_class = Code`
+- "VS Code Dev" profile with `window_class = Code`
+
+Both match VS Code windows. "VS Code" wins because it sorts before "VS Code Dev" alphabetically. To use "VS Code Dev" instead, disable "VS Code" by unchecking its Active box.
+
 ### Profile Switching
 
 When the TourBox driver is running:
 
 - The driver monitors the active window every 200ms
-- Compares window properties against all profile rules
-- Switches to the first matching profile
+- Compares window properties against all **active** profile rules
+- Switches to the first matching profile (alphabetically if multiple match)
 - Falls back to default if no match
 
 **In the GUI:**
@@ -817,7 +859,8 @@ Speed up your workflow with keyboard shortcuts:
 ### Visual Feedback
 
 - **Yellow highlight** on controller view shows selected control that has no modifiers or the modifier itself
-- **Turquoise highlight** on controller view shows the control that is the base controll (that has modifiers defined for it)
+- **Turquoise highlight** on controller view shows the control that is the base control (that has modifiers defined for it)
+- **Orange ⚠ icon** in profile name indicates conflicting window rules with another active profile
 - **Asterisk (*)** in window title means unsaved changes
 - **"(unmapped)"** in controls list means no action assigned
 - **Status bar** shows what's happening
@@ -1114,9 +1157,11 @@ The GUI preserves comments and formatting when saving!
 - **"+"** - Create new profile
 - **"⚙"** - Edit profile settings
 - **"-"** - Delete profile
+- **Active checkbox** - Enable/disable profile for window matching
 - **Import** - Import a profile from file
 - **Export** - Export selected profile to file
 - **Capture** (in settings) - Auto-detect window info
+- **Orange ⚠** - Profile conflicts with another active profile
 
 ### Importing and Exporting Profiles
 
