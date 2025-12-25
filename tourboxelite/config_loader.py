@@ -163,6 +163,10 @@ KEY_NAMES = {
     **{f'KEY_{i}': getattr(e, f'KEY_{i}') for i in range(0, 10)},
     # Function keys (F1-F12, includes extended function keys for meta-configuration)
     **{f'KEY_F{i}': getattr(e, f'KEY_F{i}') for i in range(1, 13)},
+    # Mouse buttons
+    'BTN_LEFT': e.BTN_LEFT,
+    'BTN_RIGHT': e.BTN_RIGHT,
+    'BTN_MIDDLE': e.BTN_MIDDLE,
 }
 
 # Mouse/relative movement

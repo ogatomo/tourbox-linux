@@ -147,6 +147,14 @@ class TourBoxConfigWindow(QMainWindow):
 
         file_menu.addSeparator()
 
+        # Restart Driver action
+        restart_driver_action = QAction("&Restart Driver", self)
+        restart_driver_action.setStatusTip("Restart the TourBox driver service and reload profiles")
+        restart_driver_action.triggered.connect(self._on_restart_driver)
+        file_menu.addAction(restart_driver_action)
+
+        file_menu.addSeparator()
+
         # Quit action
         quit_action = QAction("&Quit", self)
         quit_action.setShortcut(QKeySequence.Quit)
@@ -930,13 +938,19 @@ class TourBoxConfigWindow(QMainWindow):
         if not action_str or action_str == "none" or action_str == "(none)":
             return "(unmapped)"
 
-        # Handle mouse wheel
+        # Handle mouse actions
         if action_str.startswith("REL_WHEEL:"):
             value = action_str.split(":")[1]
-            return f"Wheel {'Up' if int(value) > 0 else 'Down'}"
+            return f"Scroll {'Up' if int(value) > 0 else 'Down'}"
         if action_str.startswith("REL_HWHEEL:"):
             value = action_str.split(":")[1]
-            return f"Wheel {'Right' if int(value) > 0 else 'Left'}"
+            return f"Scroll {'Right' if int(value) > 0 else 'Left'}"
+        if action_str == "BTN_LEFT":
+            return "Left Click"
+        if action_str == "BTN_RIGHT":
+            return "Right Click"
+        if action_str == "BTN_MIDDLE":
+            return "Middle Click"
 
         # Symbol key mapping
         SYMBOL_MAP = {
@@ -1031,6 +1045,65 @@ class TourBoxConfigWindow(QMainWindow):
         """Handle Export Profile menu action"""
         # Delegate to profile manager
         self.profile_manager._on_export_profile()
+
+    def _on_restart_driver(self):
+        """Handle Restart Driver menu action"""
+        from PySide6.QtWidgets import QApplication
+
+        self.statusBar().showMessage("Restarting driver...")
+        QApplication.processEvents()  # Ensure UI updates before blocking call
+
+        # Restart the driver service
+        success, message = DriverManager.restart_driver()
+
+        if success:
+            # Reload profiles from disk
+            self._reload_profiles_from_disk()
+            self.statusBar().showMessage("Driver restarted and profiles reloaded")
+            QMessageBox.information(
+                self,
+                "Driver Restarted",
+                "The TourBox driver has been restarted and profiles have been reloaded."
+            )
+        else:
+            self.statusBar().showMessage(f"Failed to restart driver: {message}")
+            QMessageBox.warning(
+                self,
+                "Restart Failed",
+                f"Failed to restart the driver:\n\n{message}"
+            )
+
+    def _reload_profiles_from_disk(self):
+        """Reload all profiles from disk and update the GUI"""
+        from ..profile_io import load_profiles_from_directory
+
+        try:
+            # Remember current profile name
+            current_name = self.current_profile.name if self.current_profile else None
+
+            # Reload profiles
+            profiles = load_profiles_from_directory()
+
+            if profiles:
+                # Update profile manager's list (this selects 'default' by default)
+                self.profile_manager.load_profiles(profiles)
+
+                # Try to re-select the previously selected profile
+                if current_name and current_name != 'default':
+                    for row in range(self.profile_manager.profile_table.rowCount()):
+                        item = self.profile_manager.profile_table.item(row, 0)
+                        if item:
+                            profile = item.data(Qt.UserRole)
+                            if profile and profile.name == current_name:
+                                self.profile_manager.profile_table.selectRow(row)
+                                break
+
+                logger.info(f"Reloaded {len(profiles)} profiles from disk")
+            else:
+                logger.warning("No profiles found when reloading from disk")
+
+        except Exception as ex:
+            logger.error(f"Error reloading profiles: {ex}", exc_info=True)
 
     def _open_user_guide(self):
         """Open the GUI User Guide documentation on GitHub"""

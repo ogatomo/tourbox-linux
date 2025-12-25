@@ -232,9 +232,9 @@ class ControlsList(QWidget):
             if rel_event:
                 event_code, value = rel_event
                 if event_code == e.REL_WHEEL:
-                    result = f"Wheel {'Up' if value > 0 else 'Down'}"
+                    result = f"Scroll {'Up' if value > 0 else 'Down'}"
                 elif event_code == e.REL_HWHEEL:
-                    result = f"Wheel {'Right' if value > 0 else 'Left'}"
+                    result = f"Scroll {'Right' if value > 0 else 'Left'}"
                 else:
                     # Fallback for other REL events
                     rel_name = self._get_rel_name(event_code)
@@ -260,14 +260,22 @@ class ControlsList(QWidget):
         if not action_str or action_str == "none":
             return "(none)"
 
-        # Handle REL events
+        # Handle REL events (scroll)
         if action_str.startswith("REL_"):
             if "WHEEL:" in action_str:
                 value = int(action_str.split(":")[1])
-                return f"Wheel {'Up' if value > 0 else 'Down'}"
+                return f"Scroll {'Up' if value > 0 else 'Down'}"
             elif "HWHEEL:" in action_str:
                 value = int(action_str.split(":")[1])
-                return f"Wheel {'Right' if value > 0 else 'Left'}"
+                return f"Scroll {'Right' if value > 0 else 'Left'}"
+
+        # Handle mouse button events
+        if action_str == "BTN_LEFT":
+            return "Left Click"
+        elif action_str == "BTN_RIGHT":
+            return "Right Click"
+        elif action_str == "BTN_MIDDLE":
+            return "Middle Click"
 
         # Symbol key mapping
         SYMBOL_MAP = {
@@ -344,6 +352,10 @@ class ControlsList(QWidget):
             e.KEY_STOPCD: 'Stop',
             e.KEY_PREVIOUSSONG: 'Previous',
             e.KEY_NEXTSONG: 'Next',
+            # Mouse buttons
+            e.BTN_LEFT: 'Left Click',
+            e.BTN_RIGHT: 'Right Click',
+            e.BTN_MIDDLE: 'Middle Click',
         }
 
         # Check preferred names first

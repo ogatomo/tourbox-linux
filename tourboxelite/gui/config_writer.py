@@ -103,10 +103,10 @@ def events_to_action_string(events) -> str:
 
     parts = []
     for event_type, event_code, value in events:
-        if event_type == e.EV_KEY and value == 1:  # Key press
-            # Find the KEY_ name
+        if event_type == e.EV_KEY and value == 1:  # Key press or mouse button
+            # Find the KEY_ or BTN_ name
             for name, code in e.__dict__.items():
-                if name.startswith('KEY_') and code == event_code:
+                if (name.startswith('KEY_') or name.startswith('BTN_')) and code == event_code:
                     parts.append(name)
                     break
         elif event_type == e.EV_REL:  # Relative movement

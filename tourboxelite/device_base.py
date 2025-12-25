@@ -242,7 +242,7 @@ class TourBoxBase(ABC):
                 event_desc = []
                 for event_type, event_code, value in events_to_send:
                     if event_type == e.EV_KEY:
-                        key_name = next((k for k, v in e.__dict__.items() if k.startswith('KEY_') and v == event_code), f"KEY_{event_code}")
+                        key_name = next((k for k, v in e.__dict__.items() if (k.startswith('KEY_') or k.startswith('BTN_')) and v == event_code), f"CODE_{event_code}")
                         action = "PRESS" if value == 1 else "RELEASE" if value == 0 else f"VAL={value}"
                         event_desc.append(f"{key_name}:{action}")
                 logger.info(f"Combo: {modifier_name}.{control_name} -> {', '.join(event_desc)}")
@@ -260,7 +260,7 @@ class TourBoxBase(ABC):
                 event_desc = []
                 for event_type, event_code, value in mapping:
                     if event_type == e.EV_KEY:
-                        key_name = next((k for k, v in e.__dict__.items() if k.startswith('KEY_') and v == event_code), f"KEY_{event_code}")
+                        key_name = next((k for k, v in e.__dict__.items() if (k.startswith('KEY_') or k.startswith('BTN_')) and v == event_code), f"CODE_{event_code}")
                         action = "PRESS" if value == 1 else "RELEASE" if value == 0 else f"VAL={value}"
                         event_desc.append(f"{key_name}:{action}")
                     elif event_type == e.EV_REL:
@@ -315,7 +315,7 @@ class TourBoxBase(ABC):
             # Log the final stored events with key names
             for event_type, event_code, value in self.modifier_mappings[(modifier, control)]:
                 if event_type == e.EV_KEY:
-                    key_name = next((k for k, v in e.__dict__.items() if k.startswith('KEY_') and v == event_code), f"KEY_{event_code}")
+                    key_name = next((k for k, v in e.__dict__.items() if (k.startswith('KEY_') or k.startswith('BTN_')) and v == event_code), f"CODE_{event_code}")
                     logger.info(f"  Event: {key_name} (code={event_code}) value={value}")
 
         # Convert base actions from action strings to events

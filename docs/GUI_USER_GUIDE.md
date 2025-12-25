@@ -1,7 +1,7 @@
 # TourBox Configuration GUI - User Guide
 
-**Version:** 1.5
-**Last Updated:** 2025-12-22
+**Version:** 1.6
+**Last Updated:** 2025-12-25
 
 ## Table of Contents
 
@@ -62,7 +62,7 @@ tourbox-gui
 
 ## Understanding the Interface
 
-![TourBox Configuration GUI](images/gui-screenshot.png?v=2.4.1)
+![TourBox Configuration GUI](images/gui-screenshot.png?v=2.4.2)
 
 The GUI has a 4-panel layout:
 
@@ -106,16 +106,16 @@ The GUI has a 4-panel layout:
 ### 3. Controls Configuration (Top-Right)
 
 - **Table showing all 20 controls** with their current mappings
-- Displays human-readable action names (e.g., "Ctrl+C", "Wheel Up")
+- Displays human-readable action names (e.g., "Ctrl+C", "Scroll Up", "Right Click")
 - Click any control to **select it for editing**
 - Shows "(unmapped)" for controls with no action assigned
 
 ### 4. Control Editor (Bottom-Right)
 
 - **Configure the selected control's action**
-- Choose action type: Keyboard, Mouse Wheel, or None
+- Choose action type: Keyboard, Mouse, or None
 - Set modifier keys (Ctrl, Alt, Shift, Super)
-- Select keys or mouse wheel directions
+- Select keys, mouse scroll directions, or mouse button clicks
 - Create and edit modifier combinations
 - **Apply** button saves changes to memory (not actually saved to the config file yet)
 
@@ -125,6 +125,7 @@ The GUI has a 4-panel layout:
   - Save (Ctrl+S) - Write changes to config file and apply them
   - Import Profile - Import a profile
   - Export Profile - Export a profile
+  - Restart Driver - Restart the TourBox driver service and reload profiles
   - Quit - Exit the application
 
 - **Help Menu:**
@@ -465,19 +466,26 @@ Send a keyboard key press (with optional modifiers).
 - Modifier-only mappings are valid (e.g., just "Ctrl" or "Alt")
 - The GUI shows human-readable names in the controls list
 
-#### 2. Mouse Wheel
+#### 2. Mouse
 
-Simulate mouse wheel scrolling.
+Simulate mouse actions including scrolling and button clicks.
 
-**Directions:**
-- Vertical Up - Scroll up
-- Vertical Down - Scroll down
-- Horizontal Left - Scroll left (for apps that support horizontal scrolling)
-- Horizontal Right - Scroll right
+**Scroll Actions:**
+- Scroll Up - Scroll up
+- Scroll Down - Scroll down
+- Scroll Left - Scroll left (for apps that support horizontal scrolling)
+- Scroll Right - Scroll right
+
+**Button Actions:**
+- Left Click - Simulate left mouse button click
+- Right Click - Simulate right mouse button click (context menu)
+- Middle Click - Simulate middle mouse button click
 
 **Common uses:**
-- Map `Knob Clockwise` to Wheel Up and `Knob Counter-CW` to Wheel Down for scrolling
+- Map `Knob Clockwise` to Scroll Up and `Knob Counter-CW` to Scroll Down for scrolling
 - Map `Dial Clockwise`/`Dial Counter-CW` for zooming (if app supports Ctrl+Wheel)
+- Map a button to Right Click to open context menus without moving your hand to the mouse
+- Map Middle Click for paste operations in terminals or opening links in new tabs
 
 #### 3. None (Unmapped)
 
@@ -809,6 +817,24 @@ Haptic settings (both strength and speed) are applied in this priority order (hi
 
 ## Tips & Tricks
 
+### Restarting the Driver
+
+Use **File → Restart Driver** to restart the TourBox driver service and reload all profiles in the GUI.
+
+**When to use Restart Driver:**
+
+- **Switching connection types** - If you switch your TourBox from Bluetooth to USB (or vice versa) without rebooting or logging out, use Restart Driver to reconnect
+- **Driver becomes unresponsive** - If button presses stop working, a restart often fixes it
+- **After external config changes** - If you edited profile files outside the GUI
+
+**What happens when you restart:**
+1. The systemd service is restarted
+2. The driver reconnects to your TourBox (USB or Bluetooth)
+3. All profiles are reloaded from disk
+4. The GUI updates to show the current profile state
+
+> **Tip:** This is much faster than logging out and back in when switching between USB and Bluetooth connections!
+
 ### Keyboard Navigation
 
 Speed up your workflow with keyboard shortcuts:
@@ -843,8 +869,8 @@ Speed up your workflow with keyboard shortcuts:
 - `knob_ccw` → Ctrl+- (zoom out)
 
 **Scrolling:**
-- `dial_cw` → Wheel Up
-- `dial_ccw` → Wheel Down
+- `dial_cw` → Scroll Up
+- `dial_ccw` → Scroll Down
 
 **Modifiers:**
 - `side` → Super (start menu)
@@ -1127,7 +1153,8 @@ tall = KEY_LEFTCTRL+KEY_W
 
 **Action formats:**
 - Keyboard: `KEY_LEFTCTRL+KEY_C` (modifiers+key)
-- Mouse wheel: `REL_WHEEL:1` (wheel:direction)
+- Mouse scroll: `REL_WHEEL:1` (scroll up), `REL_WHEEL:-1` (scroll down)
+- Mouse buttons: `BTN_LEFT`, `BTN_RIGHT`, `BTN_MIDDLE`
 - Unmapped: Omit the line or set to empty
 
 The GUI preserves comments and formatting when saving!
@@ -1150,7 +1177,7 @@ The GUI preserves comments and formatting when saving!
 
 ### Action Types
 - **Keyboard** - Key combos (Ctrl+C, Alt+F4, etc.)
-- **Mouse Wheel** - Scroll up/down/left/right
+- **Mouse** - Scroll up/down/left/right, left/right/middle click
 - **None** - Disable control
 
 ### Profile Management

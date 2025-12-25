@@ -192,7 +192,7 @@ class ComboConfigDialog(QDialog):
         action_type_layout = QHBoxLayout()
         action_type_layout.addWidget(QLabel("Action Type:"))
         self.action_type_combo = QComboBox()
-        self.action_type_combo.addItems(["Keyboard", "Mouse Wheel", "None"])
+        self.action_type_combo.addItems(["Keyboard", "Mouse", "None"])
         # Set minimum height based on font metrics
         fm_action = self.action_type_combo.fontMetrics()
         self.action_type_combo.setMinimumHeight(int(fm_action.lineSpacing() * TEXT_EDIT_HEIGHT_MULTIPLIER))
@@ -279,7 +279,7 @@ class ComboConfigDialog(QDialog):
         layout.addWidget(self.keyboard_group)
 
         # Mouse wheel action group
-        self.mouse_group = QGroupBox("Mouse Wheel Action")
+        self.mouse_group = QGroupBox("Mouse Action")
         self.mouse_group.setMinimumHeight(80)  # Ensure enough space for controls
         mouse_layout = QVBoxLayout(self.mouse_group)
 
@@ -288,13 +288,16 @@ class ComboConfigDialog(QDialog):
         combo_height = int(fm_mouse.lineSpacing() * TEXT_EDIT_HEIGHT_MULTIPLIER)
 
         mouse_dir_layout = QHBoxLayout()
-        mouse_dir_layout.addWidget(QLabel("Direction:"))
+        mouse_dir_layout.addWidget(QLabel("Action:"))
         self.mouse_direction_combo = QComboBox()
         self.mouse_direction_combo.addItems([
-            "Vertical Up",
-            "Vertical Down",
-            "Horizontal Left",
-            "Horizontal Right"
+            "Scroll Up",
+            "Scroll Down",
+            "Scroll Left",
+            "Scroll Right",
+            "Left Click",
+            "Right Click",
+            "Middle Click"
         ])
         self.mouse_direction_combo.setMinimumHeight(combo_height)
         mouse_dir_layout.addWidget(self.mouse_direction_combo)
@@ -389,7 +392,7 @@ class ComboConfigDialog(QDialog):
         if action_type == "Keyboard":
             self.keyboard_group.show()
             self.mouse_group.hide()
-        elif action_type == "Mouse Wheel":
+        elif action_type == "Mouse":
             self.keyboard_group.hide()
             self.mouse_group.show()
         else:  # None
@@ -419,21 +422,32 @@ class ComboConfigDialog(QDialog):
             self.action_type_combo.setCurrentText("None")
             return
 
-        # Check if it's a mouse wheel action
+        # Check if it's a mouse action (scroll or button)
         if action_str.startswith("REL_WHEEL:") or action_str.startswith("REL_HWHEEL:"):
-            self.action_type_combo.setCurrentText("Mouse Wheel")
+            self.action_type_combo.setCurrentText("Mouse")
             if action_str.startswith("REL_WHEEL:"):
                 value = int(action_str.split(":")[1])
                 if value > 0:
-                    self.mouse_direction_combo.setCurrentText("Vertical Up")
+                    self.mouse_direction_combo.setCurrentText("Scroll Up")
                 else:
-                    self.mouse_direction_combo.setCurrentText("Vertical Down")
+                    self.mouse_direction_combo.setCurrentText("Scroll Down")
             else:
                 value = int(action_str.split(":")[1])
                 if value > 0:
-                    self.mouse_direction_combo.setCurrentText("Horizontal Right")
+                    self.mouse_direction_combo.setCurrentText("Scroll Right")
                 else:
-                    self.mouse_direction_combo.setCurrentText("Horizontal Left")
+                    self.mouse_direction_combo.setCurrentText("Scroll Left")
+            return
+
+        # Check if it's a mouse button action
+        if action_str in ("BTN_LEFT", "BTN_RIGHT", "BTN_MIDDLE"):
+            self.action_type_combo.setCurrentText("Mouse")
+            if action_str == "BTN_LEFT":
+                self.mouse_direction_combo.setCurrentText("Left Click")
+            elif action_str == "BTN_RIGHT":
+                self.mouse_direction_combo.setCurrentText("Right Click")
+            elif action_str == "BTN_MIDDLE":
+                self.mouse_direction_combo.setCurrentText("Middle Click")
             return
 
         # It's a keyboard action
@@ -485,16 +499,22 @@ class ComboConfigDialog(QDialog):
         if action_type == "None":
             return "none"
 
-        if action_type == "Mouse Wheel":
-            direction = self.mouse_direction_combo.currentText()
-            if direction == "Vertical Up":
+        if action_type == "Mouse":
+            action = self.mouse_direction_combo.currentText()
+            if action == "Scroll Up":
                 return "REL_WHEEL:1"
-            elif direction == "Vertical Down":
+            elif action == "Scroll Down":
                 return "REL_WHEEL:-1"
-            elif direction == "Horizontal Left":
+            elif action == "Scroll Left":
                 return "REL_HWHEEL:-1"
-            elif direction == "Horizontal Right":
+            elif action == "Scroll Right":
                 return "REL_HWHEEL:1"
+            elif action == "Left Click":
+                return "BTN_LEFT"
+            elif action == "Right Click":
+                return "BTN_RIGHT"
+            elif action == "Middle Click":
+                return "BTN_MIDDLE"
 
         # Keyboard action
         parts = []
@@ -577,7 +597,7 @@ class ControlEditor(QWidget):
         action_type_layout = QHBoxLayout()
         action_type_layout.addWidget(QLabel("Action Type:"))
         self.action_type_combo = QComboBox()
-        self.action_type_combo.addItems(["Keyboard", "Mouse Wheel", "None"])
+        self.action_type_combo.addItems(["Keyboard", "Mouse", "None"])
         # Set minimum height based on font metrics
         fm_action = self.action_type_combo.fontMetrics()
         self.action_type_combo.setMinimumHeight(int(fm_action.lineSpacing() * TEXT_EDIT_HEIGHT_MULTIPLIER))
@@ -666,7 +686,7 @@ class ControlEditor(QWidget):
         layout.addWidget(self.keyboard_group)
 
         # Mouse wheel action group
-        self.mouse_group = QGroupBox("Mouse Wheel Action")
+        self.mouse_group = QGroupBox("Mouse Action")
         self.mouse_group.setMinimumHeight(80)  # Ensure enough space for controls
         mouse_layout = QVBoxLayout(self.mouse_group)
 
@@ -675,13 +695,16 @@ class ControlEditor(QWidget):
         combo_height = int(fm_mouse.lineSpacing() * TEXT_EDIT_HEIGHT_MULTIPLIER)
 
         mouse_dir_layout = QHBoxLayout()
-        mouse_dir_layout.addWidget(QLabel("Direction:"))
+        mouse_dir_layout.addWidget(QLabel("Action:"))
         self.mouse_direction_combo = QComboBox()
         self.mouse_direction_combo.addItems([
-            "Vertical Up",
-            "Vertical Down",
-            "Horizontal Left",
-            "Horizontal Right"
+            "Scroll Up",
+            "Scroll Down",
+            "Scroll Left",
+            "Scroll Right",
+            "Left Click",
+            "Right Click",
+            "Middle Click"
         ])
         self.mouse_direction_combo.setMinimumHeight(combo_height)
         mouse_dir_layout.addWidget(self.mouse_direction_combo)
@@ -904,34 +927,45 @@ class ControlEditor(QWidget):
             self.action_type_combo.setCurrentText("None")
             return
 
-        # Check if it's a mouse wheel action (handle both raw and human-readable formats)
-        if action_str.startswith("Wheel "):
-            self.action_type_combo.setCurrentText("Mouse Wheel")
+        # Check if it's a mouse action (handle both raw and human-readable formats)
+        if action_str.startswith("Wheel ") or action_str.startswith("Scroll "):
+            self.action_type_combo.setCurrentText("Mouse")
             # Parse direction from human-readable format
             if "Up" in action_str:
-                self.mouse_direction_combo.setCurrentText("Vertical Up")
+                self.mouse_direction_combo.setCurrentText("Scroll Up")
             elif "Down" in action_str:
-                self.mouse_direction_combo.setCurrentText("Vertical Down")
+                self.mouse_direction_combo.setCurrentText("Scroll Down")
             elif "Left" in action_str:
-                self.mouse_direction_combo.setCurrentText("Horizontal Left")
+                self.mouse_direction_combo.setCurrentText("Scroll Left")
             elif "Right" in action_str:
-                self.mouse_direction_combo.setCurrentText("Horizontal Right")
+                self.mouse_direction_combo.setCurrentText("Scroll Right")
             return
         elif action_str.startswith("WHEEL:") or action_str.startswith("HWHEEL:"):
             # Legacy format support
-            self.action_type_combo.setCurrentText("Mouse Wheel")
+            self.action_type_combo.setCurrentText("Mouse")
             if action_str.startswith("WHEEL:"):
                 value = int(action_str.split(":")[1])
                 if value > 0:
-                    self.mouse_direction_combo.setCurrentText("Vertical Up")
+                    self.mouse_direction_combo.setCurrentText("Scroll Up")
                 else:
-                    self.mouse_direction_combo.setCurrentText("Vertical Down")
+                    self.mouse_direction_combo.setCurrentText("Scroll Down")
             elif action_str.startswith("HWHEEL:"):
                 value = int(action_str.split(":")[1])
                 if value > 0:
-                    self.mouse_direction_combo.setCurrentText("Horizontal Right")
+                    self.mouse_direction_combo.setCurrentText("Scroll Right")
                 else:
-                    self.mouse_direction_combo.setCurrentText("Horizontal Left")
+                    self.mouse_direction_combo.setCurrentText("Scroll Left")
+            return
+        # Check if it's a mouse button action (raw or human-readable)
+        elif action_str in ("BTN_LEFT", "BTN_RIGHT", "BTN_MIDDLE",
+                           "Left Click", "Right Click", "Middle Click"):
+            self.action_type_combo.setCurrentText("Mouse")
+            if action_str in ("BTN_LEFT", "Left Click"):
+                self.mouse_direction_combo.setCurrentText("Left Click")
+            elif action_str in ("BTN_RIGHT", "Right Click"):
+                self.mouse_direction_combo.setCurrentText("Right Click")
+            elif action_str in ("BTN_MIDDLE", "Middle Click"):
+                self.mouse_direction_combo.setCurrentText("Middle Click")
             return
 
         # It's a keyboard action
@@ -996,7 +1030,7 @@ class ControlEditor(QWidget):
         if action_type == "Keyboard":
             self.keyboard_group.show()
             self.mouse_group.hide()
-        elif action_type == "Mouse Wheel":
+        elif action_type == "Mouse":
             self.keyboard_group.hide()
             self.mouse_group.show()
         else:  # None
@@ -1079,16 +1113,22 @@ class ControlEditor(QWidget):
         if action_type == "None":
             return "none"
 
-        if action_type == "Mouse Wheel":
-            direction = self.mouse_direction_combo.currentText()
-            if direction == "Vertical Up":
+        if action_type == "Mouse":
+            action = self.mouse_direction_combo.currentText()
+            if action == "Scroll Up":
                 return "REL_WHEEL:1"
-            elif direction == "Vertical Down":
+            elif action == "Scroll Down":
                 return "REL_WHEEL:-1"
-            elif direction == "Horizontal Left":
+            elif action == "Scroll Left":
                 return "REL_HWHEEL:-1"
-            elif direction == "Horizontal Right":
+            elif action == "Scroll Right":
                 return "REL_HWHEEL:1"
+            elif action == "Left Click":
+                return "BTN_LEFT"
+            elif action == "Right Click":
+                return "BTN_RIGHT"
+            elif action == "Middle Click":
+                return "BTN_MIDDLE"
 
         # Keyboard action
         parts = []
@@ -1291,13 +1331,19 @@ class ControlEditor(QWidget):
         if not action_str or action_str == "none":
             return "(none)"
 
-        # Handle mouse wheel
+        # Handle mouse actions
         if action_str.startswith("REL_WHEEL:"):
             value = action_str.split(":")[1]
-            return f"Wheel {'Up' if int(value) > 0 else 'Down'}"
+            return f"Scroll {'Up' if int(value) > 0 else 'Down'}"
         elif action_str.startswith("REL_HWHEEL:"):
             value = action_str.split(":")[1]
-            return f"Wheel {'Right' if int(value) > 0 else 'Left'}"
+            return f"Scroll {'Right' if int(value) > 0 else 'Left'}"
+        elif action_str == "BTN_LEFT":
+            return "Left Click"
+        elif action_str == "BTN_RIGHT":
+            return "Right Click"
+        elif action_str == "BTN_MIDDLE":
+            return "Middle Click"
 
         # Symbol key mapping
         SYMBOL_MAP = {

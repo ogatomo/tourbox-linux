@@ -572,10 +572,10 @@ def _get_action_strings_from_mapping(profile) -> Dict[str, str]:
             press_code = codes[0]
             code_to_control[press_code] = control
 
-    # Key code to name lookup
+    # Key code to name lookup (includes KEY_ and BTN_ codes)
     key_code_to_name = {}
     for name, code in vars(e).items():
-        if name.startswith('KEY_') and isinstance(code, int):
+        if (name.startswith('KEY_') or name.startswith('BTN_')) and isinstance(code, int):
             key_code_to_name[code] = name
 
     # Relative code to name lookup
