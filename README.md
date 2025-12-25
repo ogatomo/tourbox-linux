@@ -510,6 +510,7 @@ sudo usermod -a -G input $USER
 - [Configuration guide](docs/CONFIG_GUIDE.md) - Manual config file editing
 - [Example configurations](tourboxelite/default_mappings.conf)
 - [Development guide](docs/DEVELOPMENT.md)
+- [Why no overlay features?](docs/WHY_NO_OVERLAYS.md) - TourMenu, HUD, and Linux desktop fragmentation
 
 ## License
 
