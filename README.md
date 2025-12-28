@@ -19,12 +19,11 @@ Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc
 |--------|--------|------------|---------|-------|
 | TourBox Elite | ✅ Fully Tested | USB, Bluetooth | ✅ | Full support |
 | TourBox Elite Plus | ✅ Fully Tested | USB, Bluetooth | ✅ | Full support |
+| TourBox Lite (USB) | ✅ Community Tested | USB only | ❌ | Full support |
+| TourBox Lite (Bluetooth) | 🔄 Expected to Work | Bluetooth only | ❌ | [Help verify!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) |
 | TourBox Neo | 🔄 Expected to Work | USB only | ❌ | [Help verify!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) - Same protocol as Elite |
-| TourBox Lite | 🔄 Expected to Work | USB, Bluetooth* | ❌ | [Help verify!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) - Same protocol as Elite |
 
-\* Bluetooth available on Lite Bluetooth model only; wired Lite is USB only.
-
-> **Have a TourBox Neo or Lite?** We'd love your help testing compatibility! See our [call for testers](https://github.com/AndyCappDev/tourbox-linux/discussions/6) for details.
+> **Have a TourBox Neo or Lite (Bluetooth)?** We'd love your help testing compatibility! See our [call for testers](https://github.com/AndyCappDev/tourbox-linux/discussions/6) for details.
 
 ## Features
 
@@ -515,4 +514,10 @@ sudo usermod -a -G input $USER
 ## License
 
 MIT License - See [LICENSE.txt](LICENSE.txt) file
+
+## Community Testers
+
+Thanks to these users for testing and confirming device compatibility:
+
+- [@PunkunHm](https://github.com/PunkunHm) - TourBox Lite (USB)
 
