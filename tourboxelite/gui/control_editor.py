@@ -265,7 +265,8 @@ class ComboConfigDialog(QDialog):
         self.special_key_combo = QComboBox()
         for key_name in SPECIAL_KEYS.keys():
             self.special_key_combo.addItem(key_name)
-            if SPECIAL_KEYS[key_name] is None:
+            # Disable separator items (those starting with "---"), but not "None"
+            if key_name.startswith("---"):
                 idx = self.special_key_combo.count() - 1
                 self.special_key_combo.model().item(idx).setEnabled(False)
         self.special_key_combo.setMaximumWidth(150)
@@ -648,7 +649,8 @@ class DoublePressDialog(QDialog):
         self.special_key_combo = QComboBox()
         for key_name in SPECIAL_KEYS.keys():
             self.special_key_combo.addItem(key_name)
-            if SPECIAL_KEYS[key_name] is None:
+            # Disable separator items (those starting with "---"), but not "None"
+            if key_name.startswith("---"):
                 idx = self.special_key_combo.count() - 1
                 self.special_key_combo.model().item(idx).setEnabled(False)
         self.special_key_combo.setMaximumWidth(150)
@@ -931,8 +933,8 @@ class ControlEditor(QWidget):
         self.special_key_combo = QComboBox()
         for key_name in SPECIAL_KEYS.keys():
             self.special_key_combo.addItem(key_name)
-            # Disable separator items
-            if SPECIAL_KEYS[key_name] is None:
+            # Disable separator items (those starting with "---"), but not "None"
+            if key_name.startswith("---"):
                 idx = self.special_key_combo.count() - 1
                 self.special_key_combo.model().item(idx).setEnabled(False)
         self.special_key_combo.setMaximumWidth(150)

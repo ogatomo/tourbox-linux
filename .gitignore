@@ -32,6 +32,9 @@ htmlcov/
 *.swo
 *~
 
+# Graphics editors
+*.kra
+
 # OS
 .DS_Store
 Thumbs.db
