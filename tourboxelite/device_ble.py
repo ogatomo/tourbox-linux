@@ -11,11 +11,12 @@ import asyncio
 import logging
 from typing import Optional
 
-from bleak import BleakClient
+from bleak import BleakClient, BleakScanner
+from bleak.backends.device import BLEDevice
 from evdev import UInput
 
 from .device_base import TourBoxBase
-from .config_loader import load_profiles, load_device_config
+from .config_loader import load_profiles
 from .window_monitor import WaylandWindowMonitor
 from .haptic import build_config_commands, HapticConfig
 
@@ -32,6 +33,52 @@ UNLOCK_COMMAND = bytes.fromhex("5500078894001afe")
 # Note: CONFIG_COMMANDS are now built dynamically by build_config_commands()
 # from haptic.py to support per-profile haptic settings
 
+# Device name prefix for scanning
+TOURBOX_NAME_PREFIX = "TourBox"
+
+
+async def scan_for_tourbox(timeout: float = 10.0) -> Optional[BLEDevice]:
+    """Scan for TourBox devices by name prefix.
+
+    Scans for BLE devices whose name starts with "TourBox" (e.g., TourBox Elite,
+    TourBox Elite Plus, TourBox Lite). Stops scanning as soon as a device is found.
+
+    Args:
+        timeout: Scan timeout in seconds (default 10.0)
+
+    Returns:
+        BLEDevice if found, None otherwise
+    """
+    logger.info(f"Scanning for TourBox devices (timeout: {timeout}s)...")
+    print(f"Scanning for TourBox devices...")
+
+    found_device: Optional[BLEDevice] = None
+    stop_event = asyncio.Event()
+
+    def detection_callback(device: BLEDevice, adv_data):
+        nonlocal found_device
+        if device.name and device.name.startswith(TOURBOX_NAME_PREFIX):
+            logger.info(f"Found {device.name} at {device.address}")
+            print(f"Found {device.name} at {device.address}")
+            found_device = device
+            stop_event.set()
+
+    scanner = BleakScanner(detection_callback=detection_callback)
+    await scanner.start()
+
+    try:
+        await asyncio.wait_for(stop_event.wait(), timeout=timeout)
+    except asyncio.TimeoutError:
+        pass
+    finally:
+        await scanner.stop()
+
+    if not found_device:
+        logger.warning("No TourBox device found during scan")
+        print("No TourBox device found. Make sure your TourBox is powered on.")
+
+    return found_device
+
 
 class TourBoxBLE(TourBoxBase):
     """TourBox Elite BLE Driver
@@ -41,16 +88,15 @@ class TourBoxBLE(TourBoxBase):
     profile management, and virtual input device handling.
     """
 
-    def __init__(self, mac_address: str, pidfile: Optional[str] = None, config_path: Optional[str] = None):
+    def __init__(self, pidfile: Optional[str] = None, config_path: Optional[str] = None):
         """Initialize the BLE driver
 
         Args:
-            mac_address: Bluetooth MAC address (XX:XX:XX:XX:XX:XX)
             pidfile: Path to PID file
             config_path: Path to configuration file
         """
         super().__init__(pidfile=pidfile, config_path=config_path)
-        self.mac_address = mac_address
+        self.device: Optional[BLEDevice] = None  # Discovered device from scanning
         self.client: Optional[BleakClient] = None
         self.disconnected = False
         self.reconnect_delay = 5.0  # Initial reconnection delay in seconds
@@ -113,33 +159,16 @@ class TourBoxBLE(TourBoxBase):
         logger.info("Device unlocked and configured")
 
     async def connect(self) -> bool:
-        """Connect to the TourBox Elite via BLE
+        """Connect to the TourBox via BLE
+
+        Note: This method exists to satisfy the abstract base class.
+        The actual connection is handled by run_connection() which includes
+        device scanning.
 
         Returns:
-            True if connection successful, False otherwise
+            True (connection is handled by run_connection)
         """
-        try:
-            logger.info(f"Connecting to TourBox Elite at {self.mac_address}...")
-            self.disconnected = False
-
-            self.client = BleakClient(
-                self.mac_address,
-                timeout=5.0,
-                disconnected_callback=self.disconnection_handler
-            )
-            await self.client.connect()
-
-            if self.client.is_connected:
-                logger.info("Connected to TourBox Elite")
-                return True
-            return False
-
-        except asyncio.TimeoutError:
-            logger.error("Connection timeout - device not found")
-            return False
-        except Exception as ex:
-            logger.error(f"Connection error: {ex}")
-            return False
+        return True
 
     async def disconnect(self):
         """Disconnect from the TourBox Elite"""
@@ -157,11 +186,17 @@ class TourBoxBLE(TourBoxBase):
             True if should retry connection, False if user requested exit
         """
         try:
-            logger.info(f"Connecting to TourBox Elite at {self.mac_address}...")
+            # Scan for TourBox device
+            self.device = await scan_for_tourbox(timeout=10.0)
+            if not self.device:
+                logger.error("No TourBox device found")
+                return True  # Retry (will scan again)
+
+            logger.info(f"Connecting to {self.device.name} at {self.device.address}...")
             self.disconnected = False
 
             async with BleakClient(
-                self.mac_address,
+                self.device.address,
                 timeout=5.0,
                 disconnected_callback=self.disconnection_handler
             ) as client:
@@ -226,9 +261,6 @@ class TourBoxBLE(TourBoxBase):
             print("Error: Config file must contain at least one [profile:default] section")
             print("")
             print("Your config file should use the profile format:")
-            print("")
-            print("[device]")
-            print("mac_address = XX:XX:XX:XX:XX:XX")
             print("")
             print("[profile:default]")
             print("side = KEY_LEFTMETA")
@@ -325,8 +357,7 @@ def main():
     )
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='TourBox Elite BLE Driver')
-    parser.add_argument('mac_address', nargs='?', help='Bluetooth MAC address (XX:XX:XX:XX:XX:XX) - overrides config file')
+    parser = argparse.ArgumentParser(description='TourBox BLE Driver')
     parser.add_argument('-c', '--config', help='Path to custom config file')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose logging')
 
@@ -336,43 +367,8 @@ def main():
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    # Get MAC address from: 1) command line, 2) environment, 3) config file
-    mac_address = args.mac_address or os.getenv('TOURBOX_MAC')
-
-    if not mac_address:
-        # Try to load from config file
-        device_config = load_device_config(args.config)
-        mac_address = device_config.get('mac_address')
-
-        if mac_address:
-            logger.info(f"Using MAC address from config: {mac_address}")
-        else:
-            print("Error: MAC address not found")
-            print("")
-            print("Provide MAC address via:")
-            print("  1. Command line:  python -m tourboxelite.device_ble <MAC_ADDRESS>")
-            print("  2. Environment:   TOURBOX_MAC=<MAC_ADDRESS> python -m tourboxelite.device_ble")
-            print("  3. Config file:   Add 'mac_address = XX:XX:XX:XX:XX:XX' to [device] section")
-            print("")
-            print("Example: python -m tourboxelite.device_ble D9:BE:1E:CC:40:D7")
-            print("")
-            print("To set up config file:")
-            print("  ./install_config.sh")
-            print("  nano ~/.config/tourbox/config.conf")
-            print("")
-            print("Options:")
-            print("  -c, --config PATH    Use custom config file")
-            print("  -v, --verbose        Enable verbose logging")
-            sys.exit(1)
-
-    # Validate MAC address format
-    if ':' not in mac_address:
-        print(f"Error: Invalid MAC address format: {mac_address}")
-        print("Expected format: XX:XX:XX:XX:XX:XX")
-        sys.exit(1)
-
-    # Create and start driver
-    driver = TourBoxBLE(mac_address, config_path=args.config)
+    # Create and start driver (will scan for device)
+    driver = TourBoxBLE(config_path=args.config)
 
     try:
         asyncio.run(driver.start())

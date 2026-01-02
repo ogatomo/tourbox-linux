@@ -331,24 +331,6 @@ if [ -d "$PROFILES_DIR" ] && [ "$(ls -A "$PROFILES_DIR"/*.profile 2>/dev/null)" 
     echo -e "${GREEN}✓${NC} Found existing profiles in: $PROFILES_DIR"
     echo -e "${GREEN}✓${NC} Keeping existing configuration"
 
-    # Check if we need to prompt for MAC address (if config.conf doesn't have one)
-    if [ -f "$CONFIG_FILE" ]; then
-        EXISTING_MAC=$(grep -E "^mac_address\s*=" "$CONFIG_FILE" 2>/dev/null | sed 's/.*=\s*//' | tr -d ' ')
-        if [ -z "$EXISTING_MAC" ] || [ "$EXISTING_MAC" = "XX:XX:XX:XX:XX:XX" ]; then
-            echo ""
-            echo "No MAC address configured for Bluetooth."
-            read -p "Enter MAC address for Bluetooth (or press Enter to skip): " MAC_ADDRESS
-            if [ -n "$MAC_ADDRESS" ]; then
-                if [[ $MAC_ADDRESS =~ ^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$ ]]; then
-                    sed -i "s/mac_address = .*/mac_address = $MAC_ADDRESS/" "$CONFIG_FILE"
-                    echo -e "${GREEN}✓${NC} MAC address configured"
-                else
-                    echo -e "${YELLOW}!${NC} Invalid MAC format - please edit config manually"
-                fi
-            fi
-        fi
-    fi
-
     # Ensure required profiles exist
     if [ ! -f "$PROFILES_DIR/default.profile" ]; then
         echo -e "${YELLOW}!${NC} Default profile missing - recreating..."
@@ -377,36 +359,16 @@ else
     # Fresh install: create new format directly
     echo "The driver supports both USB and Bluetooth connections."
     echo ""
-    echo "  USB:       Just plug in the cable - no configuration needed"
-    echo "  Bluetooth: Requires MAC address (see below)"
+    echo "  USB:       Just plug in the cable - auto-detected"
+    echo "  Bluetooth: Auto-detected - just turn on your TourBox"
     echo ""
-    echo "To find your TourBox MAC address (for Bluetooth):"
-    echo "  1. Make sure TourBox is powered on and NOT connected via USB"
-    echo "  2. Run: bluetoothctl devices"
-    echo "  3. Look for 'TourBox Elite' or 'TourBox Elite Plus' in the output"
-    echo ""
-    read -p "Enter MAC address for Bluetooth (or press Enter to skip for USB-only): " MAC_ADDRESS
 
     # Create initial configuration using Python
-    if [ -n "$MAC_ADDRESS" ]; then
-        if [[ $MAC_ADDRESS =~ ^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$ ]]; then
-            ./venv/bin/python -c "from tourboxelite.profile_io import create_initial_config; success, msg = create_initial_config('$MAC_ADDRESS'); print(msg); exit(0 if success else 1)"
-            if [ $? -eq 0 ]; then
-                echo -e "${GREEN}✓${NC} Configuration created with MAC address"
-            else
-                echo -e "${RED}✗${NC} Failed to create configuration"
-            fi
-        else
-            echo -e "${YELLOW}!${NC} Invalid MAC format - creating config without MAC address"
-            ./venv/bin/python -c "from tourboxelite.profile_io import create_initial_config; success, msg = create_initial_config(); print(msg); exit(0 if success else 1)"
-        fi
+    ./venv/bin/python -c "from tourboxelite.profile_io import create_initial_config; success, msg = create_initial_config(); print(msg); exit(0 if success else 1)"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓${NC} Configuration created"
     else
-        ./venv/bin/python -c "from tourboxelite.profile_io import create_initial_config; success, msg = create_initial_config(); print(msg); exit(0 if success else 1)"
-        if [ $? -eq 0 ]; then
-            echo -e "${GREEN}✓${NC} Configuration created"
-        else
-            echo -e "${RED}✗${NC} Failed to create configuration"
-        fi
+        echo -e "${RED}✗${NC} Failed to create configuration"
     fi
 fi
 

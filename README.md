@@ -76,33 +76,15 @@ The driver supports two connection methods:
 | Method | How to Use | Requirements |
 |--------|------------|--------------|
 | **USB** | Just plug in the USB-C cable | User in `dialout` group |
-| **Bluetooth LE** | Turn on the TourBox (don't connect USB) | MAC address in config |
+| **Bluetooth LE** | Just turn on the TourBox (don't connect USB) | Bluetooth enabled |
 
-The driver **auto-detects** the connection type:
-- Scans all `/dev/ttyACM*` devices and probes each for a TourBox response
-- If a TourBox is found on USB, it uses that port
-- Otherwise, it uses Bluetooth LE
+The driver **auto-detects** everything:
+- **USB:** Scans `/dev/ttyACM*` devices and probes each for a TourBox response
+- **Bluetooth:** Scans for any device named "TourBox" and connects automatically
 
-> **Note:** For Bluetooth, you do NOT need to pair via system Bluetooth settings. The driver connects directly using the MAC address.
+> **Note:** For Bluetooth, you do NOT need to pair or configure anything. The driver finds your TourBox automatically by scanning for its name. If the driver doesn't find your TourBox, try putting it in pairing mode (hold the button above the power switch for 2-3 seconds until the LED flashes) and restart the driver with `systemctl --user restart tourbox`. After the first successful connection, normal power cycles should reconnect automatically without needing pairing mode again.
 
-### Step 1: Find Your TourBox MAC Address (Bluetooth only)
-
-**Skip this step if you only plan to use USB or your TourBox is not an Elite or Elite Plus.**  Though we recommend setting it up for Bluetooth on the Elite or Elite Plus in case you want to use Bluetooth later. The driver will still default to USB (when the USB cable is plugged in) even after Bluetooth is configured.
-
-Make sure your TourBox Elite is powered on and NOT connected via USB.
-
-```bash
-bluetoothctl devices
-```
-
-Look for "TourBox [XXX]", [XXX] being your model of TourBox  - copy the MAC address (format: `XX:XX:XX:XX:XX:XX`). You will need it for step 2.
-
-Example output:
-```
-Device 12:34:56:78:9A:BC TourBox Elite
-```
-
-### Step 2: Run the Installer
+### Run the Installer
 
 ```bash
 git clone https://github.com/AndyCappDev/tourbox-linux.git
@@ -113,14 +95,12 @@ cd tourbox-linux
 The installer will:
 1. Create a Python virtual environment
 2. Install the driver and dependencies
-3. Set up your configuration file - It will ask for the Bluetooth MAC address from step 1.
+3. Set up your configuration file
 4. Install and enable the systemd service
 
-Log off and log back on again or reboot
+Log out and log back in or reboot to activate the driver.
 
 > **Note:** If you haven't run the GUI yet and you are upgrading, your config may still be in the legacy format at `~/.config/tourbox/mappings.conf`. The GUI will automatically migrate it to the new format on first launch.
-
-Log out and log back in or reboot to activate the driver.
 
 ### Additional Step for KDE Plasma Users
 
@@ -230,32 +210,24 @@ python3 -m venv venv
 ./venv/bin/pip install -e .
 ./venv/bin/pip install -r tourboxelite/gui/requirements.txt
 
-# 3. Find your TourBox MAC address
-bluetoothctl devices
-# Look for "TourBox Elite"
-# NOTE: Do NOT pair the device - pairing is not required and won't work.
-#       The driver connects directly using the MAC address via BLE.
-
-# 4. Copy and edit config (legacy format - GUI will migrate on first launch)
+# 3. Copy config (legacy format - GUI will migrate on first launch)
 mkdir -p ~/.config/tourbox
 cp tourboxelite/default_mappings.conf ~/.config/tourbox/mappings.conf
-nano ~/.config/tourbox/mappings.conf
-# Set your MAC address in [device] section
 
-# 5. Set up udev rules for uinput access
+# 4. Set up udev rules for uinput access
 echo 'KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-uinput.rules
 sudo udevadm control --reload-rules
 sudo modprobe uinput
 echo "uinput" | sudo tee /etc/modules-load.d/uinput.conf
 
-# 6. Add user to input group (required for device access)
+# 5. Add user to input group (required for device access)
 sudo usermod -a -G input $USER
 # You'll need to log out and back in for this to take effect
 
-# 7. Add user to dialout group (for USB access)
+# 6. Add user to dialout group (for USB access)
 sudo usermod -a -G dialout $USER
 
-# 8. Set up systemd service
+# 7. Set up systemd service
 mkdir -p ~/.config/systemd/user
 nano ~/.config/systemd/user/tourbox.service
 # Add the following content (replace /path/to/tourboxelite with actual path):
@@ -273,7 +245,7 @@ nano ~/.config/systemd/user/tourbox.service
 # [Install]
 # WantedBy=default.target
 
-# 9. Enable and start service
+# 8. Enable and start service
 systemctl --user daemon-reload
 systemctl --user enable tourbox
 systemctl --user start tourbox
@@ -290,9 +262,6 @@ The easiest way to configure button mappings is with the **graphical configurati
 If editing manually before running the GUI, the config uses **profiles** - the `[profile:default]` section is required and contains your main button mappings:
 
 ```ini
-[device]
-mac_address = XX:XX:XX:XX:XX:XX
-
 [profile:default]
 # Button mappings
 side = KEY_LEFTMETA
@@ -426,8 +395,8 @@ journalctl --user -u tourbox -n 50
 ```
 
 Common issues:
-- MAC address not set in config (for Bluetooth)
 - TourBox not powered on or out of range (for Bluetooth)
+- TourBox may need to be in pairing mode for initial Bluetooth discovery
 - USB cable not connected or power-only cable (for USB)
 - Missing Python dependencies
 - Device already connected to another system

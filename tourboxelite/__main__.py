@@ -133,11 +133,9 @@ def main():
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description='TourBox Elite Driver (auto-detects USB or BLE)',
-        epilog='By default, uses USB if /dev/ttyACM0 exists, otherwise BLE.'
+        description='TourBox Driver (auto-detects USB or BLE)',
+        epilog='By default, scans for USB first, then falls back to Bluetooth.'
     )
-    parser.add_argument('mac_address', nargs='?',
-                        help='BLE MAC address (XX:XX:XX:XX:XX:XX) - only used in BLE mode')
     parser.add_argument('--usb', action='store_true',
                         help='Force USB mode')
     parser.add_argument('--ble', action='store_true',
@@ -174,13 +172,13 @@ def main():
         logger.info("BLE mode forced via --ble flag")
     else:
         # Auto-detect: scan for TourBox USB device
-        print("Scanning for TourBox Elite...")
+        print("Scanning for TourBox...")
         detected_port = find_tourbox_usb_port(usb_port)
         if detected_port:
             mode = 'usb'
             usb_port = detected_port
             logger.info(f"Auto-detected TourBox at {usb_port}")
-            print(f"Found TourBox Elite on USB ({usb_port})")
+            print(f"Found TourBox on USB ({usb_port})")
         else:
             mode = 'ble'
             logger.info("No TourBox USB device found, using BLE")
@@ -211,27 +209,7 @@ def main():
     else:  # BLE mode
         from .device_ble import TourBoxBLE
 
-        # Get MAC address from: 1) command line, 2) environment, 3) config file
-        mac_address = args.mac_address or os.getenv('TOURBOX_MAC') or device_config.get('mac_address')
-
-        if not mac_address:
-            print("Error: BLE MAC address not found")
-            print("")
-            print("Provide MAC address via:")
-            print("  1. Command line:  tourboxelite <MAC_ADDRESS>")
-            print("  2. Environment:   TOURBOX_MAC=<MAC_ADDRESS> tourboxelite")
-            print("  3. Config file:   Add 'mac_address = XX:XX:XX:XX:XX:XX' to [device] section")
-            print("")
-            print("Or connect via USB and it will be auto-detected.")
-            sys.exit(1)
-
-        # Validate MAC address format
-        if ':' not in mac_address or mac_address == 'XX:XX:XX:XX:XX:XX':
-            print(f"Error: Invalid MAC address: {mac_address}")
-            print("Expected format: XX:XX:XX:XX:XX:XX (replace with your actual MAC)")
-            sys.exit(1)
-
-        driver = TourBoxBLE(mac_address=mac_address, config_path=args.config)
+        driver = TourBoxBLE(config_path=args.config)
 
     # Run the driver
     try:
