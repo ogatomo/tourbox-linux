@@ -15,15 +15,13 @@ Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc
 
 ## Device Compatibility
 
-| Device | Status | Connection | Haptics | Notes |
-|--------|--------|------------|---------|-------|
-| TourBox Elite | ✅ Fully Tested | USB, Bluetooth | ✅ | Full support |
-| TourBox Elite Plus | ✅ Fully Tested | USB, Bluetooth | ✅ | Full support |
-| TourBox Lite (USB) | ✅ Community Tested | USB only | ❌ | Full support |
-| TourBox Lite (Bluetooth) | 🔄 Expected to Work | Bluetooth only | ❌ | [Help verify!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) |
-| TourBox Neo | 🔄 Expected to Work | USB only | ❌ | [Help verify!](https://github.com/AndyCappDev/tourbox-linux/discussions/6) - Same protocol as Elite |
-
-> **Have a TourBox Neo or Lite (Bluetooth)?** We'd love your help testing compatibility! See our [call for testers](https://github.com/AndyCappDev/tourbox-linux/discussions/6) for details.
+| Device | Connection | Haptics | Notes |
+|--------|------------|---------|-------|
+| TourBox Elite | USB, Bluetooth | ✅ | Full support |
+| TourBox Elite Plus | USB, Bluetooth | ✅ | Full support |
+| TourBox Neo | USB only | ❌ | Full Support |
+| TourBox Lite (USB) | USB only | ❌ | Full support |
+| TourBox Lite (Bluetooth) | Bluetooth only | ❌ | Full Support |
 
 ## Features
 
