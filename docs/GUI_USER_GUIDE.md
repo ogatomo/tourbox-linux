@@ -1416,10 +1416,6 @@ To check if a new version of TourBox Linux is available:
    - Stop test
    - Turn TourBox off and on
    - Start test again
-5. Check MAC address in config:
-   ```bash
-   grep mac_address ~/.config/tourbox/config.conf
-   ```
 
 ### Profile Switching Not Working
 
