@@ -73,7 +73,7 @@ class ProfileSettingsDialog(QDialog):
         # Info text
         info_label = QLabel(
             "This profile will activate when the focused window matches either of these identifiers.\n"
-            "Leave both empty to never auto-activate (manual selection only)."
+            "Leave both empty to disable auto-activation (default profile will be used instead)."
         )
         info_label.setWordWrap(True)
         info_label.setStyleSheet("color: #666; font-size: 10px;")

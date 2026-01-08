@@ -568,7 +568,7 @@ class DoublePressDialog(QDialog):
 
         info_label = QLabel(
             f"This action triggers when the button is pressed twice within {timeout}ms.\n"
-            f"Single-press actions will have ~{timeout}ms latency when enabled."
+            f"Single-press actions fire immediately (no delay)."
         )
         info_label.setWordWrap(True)
         info_label.setStyleSheet("color: #666; font-size: 10px; margin-bottom: 10px;")
