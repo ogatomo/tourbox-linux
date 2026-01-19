@@ -107,12 +107,6 @@ class TourBoxBase(ABC):
         self._double_click_first_press: Dict[str, float] = {}  # control -> timestamp of first press
         self._double_click_active_events: Dict[str, List] = {}  # control -> active double-press events (for release)
 
-        # Pending base action tracking - for modifier buttons with combos configured
-        # Base action is deferred to allow combo detection before committing to the base action
-        self._pending_base_action_task: Dict[str, asyncio.Task] = {}  # modifier -> timer task
-        self._pending_base_action_events: Dict[str, List] = {}  # modifier -> base action events
-        self._pending_base_action_released: Set[str] = set()  # modifiers released while pending
-
         # On-release button tracking - buttons that fire on release as a tap
         self._on_release_pending: Dict[str, List[Tuple[int, int, int]]] = {}  # control -> deferred events
         # On-release combo tracking - for on_release buttons pressed while modifier active
@@ -130,20 +124,6 @@ class TourBoxBase(ABC):
             True if the control is a modifier button, False otherwise
         """
         return control_name in self.modifier_buttons
-
-    def modifier_has_combos(self, modifier_name: str) -> bool:
-        """Check if a modifier button has any combos configured
-
-        Args:
-            modifier_name: Name of the modifier button
-
-        Returns:
-            True if the modifier has at least one combo mapping
-        """
-        for (mod, _target) in self.modifier_mappings.keys():
-            if mod == modifier_name:
-                return True
-        return False
 
     def _release_previous_buttons(self, new_button: str):
         """Release any previously held buttons (last-wins behavior)
@@ -243,64 +223,6 @@ class TourBoxBase(ABC):
         """Clear double-click detection state"""
         self._double_click_first_press.clear()
         self._double_click_active_events.clear()
-
-    async def _schedule_base_action_timeout(self, modifier_name: str, base_events: List):
-        """Schedule deferred base action execution for modifier button
-
-        This allows combo detection to cancel the base action before it fires.
-        Uses the same timeout as double-click detection.
-
-        Args:
-            modifier_name: Name of the modifier button
-            base_events: Events to execute if timeout expires (base action)
-        """
-        # Use half the double-click timeout (or 100ms default) for base action deferral
-        # This is shorter than double-click since we only need to detect combos
-        timeout_sec = min(self.current_profile.double_click_timeout / 2000.0, 0.15)
-
-        try:
-            await asyncio.sleep(timeout_sec)
-
-            # Timeout expired - execute base action
-            if modifier_name in self._pending_base_action_task:
-                was_released = modifier_name in self._pending_base_action_released
-
-                logger.info(f"Base action timeout expired for {modifier_name}, executing base action"
-                           f"{' (with release)' if was_released else ''}")
-
-                # Send press events
-                for event_type, event_code, value in base_events:
-                    if value == 1:  # Press events
-                        self.controller.write(event_type, event_code, value)
-                self.controller.syn()
-                self.base_action_active.add(modifier_name)
-
-                # Check if modifier was released while pending
-                if was_released:
-                    # Also send release events (quick tap completed before timeout)
-                    for event_type, event_code, value in base_events:
-                        if value == 1:  # Was a press, send release
-                            self.controller.write(event_type, event_code, 0)
-                    self.controller.syn()
-                    self.base_action_active.discard(modifier_name)
-                    self._pending_base_action_released.discard(modifier_name)
-
-                # Clean up state
-                del self._pending_base_action_task[modifier_name]
-                self._pending_base_action_events.pop(modifier_name, None)
-
-        except asyncio.CancelledError:
-            # Timer was cancelled (combo triggered or profile switch)
-            self._pending_base_action_released.discard(modifier_name)
-            self._pending_base_action_events.pop(modifier_name, None)
-
-    def _cancel_base_action_timers(self):
-        """Cancel all pending base action timers and clear state"""
-        for task in self._pending_base_action_task.values():
-            task.cancel()
-        self._pending_base_action_task.clear()
-        self._pending_base_action_events.clear()
-        self._pending_base_action_released.clear()
 
     def process_button_code(self, data: bytearray):
         """Process button/dial data from TourBox Elite
@@ -494,18 +416,8 @@ class TourBoxBase(ABC):
                             if self.current_profile and control_name in self.current_profile.on_release_controls:
                                 self._on_release_modifier_pending[control_name] = events
                                 logger.info(f"Modifier {control_name} base action DEFERRED (on_release enabled)")
-                            # Check if this modifier has combos - if so, defer base action
-                            elif self.modifier_has_combos(control_name):
-                                # Defer base action to allow combo detection
-                                self._pending_base_action_events[control_name] = events
-                                loop = asyncio.get_event_loop()
-                                task = loop.create_task(
-                                    self._schedule_base_action_timeout(control_name, events)
-                                )
-                                self._pending_base_action_task[control_name] = task
-                                logger.info(f"Modifier {control_name} base action DEFERRED (has combos)")
                             else:
-                                # No combos - send base action immediately
+                                # Immediate fire - base action fires on press (combos release it if triggered)
                                 for event_type, event_code, value in events:
                                     if value == 1:  # Press events
                                         self.controller.write(event_type, event_code, value)
@@ -528,18 +440,8 @@ class TourBoxBase(ABC):
                         if self.current_profile and control_name in self.current_profile.on_release_controls:
                             self._on_release_modifier_pending[control_name] = events
                             logger.info(f"Modifier {control_name} base action DEFERRED (on_release enabled)")
-                        # Check if this modifier has combos - if so, defer base action
-                        elif self.modifier_has_combos(control_name):
-                            # Defer base action to allow combo detection
-                            self._pending_base_action_events[control_name] = events
-                            loop = asyncio.get_event_loop()
-                            task = loop.create_task(
-                                self._schedule_base_action_timeout(control_name, events)
-                            )
-                            self._pending_base_action_task[control_name] = task
-                            logger.info(f"Modifier {control_name} base action DEFERRED (has combos)")
                         else:
-                            # No combos - send base action immediately
+                            # Immediate fire - base action fires on press (combos release it if triggered)
                             for event_type, event_code, value in events:
                                 if value == 1:  # Press events
                                     self.controller.write(event_type, event_code, value)
@@ -585,16 +487,7 @@ class TourBoxBase(ABC):
                             self.combo_used.discard(control_name)
                             return
 
-                        # Check if base action is still pending (not yet sent)
-                        if control_name in self._pending_base_action_task:
-                            # Mark for release - the timeout handler will send press+release
-                            self._pending_base_action_released.add(control_name)
-                            logger.info(f"Modifier {control_name} released while base action pending")
-                            # Reset combo usage tracking
-                            self.combo_used.discard(control_name)
-                            return
-
-                        # Release base action if it's still active (wasn't cancelled by combo)
+                        # Release base action if it's still active (wasn't released by combo)
                         if control_name in self.base_action_active:
                             events = self.modifier_base_actions[control_name]
                             # Send release events
@@ -666,14 +559,8 @@ class TourBoxBase(ABC):
                     if self.current_profile and control_name in self.current_profile.on_release_controls:
                         # Store combo for later execution on release
                         self._on_release_combo_pending[control_name] = (modifier_name, modified_action)
-                        # Still need to cancel timers and mark combo used
-                        # Clear double-press tracking for modifier
+                        # Clear double-press tracking and release base action if active
                         self._double_click_first_press.pop(modifier_name, None)
-                        if modifier_name in self._pending_base_action_task:
-                            self._pending_base_action_task[modifier_name].cancel()
-                            del self._pending_base_action_task[modifier_name]
-                            self._pending_base_action_events.pop(modifier_name, None)
-                            self._pending_base_action_released.discard(modifier_name)
                         if modifier_name in self.base_action_active:
                             base_events = self.modifier_base_actions[modifier_name]
                             for event_type, event_code, value in base_events:
@@ -688,15 +575,7 @@ class TourBoxBase(ABC):
                     # Combo button pressed - clear double-press tracking for modifier
                     self._double_click_first_press.pop(modifier_name, None)
 
-                    # Combo button pressed - cancel pending base action timer if present
-                    if modifier_name in self._pending_base_action_task:
-                        self._pending_base_action_task[modifier_name].cancel()
-                        del self._pending_base_action_task[modifier_name]
-                        self._pending_base_action_events.pop(modifier_name, None)
-                        self._pending_base_action_released.discard(modifier_name)
-                        logger.info(f"Cancelled pending base action for {modifier_name} (combo triggered)")
-
-                    # Combo button pressed - cancel base action if already active
+                    # Combo button pressed - release base action if already active
                     if modifier_name in self.base_action_active:
                         # Release the base action first
                         base_events = self.modifier_base_actions[modifier_name]
@@ -872,7 +751,6 @@ class TourBoxBase(ABC):
         self._on_release_combo_pending.clear()  # Clear on-release combo pending state
         self._on_release_modifier_pending.clear()  # Clear on-release modifier pending state
         self._cancel_double_click_timers()  # Cancel any pending double-click timers
-        self._cancel_base_action_timers()  # Cancel any pending base action timers
 
         # Convert modifier mappings from action strings to events
         self.modifier_mappings = {}
@@ -1055,7 +933,6 @@ class TourBoxBase(ABC):
         self.active_button_events.clear()  # Clear last-wins button tracking
         self.active_combo_events.clear()  # Clear active combo tracking
         self._cancel_double_click_timers()  # Cancel any pending double-click timers
-        self._cancel_base_action_timers()  # Cancel any pending base action timers
 
     def create_virtual_device(self):
         """Create the virtual input device (uinput)
