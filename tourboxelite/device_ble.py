@@ -204,12 +204,12 @@ class TourBoxBLE(TourBoxBase):
                 self.client = client
                 logger.info("Connected to TourBox Elite")
 
+                # Unlock device and send configuration
+                await self.unlock_device()
+
                 # Enable notifications
                 logger.info("Enabling button notifications...")
                 await client.start_notify(NOTIFY_CHAR, self.notification_handler)
-
-                # Unlock device and send configuration
-                await self.unlock_device()
 
                 logger.info("TourBox Elite ready! Press buttons to generate input events.")
                 print("TourBox Elite connected and ready!")
