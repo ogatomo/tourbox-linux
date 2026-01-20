@@ -57,7 +57,7 @@ async def disconnect_existing_device(timeout: float = 10.0):
     try:
         res = await asyncio.wait_for(bus.call(msg), timeout=timeout)
     except asyncio.TimeoutError:
-        logger.warning("Timeout whileenumerating bluetooth devices")
+        logger.warning("Timeout while enumerating bluetooth devices")
         return
     except Exception:
         logger.warning("Error while enumerating bluetooth devices")
