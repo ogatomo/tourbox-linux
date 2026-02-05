@@ -333,6 +333,14 @@ def load_device_config(config_path: str = None) -> Dict[str, str]:
             # Parse boolean value
             force_val = config['device']['force_haptics'].strip().lower()
             device_config['force_haptics'] = force_val in ('true', 'yes', '1', 'on')
+        if 'modifier_delay' in config['device']:
+            # Parse integer value (milliseconds) - delay between modifier keys and main keys
+            # Default is 0 (disabled). Set to 20-50 if applications don't recognize combos.
+            try:
+                device_config['modifier_delay'] = int(config['device']['modifier_delay'].strip())
+            except ValueError:
+                logger.warning(f"Invalid modifier_delay value, using default 0")
+                device_config['modifier_delay'] = 0
 
     return device_config
 

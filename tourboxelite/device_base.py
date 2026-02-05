@@ -16,8 +16,16 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Set, List, Tuple
 
 from evdev import UInput, ecodes as e
-from .config_loader import load_profiles, BUTTON_CODES, parse_action
+from .config_loader import load_profiles, load_device_config, BUTTON_CODES, parse_action
 from .window_monitor import WaylandWindowMonitor
+
+# Keyboard modifier keys - these need to be sent before main keys for proper combo recognition
+KEYBOARD_MODIFIER_KEYS = {
+    e.KEY_LEFTCTRL, e.KEY_RIGHTCTRL,
+    e.KEY_LEFTSHIFT, e.KEY_RIGHTSHIFT,
+    e.KEY_LEFTALT, e.KEY_RIGHTALT,
+    e.KEY_LEFTMETA, e.KEY_RIGHTMETA,
+}
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +122,14 @@ class TourBoxBase(ABC):
         # On-release modifier tracking - modifier buttons with on_release that need base action on release
         self._on_release_modifier_pending: Dict[str, List[Tuple[int, int, int]]] = {}  # control -> base action events
 
+        # Load device config for modifier_delay setting
+        device_config = load_device_config(config_path)
+        # Modifier delay in milliseconds - time between modifier keys and main keys
+        # Default 0 (disabled). Set to 20-50 if apps don't recognize key combos.
+        self.modifier_delay = device_config.get('modifier_delay', 0)
+        if self.modifier_delay > 0:
+            logger.info(f"Modifier delay enabled: {self.modifier_delay}ms")
+
     def is_modifier_button(self, control_name: str) -> bool:
         """Check if a control is configured as a modifier button
 
@@ -124,6 +140,56 @@ class TourBoxBase(ABC):
             True if the control is a modifier button, False otherwise
         """
         return control_name in self.modifier_buttons
+
+    def _send_events(self, events: List[Tuple[int, int, int]]):
+        """Send events to the virtual input device with optional modifier delay
+
+        If modifier_delay is configured and the events contain both keyboard
+        modifier keys (Ctrl, Shift, Alt, Meta) and non-modifier keys, sends
+        the modifier keys first, syncs, waits for the delay, then sends the
+        remaining keys. This helps applications recognize key combinations.
+
+        Args:
+            events: List of (event_type, event_code, value) tuples
+        """
+        if not events or not self.controller:
+            return
+
+        # Check if we need to apply modifier delay
+        if self.modifier_delay > 0:
+            # Separate modifier key presses from other events
+            modifier_presses = []
+            other_events = []
+
+            for event in events:
+                event_type, event_code, value = event
+                if (event_type == e.EV_KEY and
+                    value == 1 and
+                    event_code in KEYBOARD_MODIFIER_KEYS):
+                    modifier_presses.append(event)
+                else:
+                    other_events.append(event)
+
+            # If we have both modifiers and other events, send with delay
+            if modifier_presses and other_events:
+                # Send modifier keys first
+                for event in modifier_presses:
+                    self.controller.write(*event)
+                self.controller.syn()
+
+                # Wait for modifier delay
+                time.sleep(self.modifier_delay / 1000.0)
+
+                # Send remaining events
+                for event in other_events:
+                    self.controller.write(*event)
+                self.controller.syn()
+                return
+
+        # No delay needed - send all events normally
+        for event in events:
+            self.controller.write(*event)
+        self.controller.syn()
 
     def _release_previous_buttons(self, new_button: str):
         """Release any previously held buttons (last-wins behavior)
@@ -286,9 +352,7 @@ class TourBoxBase(ABC):
                                 # Track for release handling
                                 self._double_click_active_events[control_name] = double_events
 
-                                for event in double_events:
-                                    self.controller.write(*event)
-                                self.controller.syn()
+                                self._send_events(double_events)
                             return
                         else:
                             # Too slow - treat as new first press
@@ -306,10 +370,8 @@ class TourBoxBase(ABC):
                         if control_name in self.modifier_base_actions:
                             base_events = self.modifier_base_actions[control_name]
                             # Fire immediately (no deferral for combos)
-                            for event_type, event_code, value in base_events:
-                                if value == 1:  # Press events
-                                    self.controller.write(event_type, event_code, value)
-                            self.controller.syn()
+                            press_events = [(t, c, v) for t, c, v in base_events if v == 1]
+                            self._send_events(press_events)
                             self.base_action_active.add(control_name)
                             logger.info(f"Immediate fire: modifier {control_name} base action PRESSED")
                         else:
@@ -327,9 +389,7 @@ class TourBoxBase(ABC):
                                     self.active_button_events[control_name] = press_events
 
                             # Fire the base action
-                            for event in base_events:
-                                self.controller.write(*event)
-                            self.controller.syn()
+                            self._send_events(base_events)
                             logger.info(f"Immediate fire: {control_name} base action fired")
                     return  # Don't fall through - we handled the press
                 else:
@@ -379,9 +439,7 @@ class TourBoxBase(ABC):
                         if dp_events:
                             logger.info(f"Modifier {control_name} on_release: double-press detected ({elapsed_ms:.0f}ms)")
                             # Fire as tap (press + release)
-                            for event_type, event_code, value in dp_events:
-                                self.controller.write(event_type, event_code, value)
-                            self.controller.syn()
+                            self._send_events(dp_events)
                             for event_type, event_code, value in dp_events:
                                 if event_type == e.EV_KEY and value == 1:
                                     self.controller.write(event_type, event_code, 0)
@@ -418,10 +476,8 @@ class TourBoxBase(ABC):
                                 logger.info(f"Modifier {control_name} base action DEFERRED (on_release enabled)")
                             else:
                                 # Immediate fire - base action fires on press (combos release it if triggered)
-                                for event_type, event_code, value in events:
-                                    if value == 1:  # Press events
-                                        self.controller.write(event_type, event_code, value)
-                                self.controller.syn()
+                                press_events = [(t, c, v) for t, c, v in events if v == 1]
+                                self._send_events(press_events)
                                 self.base_action_active.add(control_name)
                                 logger.info(f"Modifier {control_name} base action PRESSED")
                         else:
@@ -442,10 +498,8 @@ class TourBoxBase(ABC):
                             logger.info(f"Modifier {control_name} base action DEFERRED (on_release enabled)")
                         else:
                             # Immediate fire - base action fires on press (combos release it if triggered)
-                            for event_type, event_code, value in events:
-                                if value == 1:  # Press events
-                                    self.controller.write(event_type, event_code, value)
-                            self.controller.syn()
+                            press_events = [(t, c, v) for t, c, v in events if v == 1]
+                            self._send_events(press_events)
                             self.base_action_active.add(control_name)
                             logger.info(f"Modifier {control_name} base action PRESSED")
                     else:
@@ -464,9 +518,7 @@ class TourBoxBase(ABC):
                             # Only fire if no combo was used
                             if control_name not in self.combo_used:
                                 # Fire base action immediately as tap (immediate fire for on_release)
-                                for event_type, event_code, value in events:
-                                    self.controller.write(event_type, event_code, value)
-                                self.controller.syn()
+                                self._send_events(events)
                                 # Immediately send release events
                                 for event_type, event_code, value in events:
                                     if event_type == e.EV_KEY and value == 1:
@@ -512,9 +564,7 @@ class TourBoxBase(ABC):
                 modifier_name, combo_events = self._on_release_combo_pending.pop(control_name)
                 # Fire combo as tap (press + release)
                 # Send press events
-                for event_type, event_code, value in combo_events:
-                    self.controller.write(event_type, event_code, value)
-                self.controller.syn()
+                self._send_events(combo_events)
                 # Immediately send release events
                 for event_type, event_code, value in combo_events:
                     if event_type == e.EV_KEY and value == 1:
@@ -616,9 +666,7 @@ class TourBoxBase(ABC):
                         event_desc.append(f"{key_name}:{action}")
                 logger.info(f"Combo: {modifier_name}.{control_name} -> {', '.join(event_desc)}")
 
-                for event in events_to_send:
-                    self.controller.write(*event)
-                self.controller.syn()
+                self._send_events(events_to_send)
                 return
 
         # Step 4: Execute normal action (no modifier or no combo mapping)
@@ -640,14 +688,14 @@ class TourBoxBase(ABC):
                                     if double_events:
                                         logger.info(f"On-release double-press detected: {control_name} ({elapsed_ms:.0f}ms)")
                                         # Fire double action as tap
-                                        for event in double_events:
-                                            self.controller.write(*event)
-                                        self.controller.syn()
+                                        self._send_events(double_events)
                                         # Immediately send release events
-                                        for event_type, event_code, value in double_events:
-                                            if event_type == e.EV_KEY and value == 1:
-                                                self.controller.write(event_type, event_code, 0)
-                                        self.controller.syn()
+                                        release_events = [(t, c, 0) for t, c, v in double_events
+                                                         if t == e.EV_KEY and v == 1]
+                                        if release_events:
+                                            for event in release_events:
+                                                self.controller.write(*event)
+                                            self.controller.syn()
                                     return
                                 else:
                                     # Too slow - clear timestamp, treat as new first press
@@ -666,13 +714,14 @@ class TourBoxBase(ABC):
                                 pending_events = self._on_release_pending.pop(control_name)
 
                                 # Fire tap immediately (immediate fire for on_release)
-                                # Send press events (KEY events get press value, REL events use stored value)
+                                # Build press events (KEY events get press value, REL events use stored value)
+                                press_events = []
                                 for event_type, event_code, value in pending_events:
                                     if event_type == e.EV_KEY:
-                                        self.controller.write(event_type, event_code, 1)
+                                        press_events.append((event_type, event_code, 1))
                                     elif event_type == e.EV_REL:
-                                        self.controller.write(event_type, event_code, value)
-                                self.controller.syn()
+                                        press_events.append((event_type, event_code, value))
+                                self._send_events(press_events)
                                 # Immediately send release events (only for KEY events, not REL)
                                 for event_type, event_code, value in pending_events:
                                     if event_type == e.EV_KEY:
@@ -719,9 +768,7 @@ class TourBoxBase(ABC):
                 logger.info(f"{data_bytes.hex()} -> {', '.join(event_desc)}")
 
                 # Send input events to virtual device
-                for event in mapping:
-                    self.controller.write(*event)
-                self.controller.syn()
+                self._send_events(mapping)
             else:
                 logger.warning(f"Unknown button code: {data_bytes.hex()}")
 
