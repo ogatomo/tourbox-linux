@@ -293,6 +293,14 @@ def load_profile_from_file(filepath: Path):
             except ValueError:
                 logger.warning(f"Invalid double_click_timeout value, using default 300ms")
 
+        # Parse per-profile modifier_delay (None = use global fallback)
+        modifier_delay = None
+        if 'modifier_delay' in profile_section:
+            try:
+                modifier_delay = int(profile_section['modifier_delay'])
+            except ValueError:
+                logger.warning(f"Invalid modifier_delay value in profile, ignoring")
+
         # Parse global haptic settings from [profile] section
         haptic_config = HapticConfig()
         if 'haptic' in profile_section:
@@ -474,7 +482,8 @@ def load_profile_from_file(filepath: Path):
             double_press_actions=double_press_actions,
             double_press_comments=double_press_comments,
             on_release_controls=on_release_controls,
-            on_release_user_disabled=on_release_user_disabled
+            on_release_user_disabled=on_release_user_disabled,
+            modifier_delay=modifier_delay
         )
 
         logger.info(f"Loaded profile from file: {profile}")
@@ -524,6 +533,10 @@ def save_profile_to_file(profile, filepath: Path) -> bool:
         # Only write double_click_timeout if non-default (300ms is the default)
         if profile.double_click_timeout != 300:
             lines.append(f"double_click_timeout = {profile.double_click_timeout}")
+
+        # Only write modifier_delay if explicitly set (None = use global)
+        if profile.modifier_delay is not None:
+            lines.append(f"modifier_delay = {profile.modifier_delay}")
 
         # Global haptic settings in profile section
         if profile.haptic_config.global_setting is not None:

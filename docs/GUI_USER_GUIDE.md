@@ -16,9 +16,10 @@
 9. [Using Double-Press Actions](#using-double-press-actions)
 10. [Using Activate on Release](#using-activate-on-release)
 11. [Configuring Haptic Feedback](#configuring-haptic-feedback)
-12. [Tips & Tricks](#tips--tricks)
-13. [Checking for Updates](#checking-for-updates)
-14. [Troubleshooting](#troubleshooting)
+12. [Configuring Modifier Key Delay](#configuring-modifier-key-delay)
+13. [Tips & Tricks](#tips--tricks)
+14. [Checking for Updates](#checking-for-updates)
+15. [Troubleshooting](#troubleshooting)
 
 
 ---
@@ -65,7 +66,7 @@ tourbox-gui
 
 ## Understanding the Interface
 
-![TourBox Configuration GUI](images/gui-screenshot.png?v=2.8.0)
+![TourBox Configuration GUI](images/gui-screenshot.png?v=2.9.0)
 
 The GUI has a 4-panel layout:
 
@@ -1193,6 +1194,117 @@ Haptic settings (both strength and speed) are applied in this priority order (hi
 **5. Test with your applications**
 - Save and test your haptic settings in your actual workflow
 - Adjust based on what feels natural for each use case
+
+---
+
+## Configuring Modifier Key Delay
+
+### What Is Modifier Key Delay?
+
+When the TourBox sends a key combination like Ctrl+Z, it sends the modifier key (Ctrl) and the main key (Z) at nearly the same time. Most applications handle this correctly, but some applications — particularly **GIMP** — can fail to recognize the combination because the modifier key hasn't been fully registered before the main key arrives.
+
+**Modifier key delay** adds a small pause (in milliseconds) between sending the modifier keys (Ctrl, Shift, Alt, Super) and the remaining keys in a combination. This gives the application time to register the modifier before the main key arrives.
+
+### When Do You Need It?
+
+You likely need modifier key delay if:
+
+- **Key combinations don't work in specific applications** — e.g., pressing a button mapped to Ctrl+Z does nothing in GIMP, but works fine in other apps
+- **Only the main key registers** — e.g., you get "z" instead of "Ctrl+Z"
+- **Combinations work intermittently** — sometimes the combo registers, sometimes it doesn't
+
+**Common applications that may need it:**
+- GIMP (image editor)
+- Some Java-based applications (IntelliJ, Android Studio)
+- Some older GTK applications
+
+Most applications (Firefox, VS Code, terminal emulators, etc.) do **not** need this setting.
+
+### Global vs Per-Profile Setting
+
+Modifier key delay can be configured at two levels:
+
+1. **Global setting** — In `~/.config/tourbox/config.conf` under the `[device]` section. Applies to all profiles unless overridden.
+2. **Per-profile setting** — In the profile settings dialog. Overrides the global setting for that specific profile.
+
+**Priority chain:** Per-profile value > Global `[device]` value > 0 (disabled)
+
+This means you can leave the global setting at 0 (disabled) and only enable the delay for profiles that need it — for example, your GIMP profile can have a 30ms delay while all other profiles remain at zero latency.
+
+### Setting the Global Modifier Key Delay
+
+Edit `~/.config/tourbox/config.conf`:
+
+```ini
+[device]
+modifier_delay = 30
+```
+
+This sets a 30ms delay for all profiles (unless a profile overrides it). Set to `0` to disable.
+
+### Setting Per-Profile Modifier Key Delay (GUI)
+
+1. **Select the profile** in the Profiles list (e.g., your GIMP profile)
+2. Click the **"⚙"** (settings) button to open Profile Settings
+3. Find the **"Modifier Key Delay"** section
+4. **Check** the **"Override global setting"** checkbox
+5. Set the delay value using the spin box (0-100ms)
+6. Click **"Apply"**
+7. Click **"Save"** (Ctrl+S) to write changes to config
+
+**When the checkbox is unchecked:** The profile uses the global setting from `config.conf` (or 0 if none is set).
+
+**When the checkbox is checked:** The profile uses the value you set, regardless of the global setting. Setting it to 0 with the checkbox checked explicitly disables the delay for that profile, even if the global setting is non-zero.
+
+### Recommended Values
+
+| Value | Description |
+|-------|-------------|
+| `0` | Disabled (default) — no delay between modifier and main keys |
+| `20` | Minimal delay — fixes most applications with combo issues |
+| `30` | Safe default for problematic applications |
+| `50` | Conservative — use if lower values don't work |
+| `>50` | Rarely needed — may feel sluggish |
+
+**Start with 20-30ms** and increase only if combinations still aren't recognized.
+
+### Example: GIMP Profile with Modifier Delay
+
+A typical setup where only GIMP needs the delay:
+
+1. **Global setting:** Leave at 0 (or don't set it) — most apps don't need it
+2. **GIMP profile:** Open profile settings, check "Override global setting", set to 30ms
+3. Click **"Apply"**, then **"Save"** (Ctrl+S) to write changes to config
+4. **Result:** When you switch to GIMP, key combos have a 30ms modifier delay. When you switch to any other app, there's zero delay.
+
+### Configuration in Profile Files
+
+The setting is stored in your profile file's `[profile]` section:
+
+```ini
+[profile]
+name = Gimp
+app_id = gimp
+modifier_delay = 30
+```
+
+When omitted (not present in the file), the profile uses the global setting. This is the default for all profiles.
+
+### Tips
+
+**1. Only enable where needed**
+- Most applications handle simultaneous key events correctly
+- Adding unnecessary delay makes all key combos slightly slower
+- Per-profile configuration lets you target only the apps that need it
+
+**2. Test after changing**
+- Save your profile and switch to the target application
+- Test several key combinations to verify they work reliably
+- If combos still fail, increase the delay by 10ms and test again
+
+**3. The delay applies to all key combos in the profile**
+- Every mapped action that combines modifier keys with other keys will have the delay
+- Simple key actions (single keys without modifiers) are not affected
 
 ---
 

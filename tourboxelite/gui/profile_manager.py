@@ -273,7 +273,7 @@ class ProfileManager(QWidget):
         dialog = ProfileSettingsDialog(self.current_profile, self, is_new=False)
         if dialog.exec() == QDialog.Accepted:
             # Get results
-            name, app_id, window_class, haptic_strength, haptic_speed, double_click_timeout = dialog.get_results()
+            name, app_id, window_class, haptic_strength, haptic_speed, double_click_timeout, modifier_delay = dialog.get_results()
 
             # Update profile object
             old_name = self.current_profile.name
@@ -288,9 +288,13 @@ class ProfileManager(QWidget):
             # Update double-click timeout
             self.current_profile.double_click_timeout = double_click_timeout
 
+            # Update modifier delay override
+            self.current_profile.modifier_delay = modifier_delay
+
             logger.info(f"Profile updated: {self.current_profile}")
             logger.info(f"  Haptic: {haptic_strength}, Speed: {haptic_speed}")
             logger.info(f"  Double-click timeout: {double_click_timeout}ms")
+            logger.info(f"  Modifier delay: {modifier_delay if modifier_delay is not None else 'global'}")
 
             # Reload the list to show updated info
             self._reload_profile_list()

@@ -55,6 +55,9 @@ class Profile:
     # Controls where user explicitly disabled on_release (don't auto-enable again)
     on_release_user_disabled: Set[str] = field(default_factory=set)
 
+    # Per-profile modifier delay override (None = use global, 0 = disabled, >0 = ms)
+    modifier_delay: Optional[int] = None
+
     def matches(self, window_info) -> bool:
         """Check if this profile matches the given window info"""
         # Disabled profiles never match (except default which is always enabled)

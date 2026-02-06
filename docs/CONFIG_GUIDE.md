@@ -117,6 +117,7 @@ Configures your TourBox device connection.
 
 **Available settings:**
 - `mac_address` - Your TourBox's Bluetooth MAC address (XX:XX:XX:XX:XX:XX) - Elite/Elite Plus only
+- `modifier_delay` - Milliseconds to wait between modifier keys (Ctrl/Shift/Alt/Meta) and other keys when sending key combinations. Default: `0` (disabled). Set to `20`-`50` if apps like GIMP don't recognize key combos. Can be overridden per-profile in `.profile` files (see below).
 
 **How to find your MAC address:**
 ```bash
@@ -128,6 +129,7 @@ Look for "TourBox Elite" or "TourBox Elite Plus" in the output.
 ```ini
 [device]
 mac_address = D9:BE:1E:CC:40:D7
+modifier_delay = 0
 ```
 
 ### `[service]` Section (Optional)
@@ -447,6 +449,40 @@ haptic_speed.knob.tall = medium # Medium speed for tall+knob combo
 scroll_up = KEY_LEFTCTRL+KEY_EQUAL
 scroll_down = KEY_LEFTCTRL+KEY_MINUS
 ```
+
+---
+
+## Modifier Key Delay
+
+Some applications (notably GIMP) don't recognize key combinations when the modifier key and main key arrive at nearly the same time. The `modifier_delay` setting adds a small pause between them.
+
+### Global Setting
+
+Set in `config.conf` to apply to all profiles:
+
+```ini
+[device]
+modifier_delay = 30
+```
+
+### Per-Profile Override
+
+Override the global setting for a specific profile by adding `modifier_delay` to the `[profile]` section of a `.profile` file:
+
+```ini
+[profile]
+name = Gimp
+app_id = gimp
+modifier_delay = 30
+```
+
+**Priority:** Per-profile value > Global `[device]` value > 0 (disabled)
+
+- **Omitted** from profile: Uses the global setting
+- **Set to `0`** in profile: Explicitly disables delay for this profile, even if global is non-zero
+- **Set to `30`** in profile: Uses 30ms delay regardless of global setting
+
+**Recommended values:** `20`-`50`ms. Start with `30` and adjust if needed.
 
 ---
 

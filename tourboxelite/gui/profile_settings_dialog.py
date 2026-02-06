@@ -9,7 +9,7 @@ from typing import Optional
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QLineEdit,
     QPushButton, QLabel, QGroupBox, QMessageBox, QProgressDialog, QComboBox,
-    QSlider, QSpinBox
+    QSlider, QSpinBox, QCheckBox
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
@@ -38,6 +38,7 @@ class ProfileSettingsDialog(QDialog):
         self.result_haptic_strength = profile.haptic_config.get_effective_global()
         self.result_haptic_speed = profile.haptic_config.get_effective_speed()
         self.result_double_click_timeout = profile.double_click_timeout
+        self.result_modifier_delay = profile.modifier_delay  # None = use global
 
         self._init_ui()
         self.setMinimumWidth(500)
@@ -182,6 +183,49 @@ class ProfileSettingsDialog(QDialog):
 
         layout.addWidget(double_click_group)
 
+        # Modifier delay section
+        modifier_delay_group = QGroupBox("Modifier Key Delay")
+        modifier_delay_layout = QFormLayout(modifier_delay_group)
+
+        # Override checkbox + spinbox
+        override_layout = QHBoxLayout()
+        override_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.modifier_delay_override_checkbox = QCheckBox("Override global setting")
+        self.modifier_delay_override_checkbox.stateChanged.connect(self._on_modifier_delay_override_changed)
+        override_layout.addWidget(self.modifier_delay_override_checkbox)
+
+        self.modifier_delay_spin = QSpinBox()
+        self.modifier_delay_spin.setRange(0, 100)
+        self.modifier_delay_spin.setSuffix(" ms")
+        self.modifier_delay_spin.setSingleStep(5)
+        self.modifier_delay_spin.setFixedWidth(80)
+
+        # Initialize from profile
+        if self.result_modifier_delay is not None:
+            self.modifier_delay_override_checkbox.setChecked(True)
+            self.modifier_delay_spin.setValue(self.result_modifier_delay)
+            self.modifier_delay_spin.setEnabled(True)
+        else:
+            self.modifier_delay_override_checkbox.setChecked(False)
+            self.modifier_delay_spin.setValue(0)
+            self.modifier_delay_spin.setEnabled(False)
+
+        override_layout.addWidget(self.modifier_delay_spin)
+
+        modifier_delay_layout.addRow(override_layout)
+
+        modifier_delay_info = QLabel(
+            "Delay between modifier keys (Ctrl/Shift/Alt) and other keys in combos.\n"
+            "Some apps (e.g. GIMP) need 20-50ms to recognize key combinations.\n"
+            "When unchecked, uses the global setting from config.conf [device] section."
+        )
+        modifier_delay_info.setWordWrap(True)
+        modifier_delay_info.setStyleSheet("color: #666; font-size: 10px;")
+        modifier_delay_layout.addRow("", modifier_delay_info)
+
+        layout.addWidget(modifier_delay_group)
+
         # Dialog buttons
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -298,6 +342,10 @@ class ProfileSettingsDialog(QDialog):
             )
             logger.error(f"Window capture failed: {e}")
 
+    def _on_modifier_delay_override_changed(self, state):
+        """Handle modifier delay override checkbox state change"""
+        self.modifier_delay_spin.setEnabled(state == Qt.Checked.value)
+
     def _on_apply(self):
         """Handle apply button click"""
         # Validate profile name
@@ -326,6 +374,10 @@ class ProfileSettingsDialog(QDialog):
         self.result_haptic_strength = self.haptic_combo.currentData()
         self.result_haptic_speed = self.haptic_speed_combo.currentData()
         self.result_double_click_timeout = self.double_click_timeout_spin.value()
+        if self.modifier_delay_override_checkbox.isChecked():
+            self.result_modifier_delay = self.modifier_delay_spin.value()
+        else:
+            self.result_modifier_delay = None
 
         # Accept the dialog
         self.accept()
@@ -334,7 +386,8 @@ class ProfileSettingsDialog(QDialog):
         """Get the edited profile settings
 
         Returns:
-            Tuple of (name, app_id, window_class, haptic_strength, haptic_speed, double_click_timeout)
+            Tuple of (name, app_id, window_class, haptic_strength, haptic_speed,
+                      double_click_timeout, modifier_delay)
         """
         return (
             self.result_profile_name,
@@ -342,5 +395,6 @@ class ProfileSettingsDialog(QDialog):
             self.result_window_class,
             self.result_haptic_strength,
             self.result_haptic_speed,
-            self.result_double_click_timeout
+            self.result_double_click_timeout,
+            self.result_modifier_delay
         )

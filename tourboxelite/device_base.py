@@ -124,11 +124,13 @@ class TourBoxBase(ABC):
 
         # Load device config for modifier_delay setting
         device_config = load_device_config(config_path)
-        # Modifier delay in milliseconds - time between modifier keys and main keys
+        # Global modifier delay in milliseconds - time between modifier keys and main keys
         # Default 0 (disabled). Set to 20-50 if apps don't recognize key combos.
-        self.modifier_delay = device_config.get('modifier_delay', 0)
+        # Per-profile values override this when set.
+        self._global_modifier_delay = device_config.get('modifier_delay', 0)
+        self.modifier_delay = self._global_modifier_delay
         if self.modifier_delay > 0:
-            logger.info(f"Modifier delay enabled: {self.modifier_delay}ms")
+            logger.info(f"Global modifier delay enabled: {self.modifier_delay}ms")
 
     def is_modifier_button(self, control_name: str) -> bool:
         """Check if a control is configured as a modifier button
@@ -826,6 +828,13 @@ class TourBoxBase(ABC):
         for modifier, action_str in profile.modifier_base_actions.items():
             self.modifier_base_actions[modifier] = parse_action(action_str)
 
+        # Resolve per-profile modifier_delay (profile value > global > 0)
+        if profile.modifier_delay is not None:
+            self.modifier_delay = profile.modifier_delay
+            logger.info(f"  Per-profile modifier_delay: {self.modifier_delay}ms")
+        else:
+            self.modifier_delay = self._global_modifier_delay
+
         # Print profile switch to console
         print(f"\nSwitched to profile: {profile.name}")
         logger.info(f"Switched to profile: {profile.name}")
@@ -874,6 +883,10 @@ class TourBoxBase(ABC):
             self.profiles = new_profiles
             logger.info(f"Reloaded {len(self.profiles)} profiles")
 
+            # Reload global modifier_delay from device config
+            device_config = load_device_config(self.config_path)
+            self._global_modifier_delay = device_config.get('modifier_delay', 0)
+
             # Find the current profile in the new profiles
             new_current_profile = next((p for p in self.profiles if p.name == current_profile_name), None)
 
@@ -909,6 +922,13 @@ class TourBoxBase(ABC):
             self.modifier_base_actions = {}
             for modifier, action_str in new_current_profile.modifier_base_actions.items():
                 self.modifier_base_actions[modifier] = parse_action(action_str)
+
+            # Resolve per-profile modifier_delay (profile value > global > 0)
+            if new_current_profile.modifier_delay is not None:
+                self.modifier_delay = new_current_profile.modifier_delay
+                logger.info(f"Per-profile modifier_delay: {self.modifier_delay}ms")
+            else:
+                self.modifier_delay = self._global_modifier_delay
 
             # Check if capabilities changed
             if new_current_profile.capabilities != self.capabilities:
