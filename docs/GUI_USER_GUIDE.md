@@ -66,7 +66,7 @@ tourbox-gui
 
 ## Understanding the Interface
 
-![TourBox Configuration GUI](images/gui-screenshot.png?v=2.9.0)
+![TourBox Configuration GUI](images/gui-screenshot.png?v=2.10.0)
 
 The GUI has a 4-panel layout:
 

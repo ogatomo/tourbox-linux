@@ -1,6 +1,6 @@
 # TourBox Lite / Neo / Elite / Elite Plus Linux Driver
 
-**Version 2.9.0**
+**Version 2.10.0**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Linux](https://img.shields.io/badge/platform-linux-lightgrey.svg)](https://www.linux.org/)
@@ -26,7 +26,7 @@ Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc
 - ✅ **Graphical Configuration** - Full-featured GUI for visual configuration with live preview
 - ✅ **USB and Bluetooth LE** - Connect via USB cable or wirelessly via Bluetooth
 - ✅ **Haptic Feedback** - Configurable vibration feedback for rotary controls (Elite series only)
-- ✅ **Application Profiles** - Different button mappings per application (Wayland only)
+- ✅ **Application Profiles** - Different button mappings per application (Wayland and X11)
 - ✅ **Window Detection** - Automatic profile switching based on focused window
 - ✅ **Full Button Mapping** - All 20 controls configurable (buttons, knobs, scroll wheel, dial)
 - ✅ **Modifier Keys** - Create over 250 unique key combinations per profile using physical buttons as modifiers
@@ -46,7 +46,7 @@ Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc
   - **Debian/Ubuntu:** `gcc python3-dev linux-headers-generic`
   - **Fedora/RHEL:** `gcc python3-devel kernel-headers`
   - **Arch:** `gcc python linux-headers`
-- Running on Wayland (for app-specific profiles) or X11 (default profile only)
+- Running on Wayland or X11 (for app-specific profiles, X11 requires `xdotool`)
 
 > **Note:** The `install.sh` script will check for these dependencies and tell you what to install if anything is missing.
 
@@ -60,9 +60,10 @@ Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc
 ### Additional Requirements for Profile Mode
 
 - **For profile mode (app-specific mappings):**
-  - **KDE Plasma:** `kdotool` required (see installation instructions below)
-  - **GNOME:** [Focused Window D-Bus extension](https://extensions.gnome.org/extension/5592/focused-window-d-bus/) required (see installation instructions below)
-  - **Sway/Hyprland:** No additional requirements
+  - **KDE Plasma (Wayland):** `kdotool` required (see installation instructions below)
+  - **GNOME (Wayland):** [Focused Window D-Bus extension](https://extensions.gnome.org/extension/5592/focused-window-d-bus/) required (see installation instructions below)
+  - **Sway/Hyprland/Niri:** No additional requirements
+  - **X11 (all desktops):** `xdotool` required (see installation instructions below)
 
 ## Quick Install
 
@@ -134,6 +135,26 @@ Without this extension, profile mode will not work on GNOME (the driver will use
 
 No additional software required - profile mode works out of the box using the compositor's built-in IPC.
 
+### Additional Step for X11 Users
+
+If you're using X11 (Cinnamon, MATE, XFCE, i3, etc.) and want profile mode (app-specific mappings), you need to install `xdotool`:
+
+```bash
+# Debian/Ubuntu/Mint
+sudo apt install xdotool
+
+# Fedora/RHEL
+sudo dnf install xdotool
+
+# Arch
+sudo pacman -S xdotool
+```
+
+Verify installation:
+```bash
+xdotool --version
+```
+
 ## Updating
 
 To update to the latest version:
@@ -156,7 +177,7 @@ The installer will automatically:
 
 The driver includes a **graphical configuration tool** that makes it easy to configure button mappings without editing config files manually.
 
-![TourBox Elite Configuration GUI](docs/images/gui-screenshot.png?v=2.9.0)
+![TourBox Elite Configuration GUI](docs/images/gui-screenshot.png?v=2.10.0)
 
 ### Running the GUI
 
@@ -325,9 +346,9 @@ knob_ccw = KEY_LEFTCTRL+KEY_MINUS   # Zoom out
 # ... more rotary controls
 ```
 
-### App-Specific Profiles (Wayland only)
+### App-Specific Profiles
 
-On Wayland, you can add app-specific profiles that automatically switch when you focus different windows:
+You can add app-specific profiles that automatically switch when you focus different windows:
 
 ```ini
 [profile:vscode]
@@ -346,7 +367,7 @@ knob_cw = KEY_LEFTCTRL+KEY_EQUAL    # Zoom in
 # ... all other buttons
 ```
 
-**Note:** On X11, only `[profile:default]` is used. App-specific profiles require Wayland.
+**Note:** On X11, app-specific profiles require `xdotool`. On Wayland, see the compositor-specific requirements above.
 
 ### Haptic Feedback
 
@@ -503,10 +524,15 @@ ls -l /dev/uinput
 
 ### Profile switching not working
 
-Profile mode requires Wayland. Verify:
+Profile mode requires Wayland or X11 with `xdotool`. Verify your session type:
 ```bash
 echo $XDG_SESSION_TYPE
-# Should output: wayland
+# Should output: wayland or x11
+```
+
+For X11, ensure `xdotool` is installed:
+```bash
+xdotool --version
 ```
 
 Test window detection:

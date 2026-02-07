@@ -16,7 +16,7 @@ import serial
 
 from .device_base import TourBoxBase
 from .config_loader import load_profiles, load_device_config
-from .window_monitor import WaylandWindowMonitor
+from .window_monitor import WindowMonitor
 from .haptic import build_config_message_usb, HapticConfig
 
 logger = logging.getLogger(__name__)
@@ -296,7 +296,7 @@ class TourBoxUSB(TourBoxBase):
             logger.warning(f"No 'default' profile found, using '{self.profiles[0].name}' as fallback")
 
         # Initialize window monitor
-        self.window_monitor = WaylandWindowMonitor()
+        self.window_monitor = WindowMonitor()
 
         # Write PID file
         pid = str(os.getpid())

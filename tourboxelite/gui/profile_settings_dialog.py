@@ -16,7 +16,7 @@ from PySide6.QtGui import QFont
 
 # Import from existing driver code
 from tourboxelite.config_loader import Profile
-from tourboxelite.window_monitor import WaylandWindowMonitor, WindowInfo
+from tourboxelite.window_monitor import WindowMonitor, WindowInfo
 from tourboxelite.haptic import HapticStrength, HapticSpeed
 
 logger = logging.getLogger(__name__)
@@ -260,7 +260,7 @@ class ProfileSettingsDialog(QDialog):
         # Initialize window monitor if needed
         if not self.window_monitor:
             try:
-                self.window_monitor = WaylandWindowMonitor()
+                self.window_monitor = WindowMonitor()
             except Exception as e:
                 countdown_dialog.close()
                 QMessageBox.critical(

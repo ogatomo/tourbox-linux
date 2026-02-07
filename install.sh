@@ -599,6 +599,33 @@ if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
         echo "  Detected compositor: ${XDG_CURRENT_DESKTOP:-Unknown}"
         echo -e "  ${GREEN}✓${NC} Window detection works natively"
     fi
+elif [ "$XDG_SESSION_TYPE" = "x11" ]; then
+    echo -e "${GREEN}✓${NC} X11 detected - Profile mode is available with xdotool!"
+    echo ""
+
+    if ! command -v xdotool &> /dev/null; then
+        echo -e "${YELLOW}╔════════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${YELLOW}║  ATTENTION X11 USERS:                                          ║${NC}"
+        echo -e "${YELLOW}║  xdotool is NOT installed - Profile mode will NOT work!        ║${NC}"
+        echo -e "${YELLOW}╚════════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        echo -e "${BLUE}To enable profile mode (app-specific button mappings), install xdotool:${NC}"
+        echo ""
+        echo -e "${GREEN}Debian/Ubuntu/Mint:${NC}"
+        echo "   sudo apt install xdotool"
+        echo ""
+        echo -e "${GREEN}Fedora/RHEL:${NC}"
+        echo "   sudo dnf install xdotool"
+        echo ""
+        echo -e "${GREEN}Arch:${NC}"
+        echo "   sudo pacman -S xdotool"
+        echo ""
+        echo -e "${YELLOW}Note: Simple mode (single mapping) works without xdotool.${NC}"
+        echo ""
+    else
+        XDOTOOL_VERSION=$(xdotool --version 2>&1 | head -1)
+        echo -e "  ${GREEN}✓${NC} xdotool found: $XDOTOOL_VERSION"
+    fi
 fi
 
 if [ "$NEED_RELOGIN" = "true" ]; then

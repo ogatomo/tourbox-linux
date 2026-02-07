@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Window monitoring for Wayland compositors
+"""Window monitoring for Wayland compositors and X11
 
 Detects active window information to enable application-specific profiles.
-Supports: Sway, Hyprland, GNOME Shell (Mutter), KDE Plasma (KWin)
+Supports: Sway, Hyprland, GNOME Shell (Mutter), KDE Plasma (KWin), Niri, X11 (via xdotool)
 """
 
 import asyncio
@@ -27,8 +27,8 @@ class WindowInfo:
         return f"WindowInfo(app_id='{self.app_id}', title='{self.title}', class='{self.wm_class}')"
 
 
-class WaylandWindowMonitor:
-    """Monitor active window on Wayland compositors"""
+class WindowMonitor:
+    """Monitor active window on Wayland compositors and X11"""
 
     def __init__(self):
         self.compositor = None
@@ -70,31 +70,34 @@ class WaylandWindowMonitor:
         return None
 
     def _detect_compositor(self):
-        """Auto-detect which Wayland compositor is running"""
+        """Auto-detect which Wayland compositor or X11 session is running"""
 
         # Check environment variables
         session = os.environ.get('XDG_CURRENT_DESKTOP', '').lower()
+        session_type = os.environ.get('XDG_SESSION_TYPE', '').lower()
         wayland_display = os.environ.get('WAYLAND_DISPLAY', '')
 
-        if not wayland_display:
-            logger.warning("WAYLAND_DISPLAY not set - may not be running Wayland")
+        if not wayland_display and session_type != 'x11':
+            logger.warning("WAYLAND_DISPLAY not set and not X11 - may not be running a supported session")
 
         # Try to detect compositor by testing commands
+        # X11 is last as a generic fallback after all Wayland-specific detectors
         detectors = [
             ('sway', self._test_sway),
             ('hyprland', self._test_hyprland),
             ('gnome', self._test_gnome),
             ('kde', self._test_kde),
             ('niri', self._test_niri),
+            ('x11', self._test_x11),
         ]
 
         for name, test_func in detectors:
             if test_func():
                 self.compositor = name
-                logger.info(f"Detected Wayland compositor: {name}")
+                logger.info(f"Detected window manager: {name}")
                 return
 
-        logger.warning(f"Could not detect Wayland compositor (session={session})")
+        logger.warning(f"Could not detect compositor or window manager (session={session}, type={session_type})")
         logger.warning("Profile switching will be disabled")
 
     def _test_sway(self) -> bool:
@@ -163,6 +166,22 @@ class WaylandWindowMonitor:
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
 
+    def _test_x11(self) -> bool:
+        """Test if running on X11 with xdotool available"""
+        session_type = os.environ.get('XDG_SESSION_TYPE', '').lower()
+        if session_type != 'x11':
+            return False
+
+        try:
+            result = subprocess.run(
+                ['xdotool', 'getactivewindow'],
+                capture_output=True,
+                timeout=1
+            )
+            return result.returncode == 0
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return False
+
     def get_active_window(self) -> Optional[WindowInfo]:
         """Get information about the currently active window"""
 
@@ -180,6 +199,8 @@ class WaylandWindowMonitor:
                 return self._get_kde_window()
             elif self.compositor == 'niri':
                 return self._get_niri_window()
+            elif self.compositor == 'x11':
+                return self._get_x11_window()
         except Exception as e:
             logger.error(f"Error getting active window: {e}")
             return None
@@ -365,6 +386,43 @@ class WaylandWindowMonitor:
 
         return None
 
+    def _get_x11_window(self) -> Optional[WindowInfo]:
+        """Get active window on X11 using xdotool
+
+        Requires: xdotool (available in most distro repositories)
+        """
+        try:
+            # Get window class
+            class_result = subprocess.run(
+                ['xdotool', 'getactivewindow', 'getwindowclassname'],
+                capture_output=True,
+                text=True,
+                timeout=1
+            )
+
+            # Get window title
+            title_result = subprocess.run(
+                ['xdotool', 'getactivewindow', 'getwindowname'],
+                capture_output=True,
+                text=True,
+                timeout=1
+            )
+
+            if class_result.returncode == 0 or title_result.returncode == 0:
+                window_class = class_result.stdout.strip() if class_result.returncode == 0 else ''
+                window_title = title_result.stdout.strip() if title_result.returncode == 0 else ''
+
+                return WindowInfo(
+                    app_id=window_class,
+                    title=window_title,
+                    wm_class=window_class
+                )
+
+        except Exception as e:
+            logger.debug(f"X11 window detection error: {e}")
+
+        return None
+
     async def monitor_window_changes(self, callback, interval: float = 0.2):
         """Monitor for window changes and call callback when window changes
 
@@ -395,13 +453,17 @@ class WaylandWindowMonitor:
                 await asyncio.sleep(interval)
 
 
+# Backward compatibility alias
+WaylandWindowMonitor = WindowMonitor
+
+
 # Convenience function for testing
 async def test_monitor():
     """Test window monitoring"""
-    monitor = WaylandWindowMonitor()
+    monitor = WindowMonitor()
 
     if not monitor.compositor:
-        print("No Wayland compositor detected!")
+        print("No compositor or window manager detected!")
         return
 
     print(f"Monitoring windows on {monitor.compositor}...")

@@ -17,7 +17,7 @@ from typing import Optional, Dict, Set, List, Tuple
 
 from evdev import UInput, ecodes as e
 from .config_loader import load_profiles, load_device_config, BUTTON_CODES, parse_action
-from .window_monitor import WaylandWindowMonitor
+from .window_monitor import WindowMonitor
 
 # Keyboard modifier keys - these need to be sent before main keys for proper combo recognition
 KEYBOARD_MODIFIER_KEYS = {
@@ -93,7 +93,7 @@ class TourBoxBase(ABC):
         self.capabilities: Optional[Dict] = None
         self.profiles: List = []
         self.current_profile = None
-        self.window_monitor: Optional[WaylandWindowMonitor] = None
+        self.window_monitor: Optional[WindowMonitor] = None
         self.use_profiles = False
 
         # Modifier state tracking

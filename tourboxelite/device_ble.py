@@ -19,7 +19,7 @@ from evdev import UInput
 
 from .device_base import TourBoxBase
 from .config_loader import load_profiles
-from .window_monitor import WaylandWindowMonitor
+from .window_monitor import WindowMonitor
 from .haptic import build_config_commands, HapticConfig
 
 logger = logging.getLogger(__name__)
@@ -359,7 +359,7 @@ class TourBoxBLE(TourBoxBase):
             logger.warning(f"No 'default' profile found, using '{self.profiles[0].name}' as fallback")
 
         # Initialize window monitor
-        self.window_monitor = WaylandWindowMonitor()
+        self.window_monitor = WindowMonitor()
 
         # Write PID file
         pid = str(os.getpid())
