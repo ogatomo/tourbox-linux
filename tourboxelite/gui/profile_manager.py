@@ -76,7 +76,10 @@ class ProfileManager(QWidget):
         self.profile_table.verticalHeader().setVisible(False)  # Hide row numbers
         # Set row height based on font metrics for proper scaling
         fm = self.profile_table.fontMetrics()
-        self.profile_table.verticalHeader().setDefaultSectionSize(int(safe_line_spacing(fm) * TABLE_ROW_HEIGHT_MULTIPLIER))
+        row_height = int(safe_line_spacing(fm) * TABLE_ROW_HEIGHT_MULTIPLIER)
+        self.profile_table.verticalHeader().setMinimumSectionSize(row_height)
+        self.profile_table.verticalHeader().setMaximumSectionSize(row_height)
+        self.profile_table.verticalHeader().setDefaultSectionSize(row_height)
         self.profile_table.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.profile_table.currentCellChanged.connect(self._on_profile_selection_changed)
         layout.addWidget(self.profile_table)

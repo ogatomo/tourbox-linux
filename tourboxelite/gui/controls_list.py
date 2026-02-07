@@ -90,6 +90,8 @@ class ControlsList(QWidget):
         # Set row height based on font metrics for proper scaling
         fm = self.table.fontMetrics()
         row_height = int(safe_line_spacing(fm) * TABLE_ROW_HEIGHT_MULTIPLIER)
+        self.table.verticalHeader().setMinimumSectionSize(row_height)
+        self.table.verticalHeader().setMaximumSectionSize(row_height)
         self.table.verticalHeader().setDefaultSectionSize(row_height)
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.table.itemSelectionChanged.connect(self._on_selection_changed)
