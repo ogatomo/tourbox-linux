@@ -1636,13 +1636,6 @@ def main():
 
     logger.info("Starting TourBox Configuration GUI")
 
-    # Force standard font DPI to work around systems (e.g., Linux Mint/Cinnamon)
-    # that report bogus DPI values to Qt, causing wildly incorrect font metrics.
-    # 96 is the standard default, so this is a no-op on correctly configured systems.
-    import os
-    if 'QT_FONT_DPI' not in os.environ:
-        os.environ['QT_FONT_DPI'] = '96'
-
     # Create Qt application
     app = QApplication(sys.argv)
     app.setApplicationName("TourBox Configuration")
