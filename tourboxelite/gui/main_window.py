@@ -1648,22 +1648,20 @@ def main():
     app.setApplicationName("TourBox Configuration")
     app.setDesktopFileName("tourbox-gui.desktop")
 
-    # Detect and fix bogus font metrics. Some systems (e.g., Linux Mint/Cinnamon)
-    # report wildly incorrect font metrics (lineSpacing 500+) even with QT_FONT_DPI
-    # set. Override the application font to force sane metrics for ALL widgets
-    # (menu bars, toolbars, etc.), not just those using safe_line_spacing().
+    # Detect and fix bogus font metrics. Some system fonts (e.g., "Courier Prime
+    # Code") have wildly incorrect metrics (descent of 500+ pixels) which causes
+    # all widgets (menu bars, toolbars, tables, etc.) to render with huge heights.
+    # When detected, replace the font family entirely with a known-good sans-serif.
     _MAX_SANE_LINE_SPACING = 50
     fm = app.fontMetrics()
     if fm.lineSpacing() > _MAX_SANE_LINE_SPACING:
         logger.warning(
-            "Bogus font metrics detected (lineSpacing=%d), "
-            "overriding application font to force sane metrics",
-            fm.lineSpacing()
+            "Bogus font metrics detected (lineSpacing=%d, descent=%d, font=%s), "
+            "replacing with default sans-serif font",
+            fm.lineSpacing(), fm.descent(), app.font().family()
         )
         from PySide6.QtGui import QFont
-        font = app.font()
-        font.setPixelSize(13)
-        app.setFont(font)
+        app.setFont(QFont("Sans Serif", 10))
 
     # Create and show main window
     window = TourBoxConfigWindow()
