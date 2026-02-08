@@ -1,13 +1,13 @@
-# TourBox Lite / Neo / Elite / Elite Plus Linux Driver
+# TuxBox — Linux Driver for TourBox Controllers
 
-**Version 2.10.0**
+**Version 3.0.0**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Linux](https://img.shields.io/badge/platform-linux-lightgrey.svg)](https://www.linux.org/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
 **Author:** Scott Bowman ([AndyCappDev](https://github.com/AndyCappDev))
-**Original Repository:** [github.com/AndyCappDev/tourbox-linux](https://github.com/AndyCappDev/tourbox-linux)
+**Repository:** [github.com/AndyCappDev/tuxbox](https://github.com/AndyCappDev/tuxbox)
 
 Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc. Connects via **USB** or **Bluetooth LE** with button response so seamless, you'll forget it's not the official driver.
 
@@ -34,7 +34,7 @@ Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc
 - ✅ **Systemd Integration** - Runs as a user service, starts on login
 - ✅ **Non-Systemd Support** - Works with OpenRC, runit, s6, and other init systems
 
-![TourBox Elite Configuration GUI](docs/images/gui-screenshot.png?v=2.10.0)
+![TuxBox Configuration GUI](docs/images/gui-screenshot.png?v=3.0.0)
 
 ## Requirements
 
@@ -87,8 +87,8 @@ The driver **auto-detects** everything:
 ### Run the Installer
 
 ```bash
-git clone https://github.com/AndyCappDev/tourbox-linux.git
-cd tourbox-linux
+git clone https://github.com/AndyCappDev/tuxbox.git
+cd tuxbox
 ./install.sh
 ```
 
@@ -171,7 +171,7 @@ xdotool --version
 To update to the latest version:
 
 ```bash
-cd /path/to/tourboxelite
+cd /path/to/tuxbox
 git pull
 ./install.sh
 ```
@@ -193,7 +193,7 @@ The driver includes a **graphical configuration tool** that makes it easy to con
 After installation, simply run:
 
 ```bash
-tourbox-gui
+tuxbox-gui
 ```
 
 You can also run it from the Application Launcher or pin it to your Application Manager after you run it for the first time for easy access.
@@ -207,7 +207,7 @@ You can also run it from the Application Launcher or pin it to your Application 
 - **Easy Key Assignment** - Point-and-click interface for keyboard shortcuts and mouse wheel actions
 - **Check for Updates** - Easily check if a newer version is available (Help → Check for Updates)
 
-**📖 See the [Complete GUI User Guide](docs/GUI_USER_GUIDE.md) for detailed instructions, tutorials, and troubleshooting.**
+**See the [Complete GUI User Guide](docs/GUI_USER_GUIDE.md) for detailed instructions, tutorials, and troubleshooting.**
 
 ## Manual Installation
 
@@ -232,11 +232,11 @@ python3 -m venv venv
 
 # 2. Install the driver and GUI dependencies
 ./venv/bin/pip install -e .
-./venv/bin/pip install -r tourboxelite/gui/requirements.txt
+./venv/bin/pip install -r tuxbox/gui/requirements.txt
 
 # 3. Copy config (legacy format - GUI will migrate on first launch)
-mkdir -p ~/.config/tourbox
-cp tourboxelite/default_mappings.conf ~/.config/tourbox/mappings.conf
+mkdir -p ~/.config/tuxbox
+cp tuxbox/default_mappings.conf ~/.config/tuxbox/mappings.conf
 
 # 4. Set up udev rules for uinput access
 echo 'KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-uinput.rules
@@ -253,16 +253,16 @@ sudo usermod -a -G dialout $USER
 
 # 7. Set up systemd service
 mkdir -p ~/.config/systemd/user
-nano ~/.config/systemd/user/tourbox.service
-# Add the following content (replace /path/to/tourboxelite with actual path):
+nano ~/.config/systemd/user/tuxbox.service
+# Add the following content (replace /path/to/tuxbox with actual path):
 #
 # [Unit]
-# Description=TourBox Elite Driver
+# Description=TuxBox Driver
 # After=graphical-session.target
 #
 # [Service]
 # Type=simple
-# ExecStart=/path/to/tourboxelite/venv/bin/python -m tourboxelite
+# ExecStart=/path/to/tuxbox/venv/bin/python -m tuxbox
 # Restart=on-failure
 # RestartSec=5
 #
@@ -271,8 +271,8 @@ nano ~/.config/systemd/user/tourbox.service
 
 # 8. Enable and start service
 systemctl --user daemon-reload
-systemctl --user enable tourbox
-systemctl --user start tourbox
+systemctl --user enable tuxbox
+systemctl --user start tuxbox
 ```
 
 ### Non-Systemd Systems (OpenRC, runit, etc.)
@@ -281,36 +281,36 @@ The driver works on systems without systemd. The installer will detect this and 
 
 1. **Create your own init script** for your init system (OpenRC, runit, s6, etc.)
 
-2. **Configure a restart command** for the GUI to use when restarting the driver. Add to `~/.config/tourbox/config.conf`:
+2. **Configure a restart command** for the GUI to use when restarting the driver. Add to `~/.config/tuxbox/config.conf`:
 
 ```ini
 [service]
-restart_command = rc-service tourbox restart
+restart_command = rc-service tuxbox restart
 ```
 
 Examples for different init systems:
-- **OpenRC:** `rc-service tourbox restart`
-- **runit:** `sv restart tourbox`
-- **s6:** `s6-svc -r /run/service/tourbox`
+- **OpenRC:** `rc-service tuxbox restart`
+- **runit:** `sv restart tuxbox`
+- **s6:** `s6-svc -r /run/service/tuxbox`
 
 **Note:** Saving profiles in the GUI works without any configuration (it sends a reload signal directly to the driver process). Only the "File → Restart Driver" menu option requires the custom command.
 
 The driver can also be run manually:
 ```bash
-/path/to/tourbox-linux/venv/bin/python -m tourboxelite
+/path/to/tuxbox/venv/bin/python -m tuxbox
 ```
 
 #### Example OpenRC Init Script (Gentoo)
 
-Create `/etc/init.d/tourbox`:
+Create `/etc/init.d/tuxbox`:
 
 ```sh
 #!/sbin/openrc-run
 
-name="TourBox Elite Driver"
-description="Open source driver for TourBox Elite"
-command="/home/USER/tourbox-linux/venv/bin/python"
-command_args="-m tourboxelite"
+name="TuxBox Driver"
+description="TuxBox - Linux driver for TourBox controllers"
+command="/home/USER/tuxbox/venv/bin/python"
+command_args="-m tuxbox"
 command_background=true
 command_user="USER:USER"
 pidfile="/run/${RC_SVCNAME}.pid"
@@ -324,16 +324,16 @@ depend() {
 Replace `USER` with your username (in three places) and update the path if needed. Then:
 
 ```bash
-sudo chmod +x /etc/init.d/tourbox
-sudo rc-update add tourbox default
-sudo rc-service tourbox start
+sudo chmod +x /etc/init.d/tuxbox
+sudo rc-update add tuxbox default
+sudo rc-service tuxbox start
 ```
 
 ## Configuration
 
-The easiest way to configure button mappings is with the **graphical configuration tool** (see below). For manual editing, profiles are stored in `~/.config/tourbox/profiles/` as individual `.profile` files.
+The easiest way to configure button mappings is with the **graphical configuration tool** (see below). For manual editing, profiles are stored in `~/.config/tuxbox/profiles/` as individual `.profile` files.
 
-> **Note:** Legacy configs at `~/.config/tourbox/mappings.conf` are automatically migrated when you first run the GUI.
+> **Note:** Legacy configs at `~/.config/tourbox/mappings.conf` are automatically migrated when you first run the driver or GUI.
 
 ### Legacy Format (Single File)
 
@@ -396,7 +396,7 @@ Configure haptic settings via the GUI (Profile Settings dialog) or edit the conf
 
 After editing, restart the service:
 ```bash
-systemctl --user restart tourbox
+systemctl --user restart tuxbox
 ```
 
 ## Usage
@@ -405,19 +405,19 @@ systemctl --user restart tourbox
 
 ```bash
 # Start the driver
-systemctl --user start tourbox
+systemctl --user start tuxbox
 
 # Stop the driver
-systemctl --user stop tourbox
+systemctl --user stop tuxbox
 
 # Check status
-systemctl --user status tourbox
+systemctl --user status tuxbox
 
 # View logs
-journalctl --user -u tourbox -f
+journalctl --user -u tuxbox -f
 
 # Restart after config changes
-systemctl --user restart tourbox
+systemctl --user restart tuxbox
 ```
 
 ### Manual Testing
@@ -426,17 +426,17 @@ Before running the driver manually, you must stop the systemd service first:
 
 ```bash
 # Stop the service
-systemctl --user stop tourbox
+systemctl --user stop tuxbox
 
-# Navigate to the tourboxelite directory
-cd /path/to/tourboxelite
+# Navigate to the tuxbox directory
+cd /path/to/tuxbox
 
 # Run directly in terminal with verbose logging (auto-detects USB/BLE)
-./venv/bin/python -m tourboxelite -v
+./venv/bin/python -m tuxbox -v
 
 # Or force a specific connection mode:
-./venv/bin/python -m tourboxelite --usb -v   # Force USB
-./venv/bin/python -m tourboxelite --ble -v   # Force Bluetooth
+./venv/bin/python -m tuxbox --usb -v   # Force USB
+./venv/bin/python -m tuxbox --ble -v   # Force Bluetooth
 ```
 
 Press `Ctrl+C` to stop.
@@ -444,7 +444,7 @@ Press `Ctrl+C` to stop.
 When you're done testing, restart the service:
 
 ```bash
-systemctl --user start tourbox
+systemctl --user start tuxbox
 ```
 
 ## Uninstall
@@ -456,10 +456,10 @@ systemctl --user start tourbox
 Or manually:
 
 ```bash
-systemctl --user stop tourbox
-systemctl --user disable tourbox
-rm ~/.config/systemd/user/tourbox.service
-rm -rf ~/.config/tourbox
+systemctl --user stop tuxbox
+systemctl --user disable tuxbox
+rm ~/.config/systemd/user/tuxbox.service
+rm -rf ~/.config/tuxbox
 systemctl --user daemon-reload
 ```
 
@@ -469,7 +469,7 @@ systemctl --user daemon-reload
 
 Check logs:
 ```bash
-journalctl --user -u tourbox -n 50
+journalctl --user -u tuxbox -n 50
 ```
 
 Common issues:
@@ -504,9 +504,9 @@ Make sure you're using a **data cable**, not a power-only charging cable. Try a 
 ls -la /dev/ttyACM*
 
 # Run with a specific port
-./venv/bin/python -m tourboxelite --usb --port /dev/ttyACM1
+./venv/bin/python -m tuxbox --usb --port /dev/ttyACM1
 
-# Or set it in your config file (~/.config/tourbox/config.conf):
+# Or set it in your config file (~/.config/tuxbox/config.conf):
 # [device]
 # usb_port = /dev/ttyACM1
 ```
@@ -546,7 +546,7 @@ xdotool --version
 
 Test window detection:
 ```bash
-./venv/bin/python -m tourboxelite.window_monitor
+./venv/bin/python -m tuxbox.window_monitor
 ```
 
 ### Buttons not responding
@@ -561,7 +561,7 @@ sudo usermod -a -G input $USER
 
 - **[GUI User Guide](docs/GUI_USER_GUIDE.md)** - Complete guide for the graphical configuration tool
 - [Configuration guide](docs/CONFIG_GUIDE.md) - Manual config file editing
-- [Example configurations](tourboxelite/default_mappings.conf)
+- [Example configurations](tuxbox/default_mappings.conf)
 - [Development guide](docs/DEVELOPMENT.md)
 - [Why no overlay features?](docs/WHY_NO_OVERLAYS.md) - TourMenu, HUD, and Linux desktop fragmentation
 - [Button timing trade-offs](docs/BUTTON_TIMING_TRADEOFFS.md) - Understanding delays with combos and double-press
@@ -575,4 +575,3 @@ MIT License - See [LICENSE.txt](LICENSE.txt) file
 Thanks to these users for testing and confirming device compatibility:
 
 - [@PunkunHm](https://github.com/PunkunHm) - TourBox Lite (USB)
-

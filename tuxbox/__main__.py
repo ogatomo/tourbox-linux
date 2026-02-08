@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TourBox Elite Driver - Unified entry point with auto-detection
+"""TuxBox Driver - Unified entry point with auto-detection
 
 Automatically detects whether the TourBox is connected via USB or Bluetooth
 and launches the appropriate driver.
@@ -87,7 +87,7 @@ def probe_usb_device(port: str) -> bool:
         return False
 
 
-def find_tourbox_usb_port(configured_port: str = None) -> str:
+def find_tuxbox_usb_port(configured_port: str = None) -> str:
     """Find the TourBox Elite USB port by scanning available devices
 
     Args:
@@ -133,7 +133,7 @@ def main():
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description='TourBox Driver (auto-detects USB or BLE)',
+        description='TuxBox Driver (auto-detects USB or BLE)',
         epilog='By default, scans for USB first, then falls back to Bluetooth.'
     )
     parser.add_argument('--usb', action='store_true',
@@ -173,7 +173,7 @@ def main():
     else:
         # Auto-detect: scan for TourBox USB device
         print("Scanning for TourBox...")
-        detected_port = find_tourbox_usb_port(usb_port)
+        detected_port = find_tuxbox_usb_port(usb_port)
         if detected_port:
             mode = 'usb'
             usb_port = detected_port
@@ -186,11 +186,11 @@ def main():
 
     # Start appropriate driver
     if mode == 'usb':
-        from .device_usb import TourBoxUSB
+        from .device_usb import TuxBoxUSB
 
         # If USB mode was forced, scan for the device
         if args.usb and not args.port:
-            detected_port = find_tourbox_usb_port(usb_port)
+            detected_port = find_tuxbox_usb_port(usb_port)
             if detected_port:
                 usb_port = detected_port
             elif not os.path.exists(usb_port):
@@ -204,12 +204,12 @@ def main():
             print("Is the TourBox connected via USB?")
             sys.exit(1)
 
-        driver = TourBoxUSB(port=usb_port, config_path=args.config)
+        driver = TuxBoxUSB(port=usb_port, config_path=args.config)
 
     else:  # BLE mode
-        from .device_ble import TourBoxBLE
+        from .device_ble import TuxBoxBLE
 
-        driver = TourBoxBLE(config_path=args.config)
+        driver = TuxBoxBLE(config_path=args.config)
 
     # Run the driver
     try:

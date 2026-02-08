@@ -6,22 +6,22 @@ This guide will help you map all buttons, dials, and controls on your TourBox to
 
 ## Quick Start
 
-First, stop the TourBox service (if running) to avoid conflicts:
+First, stop the TuxBox service (if running) to avoid conflicts:
 ```bash
-systemctl --user stop tourbox
+systemctl --user stop tuxbox
 ```
 
-Navigate to the tourbox directory and run the test script:
+Navigate to the tuxbox directory and run the test script:
 ```bash
-cd /path/to/tourboxelite
-./venv/bin/python ble_test_tourbox.py
+cd /path/to/tuxbox
+./venv/bin/python ble_test_tuxbox.py
 ```
 
 Then press each control **ONE AT A TIME** and record the hex codes you see.
 
 When done testing, restart the service:
 ```bash
-systemctl --user start tourbox
+systemctl --user start tuxbox
 ```
 
 ---
@@ -138,7 +138,7 @@ Copy this template to a new file `MY_BUTTON_MAP.md` and fill it in:
 
 ### Method 2: Automated Logging
 
-Modify `ble_test_tourbox.py` to log to file:
+Modify `ble_test_tuxbox.py` to log to file:
 
 ```python
 def notification_handler(sender, data):
@@ -194,7 +194,7 @@ From your initial test, you discovered:
 
 Once you have complete mapping:
 
-1. **Share with community:** Post to TourBoxForLinux GitHub
+1. **Share with community:** Post to TuxBox GitHub
 2. **Create input driver:** Map hex codes to Linux input events
 3. **Update documentation:** Add to TOURBOX_ELITE_PROTOCOL_SOLVED.md
 
@@ -235,4 +235,4 @@ Document it! This helps understand the full protocol.
 
 ---
 
-Good luck mapping! 🎮
+Good luck mapping!

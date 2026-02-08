@@ -14,9 +14,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal, Qt
 from evdev import ecodes as e
-from tourboxelite.config_loader import VALID_MODIFIER_BUTTONS
-from tourboxelite.gui.ui_constants import TABLE_ROW_HEIGHT_MULTIPLIER, TEXT_EDIT_HEIGHT_MULTIPLIER
-from tourboxelite.haptic import HapticStrength, HapticSpeed
+from tuxbox.config_loader import VALID_MODIFIER_BUTTONS
+from tuxbox.gui.ui_constants import TABLE_ROW_HEIGHT_MULTIPLIER, TEXT_EDIT_HEIGHT_MULTIPLIER
+from tuxbox.haptic import HapticStrength, HapticSpeed
 
 logger = logging.getLogger(__name__)
 

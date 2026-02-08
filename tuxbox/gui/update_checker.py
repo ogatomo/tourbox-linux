@@ -1,4 +1,4 @@
-"""Update checker for TourBox Elite GUI
+"""Update checker for TuxBox GUI
 
 Fetches version information from GitHub releases and compares with installed version.
 """
@@ -10,12 +10,12 @@ import urllib.error
 
 from PySide6.QtCore import QThread, Signal
 
-from tourboxelite import VERSION
+from tuxbox import VERSION
 
 logger = logging.getLogger(__name__)
 
 # GitHub API URL for latest release
-RELEASES_URL = "https://api.github.com/repos/AndyCappDev/tourbox-linux/releases/latest"
+RELEASES_URL = "https://api.github.com/repos/AndyCappDev/tuxbox/releases/latest"
 REQUEST_TIMEOUT = 5  # seconds
 
 
@@ -40,7 +40,7 @@ class UpdateChecker(QThread):
             request = urllib.request.Request(
                 RELEASES_URL,
                 headers={
-                    'User-Agent': f'TourBoxElite/{self.current_version}',
+                    'User-Agent': f'TuxBox/{self.current_version}',
                     'Accept': 'application/vnd.github.v3+json'
                 }
             )

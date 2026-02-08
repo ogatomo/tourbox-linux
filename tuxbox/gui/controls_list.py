@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Controls list widget
 
-Displays all TourBox controls and their current action mappings.
+Displays all TourBox controls and their current mappings.
 """
 
 import logging
@@ -15,9 +15,9 @@ from PySide6.QtGui import QBrush, QColor
 from evdev import ecodes as e
 
 # Import from existing driver code
-from tourboxelite.config_loader import Profile, BUTTON_CODES
+from tuxbox.config_loader import Profile, BUTTON_CODES
 
-from tourboxelite.gui.ui_constants import TABLE_ROW_HEIGHT_MULTIPLIER
+from tuxbox.gui.ui_constants import TABLE_ROW_HEIGHT_MULTIPLIER
 
 logger = logging.getLogger(__name__)
 

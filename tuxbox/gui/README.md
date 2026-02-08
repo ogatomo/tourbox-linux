@@ -1,13 +1,13 @@
-# TourBox Elite Configuration GUI
+# TuxBox Configuration GUI
 
-Graphical interface for configuring TourBox Elite button mappings and application-specific profiles.
+Graphical interface for configuring TourBox button mappings and application-specific profiles.
 
 ## Installation
 
 The GUI dependencies are **automatically installed** by the main `install.sh` script. If you performed a manual installation, ensure you have the GUI dependencies:
 
 ```bash
-pip install -r tourboxelite/gui/requirements.txt
+pip install -r tuxbox/gui/requirements.txt
 ```
 
 ## Usage
@@ -15,16 +15,16 @@ pip install -r tourboxelite/gui/requirements.txt
 ### Running the GUI
 
 ```bash
-tourbox-gui
+tuxbox-gui
 ```
 
-The installer creates a launcher script in `/usr/local/bin/tourbox-gui` that you can run from anywhere.
+The installer creates a launcher script in `/usr/local/bin/tuxbox-gui` that you can run from anywhere.
 
 ### What the GUI Does
 
 1. **On Launch:**
-   - Automatically stops the TourBox driver service
-   - Connects to your TourBox Elite via Bluetooth
+   - Automatically stops the TuxBox driver service
+   - Connects to your TourBox via Bluetooth
    - Loads your existing configuration
 
 2. **Configuration:**
@@ -48,7 +48,7 @@ The installer creates a launcher script in `/usr/local/bin/tourbox-gui` that you
 
 ## Documentation
 
-**📖 [Complete User Guide](../../docs/GUI_USER_GUIDE.md)** - Comprehensive guide with tutorials, tips, and troubleshooting
+**[Complete User Guide](../../docs/GUI_USER_GUIDE.md)** - Comprehensive guide with tutorials, tips, and troubleshooting
 
 ## Architecture
 

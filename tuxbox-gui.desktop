@@ -1,13 +1,13 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=TourBox Configuration
+Name=TuxBox Configuration
 GenericName=Input Device Configuration
 Comment=Configure TourBox button mappings and profiles
-Icon=tourbox-icon
-Exec=/usr/local/bin/tourbox-gui
+Icon=tuxbox-icon
+Exec=/usr/local/bin/tuxbox-gui
 Terminal=false
 Categories=Settings;HardwareSettings;Utility;
-Keywords=tourbox;input;controller;configuration;bluetooth;mapping;
+Keywords=tourbox;tuxbox;input;controller;configuration;bluetooth;mapping;
 StartupNotify=true
-StartupWMClass=TourBox Configuration
+StartupWMClass=TuxBox Configuration

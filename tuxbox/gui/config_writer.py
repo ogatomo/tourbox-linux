@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Configuration writer for TourBox Elite profiles
+"""Configuration writer for TuxBox profiles
 
 Handles saving profile mappings back to the config file with atomic writes and backups.
 """
@@ -12,9 +12,9 @@ from typing import Dict, Optional
 from datetime import datetime
 from evdev import ecodes as e
 
-from tourboxelite.config_loader import get_config_path, BUTTON_CODES, Profile, create_button_mapping
-from tourboxelite.haptic import HapticStrength, HapticSpeed
-from tourboxelite.profile_io import (
+from tuxbox.config_loader import get_config_path, BUTTON_CODES, Profile, create_button_mapping
+from tuxbox.haptic import HapticStrength, HapticSpeed
+from tuxbox.profile_io import (
     has_profiles_dir, save_profile_to_file, get_profile_filepath,
     delete_profile_file, rename_profile_file, profile_exists
 )
@@ -1205,7 +1205,7 @@ def import_profile(source_path: str) -> tuple:
         Tuple of (Profile or None, error_message)
     """
     from pathlib import Path
-    from tourboxelite.profile_io import import_profile_from_file
+    from tuxbox.profile_io import import_profile_from_file
     return import_profile_from_file(Path(source_path))
 
 

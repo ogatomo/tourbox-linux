@@ -1,17 +1,17 @@
-# TourBox Configuration Guide
+# TuxBox Configuration Guide
 
 This guide explains how to configure your TourBox device and customize button mappings.
 
 ## Configuration File Structure
 
-TourBox Linux supports two configuration formats:
+TuxBox supports two configuration formats:
 
 ### New Format (v2.3.0+) - Individual Profile Files
 
-Profiles are stored as individual `.profile` files in `~/.config/tourbox/profiles/`:
+Profiles are stored as individual `.profile` files in `~/.config/tuxbox/profiles/`:
 
 ```
-~/.config/tourbox/
+~/.config/tuxbox/
 ├── config.conf              # Device and service settings
 └── profiles/
     ├── default.profile      # Default profile (required)
@@ -27,7 +27,7 @@ Profiles are stored as individual `.profile` files in `~/.config/tourbox/profile
 
 ### Legacy Format - Single Config File
 
-All profiles in one file at `~/.config/tourbox/mappings.conf`:
+All profiles in one file at `~/.config/tuxbox/mappings.conf`:
 
 ```ini
 [device]
@@ -61,9 +61,9 @@ app_id = Code
 ./install_config.sh
 ```
 
-This creates `~/.config/tourbox/mappings.conf`. If you don't have a MAC address configured yet, it will prompt you to enter it, otherwise it will preserve it.
+This creates `~/.config/tuxbox/mappings.conf`. If you don't have a MAC address configured yet, it will prompt you to enter it, otherwise it will preserve it.
 
-**⚠️ WARNING:** Running this on an existing config will:
+**WARNING:** Running this on an existing config will:
 - Replace ALL your custom button mappings with defaults
 - Replace ALL your custom profiles with example profiles
 - Preserve ONLY your MAC address (everything else is lost)
@@ -71,19 +71,19 @@ This creates `~/.config/tourbox/mappings.conf`. If you don't have a MAC address 
 ### 2. Edit your configuration (optional)
 
 ```bash
-nano ~/.config/tourbox/mappings.conf
+nano ~/.config/tuxbox/mappings.conf
 # or
-gedit ~/.config/tourbox/mappings.conf
+gedit ~/.config/tuxbox/mappings.conf
 ```
 
 ### 3. Run the driver
 
 ```bash
 # If MAC address is in config file:
-sudo ./venv/bin/python -m tourboxelite.device_ble
+sudo ./venv/bin/python -m tuxbox.device_ble
 
 # Or override with command line:
-sudo ./venv/bin/python -m tourboxelite.device_ble D9:BE:1E:CC:40:D7
+sudo ./venv/bin/python -m tuxbox.device_ble D9:BE:1E:CC:40:D7
 ```
 
 ---
@@ -142,26 +142,26 @@ Configures how the GUI manages the driver service. This is primarily useful for 
 **Example for OpenRC (Gentoo):**
 ```ini
 [service]
-restart_command = rc-service tourbox restart
+restart_command = rc-service tuxbox restart
 ```
 
 **Example for runit:**
 ```ini
 [service]
-restart_command = sv restart tourbox
+restart_command = sv restart tuxbox
 ```
 
 **Example for s6:**
 ```ini
 [service]
-restart_command = s6-svc -r /run/service/tourbox
+restart_command = s6-svc -r /run/service/tuxbox
 ```
 
 **Notes:**
 - If not configured, the GUI will use systemctl (if available)
 - The restart command should work whether the service is running or stopped
 - Saving profiles does NOT require this setting (reload uses direct signal)
-- Only "File → Restart Driver" in the GUI uses this command
+- Only "File -> Restart Driver" in the GUI uses this command
 
 ### `[profile:name]` Sections
 
@@ -257,11 +257,11 @@ The window monitor tool will show you the window class, app_id, and title for an
 
 To run it:
 ```bash
-# Navigate to the tourboxelite directory
-cd /path/to/tourboxelite
+# Navigate to the tuxbox directory
+cd /path/to/tuxbox
 
 # Run the window monitor
-./venv/bin/python -m tourboxelite.window_monitor
+./venv/bin/python -m tuxbox.window_monitor
 ```
 
 The monitor will continuously display information about the currently focused window. As you switch between different applications, you'll see output like:
@@ -311,7 +311,7 @@ scroll_down = REL_WHEEL:-1
 2. Window monitor checks focused window every 200ms
 3. When window changes, driver looks for matching profile
 4. If match found, **instantly switches** button mappings
-5. Console shows: `🎮 Switched to profile: vscode`
+5. Console shows: `Switched to profile: vscode`
 6. If no match, falls back to `default` profile
 
 **Notes:**
@@ -644,15 +644,15 @@ knob_ccw = KEY_LEFTCTRL+KEY_LEFTSHIFT+KEY_TAB  # Previous tab
 The driver searches for config files in this order:
 
 1. Custom path (via `-c` option)
-2. `~/.config/tourbox/mappings.conf` (user config)
-3. `/etc/tourbox/mappings.conf` (system-wide)
+2. `~/.config/tuxbox/mappings.conf` (user config)
+3. `/etc/tuxbox/mappings.conf` (system-wide)
 
 ## MAC Address Priority
 
 The driver looks for the MAC address in this order:
 
-1. **Command line argument** - `python -m tourboxelite.device_ble D9:BE:1E:CC:40:D7`
-2. **Environment variable** - `TOURBOX_MAC=D9:BE:1E:CC:40:D7 python -m tourboxelite.device_ble`
+1. **Command line argument** - `python -m tuxbox.device_ble D9:BE:1E:CC:40:D7`
+2. **Environment variable** - `TOURBOX_MAC=D9:BE:1E:CC:40:D7 python -m tuxbox.device_ble`
 3. **Config file** - `mac_address` in `[device]` section
 
 This allows you to:
@@ -667,28 +667,28 @@ This allows you to:
 Before testing manually, stop the systemd service (if running):
 
 ```bash
-systemctl --user stop tourbox
+systemctl --user stop tuxbox
 ```
 
 ### Run with verbose logging to see button events:
 
 ```bash
-cd /path/to/tourboxelite
-./venv/bin/python -m tourboxelite.device_ble -v
+cd /path/to/tuxbox
+./venv/bin/python -m tuxbox.device_ble -v
 ```
 
-The driver will read your MAC address from `~/.config/tourbox/mappings.conf`.
+The driver will read your MAC address from `~/.config/tuxbox/mappings.conf`.
 
 ### Use a specific config file:
 
 ```bash
-./venv/bin/python -m tourboxelite.device_ble -c my_custom_config.conf
+./venv/bin/python -m tuxbox.device_ble -c my_custom_config.conf
 ```
 
 When done testing, restart the service:
 
 ```bash
-systemctl --user start tourbox
+systemctl --user start tuxbox
 ```
 
 ### Test in a text editor:
@@ -708,12 +708,12 @@ systemctl --user start tourbox
 - Check logs to see if button is detected:
   ```bash
   # If running as systemd service:
-  journalctl --user -u tourbox -f
+  journalctl --user -u tuxbox -f
 
   # Or run manually with verbose mode:
-  systemctl --user stop tourbox
-  cd /path/to/tourboxelite
-  ./venv/bin/python -m tourboxelite.device_ble -v
+  systemctl --user stop tuxbox
+  cd /path/to/tuxbox
+  ./venv/bin/python -m tuxbox.device_ble -v
   ```
 
 ### Wrong action happens
@@ -730,7 +730,7 @@ systemctl --user start tourbox
 
 ### Config not loading
 
-- Check file permissions: `ls -l ~/.config/tourbox/mappings.conf`
+- Check file permissions: `ls -l ~/.config/tuxbox/mappings.conf`
 - Verify INI syntax (no extra quotes, proper `=` signs)
 - Run with `-v` to see which config file is loaded
 
@@ -740,7 +740,7 @@ systemctl --user start tourbox
 
 **Check compositor detection:**
 ```bash
-python3 -m tourboxelite.window_monitor
+python3 -m tuxbox.window_monitor
 # Should show your compositor and window changes
 ```
 
@@ -755,7 +755,7 @@ If no compositor detected:
 **Check window_class matching:**
 ```bash
 # Find the correct window_class for your app
-python3 -m tourboxelite.window_monitor
+python3 -m tuxbox.window_monitor
 # Focus the application and note the window info
 ```
 
@@ -797,10 +797,10 @@ python3 -c "from evdev import ecodes as e; print([k for k in dir(e) if k.startsw
 
 ## Need Help?
 
-- Check the default config: `tourboxelite/default_mappings.conf`
+- Check the default config: `tuxbox/default_mappings.conf`
 - See examples above
 - Open an issue on GitHub with your config file and error messages
 
 ---
 
-**Happy customizing!** 🎮
+**Happy customizing!**

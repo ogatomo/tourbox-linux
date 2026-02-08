@@ -1,4 +1,4 @@
-# TourBox Configuration GUI - User Guide
+# TuxBox Configuration GUI - User Guide
 
 **Version:** 2.0
 **Last Updated:** 2026-01-01
@@ -26,7 +26,7 @@
 
 ## Introduction
 
-The TourBox Configuration GUI is a graphical application that lets you configure your TourBox controller without manually editing configuration files. With this tool, you can:
+The TuxBox Configuration GUI is a graphical application that lets you configure your TourBox controller without manually editing configuration files. With this tool, you can:
 
 - **Visually configure** all 20 controls (buttons, dials, scroll wheel, knob)
 - **Press physical buttons** on your TourBox to instantly select controls for editing
@@ -47,13 +47,13 @@ The TourBox Configuration GUI is a graphical application that lets you configure
 Simply run:
 
 ```bash
-tourbox-gui
+tuxbox-gui
 ```
 
 **What happens on launch:**
 
 1. If you have a legacy config (`mappings.conf`), it will be automatically migrated to individual profile files
-2. Loads your profiles from `~/.config/tourbox/profiles/`
+2. Loads your profiles from `~/.config/tuxbox/profiles/`
 3. Displays all profiles and button mappings
 
 **On exit:**
@@ -66,25 +66,25 @@ tourbox-gui
 
 ## Understanding the Interface
 
-![TourBox Configuration GUI](images/gui-screenshot.png?v=2.10.0)
+![TuxBox Configuration GUI](images/gui-screenshot.png?v=2.10.0)
 
 The GUI has a 4-panel layout:
 
 ```
-┌─────────────────────┬──────────────────────────┐
-│                     │                          │
-│  1. Controller      │  2. Controls             │
-│     View            │     Configuration        │
-│                     │     (Button List)        │
-│  (Visual TourBox)   │                          │
-│                     │                          │
-├─────────────────────┼──────────────────────────┤
-│                     │                          │
-│  3. Profiles        │  4. Control Editor       │
-│                     │                          │
-│  (Profile List)     │  (Edit Mappings)         │
-│                     │                          │
-└─────────────────────┴──────────────────────────┘
++---------------------+--------------------------+
+|                     |                          |
+|  1. Controller      |  2. Controls             |
+|     View            |     Configuration        |
+|                     |     (Button List)        |
+|  (Visual TourBox)   |                          |
+|                     |                          |
++---------------------+--------------------------+
+|                     |                          |
+|  3. Profiles        |  4. Control Editor       |
+|                     |                          |
+|  (Profile List)     |  (Edit Mappings)         |
+|                     |                          |
++---------------------+--------------------------+
 ```
 
 ### 1. Controller View (Top-Left)
@@ -104,7 +104,7 @@ The GUI has a 4-panel layout:
   - Checked: Profile will activate when its window rules match
   - Unchecked: Profile is disabled and will be skipped during matching
   - Changes take effect immediately (no save required)
-- **Conflict warning** - Profiles with an orange **⚠** icon have conflicting window rules with another active profile. Hover to see which profiles conflict. Only the first alphabetically will be used.
+- **Conflict warning** - Profiles with an orange **!** icon have conflicting window rules with another active profile. Hover to see which profiles conflict. Only the first alphabetically will be used.
 - Buttons to **create**, **edit**, **delete**, **import**, and **export** profiles
 
 ### 3. Controls Configuration (Top-Right)
@@ -130,7 +130,7 @@ The GUI has a 4-panel layout:
   - Save (Ctrl+S) - Write changes to config file and apply them
   - Import Profile - Import a profile
   - Export Profile - Export a profile
-  - Restart Driver - Restart the TourBox driver service and reload profiles
+  - Restart Driver - Restart the TuxBox driver service and reload profiles
   - Quit - Exit the application
 
 - **Help Menu:**
@@ -147,7 +147,7 @@ The GUI has a 4-panel layout:
 You can **press any button or rotate any dial on your TourBox** to instantly select that control for editing in the GUI. This is much faster than clicking through the Controls Configuration table.
 
 **How it works:**
-- The driver includes a built-in `TourBox GUI` profile that activates when the GUI window is focused
+- The driver includes a built-in `TuxBox GUI` profile that activates when the GUI window is focused
 - Physical button presses are mapped to keyboard shortcuts that the GUI recognizes
 - The GUI automatically selects the corresponding control for editing
 
@@ -157,7 +157,7 @@ You can **press any button or rotate any dial on your TourBox** to instantly sel
 3. The "Knob Clockwise" control is automatically selected in the Controls Configuration table
 4. The Control Editor loads the current mapping, ready to edit
 
-> **Note:** This requires the TourBox driver to be running. If you stopped the driver for testing, physical button selection won't work until you restart it.
+> **Note:** This requires the TuxBox driver to be running. If you stopped the driver for testing, physical button selection won't work until you restart it.
 
 ---
 
@@ -180,7 +180,7 @@ You can **press any button or rotate any dial on your TourBox** to instantly sel
    - Window title shows an asterisk (*) indicating unsaved changes
 5. Click **"Save"** (toolbar or Ctrl+S)
    - Creates a timestamped backup of your profile
-   - Writes the changes to `~/.config/tourbox/profiles/<profile>.profile`
+   - Writes the changes to `~/.config/tuxbox/profiles/<profile>.profile`
    - Automatically applies the new configuration
    - Success dialog confirms the save
 
@@ -196,7 +196,7 @@ You can **press any button or rotate any dial on your TourBox** to instantly sel
    - Choose **Yes** if you would like to copy settings for the currently selected profile
 3. The new profile is created and selected
 4. A dialog appears asking if you would like to set up window matching rules:
-   - Click **Yes** 
+   - Click **Yes**
    - Click **"Capture Active Window"**
    - A dialog box appears giving you 5 seconds to click on VS Code window
    - The GUI auto-fills the App ID and Window Class fields
@@ -219,7 +219,7 @@ You can **press any button or rotate any dial on your TourBox** to instantly sel
    - Verify that mappings work as expected
 5. **Switch back to the GUI** to make further adjustments if needed
 
-**Result:** You can rapidly iterate: edit → save → test in app → edit → save without closing anything!
+**Result:** You can rapidly iterate: edit -> save -> test in app -> edit -> save without closing anything!
 
 ---
 
@@ -271,8 +271,8 @@ Profiles activate when the window properties match your rules. You can match by:
 **Capturing Window Info Automatically:**
 
 1. Open the application that you want to match the profile to
-2. In the TourBox GUI, select the profile want to set the window matching for
-3. Click the **"⚙"** (settings) button in the Profiles pane
+2. In the TuxBox GUI, select the profile want to set the window matching for
+3. Click the **"settings"** (settings) button in the Profiles pane
 4. Click the **"Capture Active Window"** button
 5. **Within 5 seconds**, click on the app window you want to match to
 6. After 5 seconds, the GUI auto-fills the App ID and Window Class fields
@@ -288,7 +288,7 @@ Profiles activate when the window properties match your rules. You can match by:
 ### Editing Profiles
 
 1. Select the profile in the Profiles list
-2. Click the **"⚙"** (settings) button
+2. Click the **"settings"** (settings) button
 3. Edit name and/or window matching rules
 4. Click **Apply** (changes saved to memory)
 5. Click **Save** button to write to config file
@@ -323,7 +323,7 @@ Each profile has an **Active** checkbox that controls whether it participates in
 
 When two or more **active** profiles match the same application (same window_class or app_id), a conflict exists. The GUI warns you about this:
 
-- Conflicting profiles show an orange **⚠** icon next to their name
+- Conflicting profiles show an orange **!** icon next to their name
 - Hover over the profile name to see which profiles it conflicts with
 - Only the **first profile alphabetically** will be used when the application is focused
 
@@ -340,7 +340,7 @@ Both match VS Code windows. "VS Code" wins because it sorts before "VS Code Dev"
 
 ### Profile Switching
 
-When the TourBox driver is running:
+When the TuxBox driver is running:
 
 - The driver monitors the active window every 200ms
 - Compares window properties against all **active** profile rules
@@ -520,11 +520,11 @@ The control does nothing when pressed.
 **Modifier buttons** are a powerful feature that allows you to create **over 250 unique key combinations per profile** using your TourBox's physical buttons. When a button acts as a modifier, it can be combined with any other control to trigger different actions.
 
 **Example Workflow:**
-- `Side` button alone → Send Super key (open application menu)
-- `Side + Top` button → Send Ctrl+C (copy)
-- `Side + Tall` button → Send Ctrl+V (paste)
-- `Side + Short` button → Send Ctrl+Z (undo)
-- `Side + C1` button → Send Ctrl+Shift+Z (redo)
+- `Side` button alone -> Send Super key (open application menu)
+- `Side + Top` button -> Send Ctrl+C (copy)
+- `Side + Tall` button -> Send Ctrl+V (paste)
+- `Side + Short` button -> Send Ctrl+Z (undo)
+- `Side + C1` button -> Send Ctrl+Shift+Z (redo)
 - ... and so on!
 
 This gives you multiple "layers" of functionality from the same physical buttons, similar to how Shift, Ctrl, and Alt keys work on your keyboard.
@@ -605,8 +605,8 @@ However, the **click actions** (scroll_click, knob_click, dial_click) **can** be
 ### How Modifier Buttons Work
 
 **Press behavior:**
-- **Hold modifier + press another control** → Sends the combination action
-- **Press and release modifier alone** → Sends the base action
+- **Hold modifier + press another control** -> Sends the combination action
+- **Press and release modifier alone** -> Sends the base action
 
 **Visual feedback:**
 - When a modifier button is selected, you'll see its **base action** in the "Current Action" column
@@ -616,43 +616,43 @@ However, the **click actions** (scroll_click, knob_click, dial_click) **can** be
 ### Common Modifier Patterns
 
 **Text Editing (Side as modifier):**
-- `side + tall` → Ctrl+C (copy)
-- `side + short` → Ctrl+V (paste)
-- `side + c1` → Ctrl+Z (undo)
-- `side + c2` → Ctrl+Shift+Z (redo)
-- `side + tour` → Ctrl+A (select all)
-- `side` alone → Super (application menu)
+- `side + tall` -> Ctrl+C (copy)
+- `side + short` -> Ctrl+V (paste)
+- `side + c1` -> Ctrl+Z (undo)
+- `side + c2` -> Ctrl+Shift+Z (redo)
+- `side + tour` -> Ctrl+A (select all)
+- `side` alone -> Super (application menu)
 
 **Navigation (Top as modifier):**
-- `top + dpad_up` → Page Up
-- `top + dpad_down` → Page Down
-- `top + dpad_left` → Home
-- `top + dpad_right` → End
-- `top + scroll_up` → Ctrl+Home (document start)
-- `top + scroll_down` → Ctrl+End (document end)
-- `top` alone → Shift
+- `top + dpad_up` -> Page Up
+- `top + dpad_down` -> Page Down
+- `top + dpad_left` -> Home
+- `top + dpad_right` -> End
+- `top + scroll_up` -> Ctrl+Home (document start)
+- `top + scroll_down` -> Ctrl+End (document end)
+- `top` alone -> Shift
 
 **Application-Specific (Tall as modifier for GIMP/Photoshop):**
-- `tall + knob_cw` → Increase brush size
-- `tall + knob_ccw` → Decrease brush size
-- `tall + c1` → Switch to brush tool
-- `tall + c2` → Switch to eraser tool
-- `tall + tour` → Reset tool options
-- `tall` alone → Alt
+- `tall + knob_cw` -> Increase brush size
+- `tall + knob_ccw` -> Decrease brush size
+- `tall + c1` -> Switch to brush tool
+- `tall + c2` -> Switch to eraser tool
+- `tall + tour` -> Reset tool options
+- `tall` alone -> Alt
 
 **Context Menu Navigation (C1 as modifier):**
 
 This pattern lets you navigate context menus entirely from your TourBox - open the menu, scroll through options, and select - without touching your mouse:
 
-- `c1` alone → Right Click (opens context menu)
-- `c1 + scroll_up` → Up Arrow (navigate menu up)
-- `c1 + scroll_down` → Down Arrow (navigate menu down)
-- `c2` → Left Click or Enter (select menu item)
+- `c1` alone -> Right Click (opens context menu)
+- `c1 + scroll_up` -> Up Arrow (navigate menu up)
+- `c1 + scroll_down` -> Down Arrow (navigate menu down)
+- `c2` -> Left Click or Enter (select menu item)
 
 **Workflow:**
-1. Hold C1 → right-click opens the context menu
-2. While still holding C1, scroll up/down → arrow keys navigate the menu
-3. Release C1, press C2 → selects the highlighted item
+1. Hold C1 -> right-click opens the context menu
+2. While still holding C1, scroll up/down -> arrow keys navigate the menu
+3. Release C1, press C2 -> selects the highlighted item
 
 This effectively recreates the overlay menu experience using native application context menus!
 
@@ -689,16 +689,16 @@ Here's a complete example showing how to set up a modifier-heavy workflow:
 **Side Button (Modifier):**
 - Base action: Super
 - Combinations:
-  - side + top → Ctrl+C (copy)
-  - side + tall → Ctrl+V (paste)
-  - side + short → Ctrl+X (cut)
-  - side + c1 → Ctrl+Z (undo)
-  - side + c2 → Ctrl+Shift+Z (redo)
-  - side + tour → Ctrl+A (select all)
-  - side + dpad_up → Ctrl+Home
-  - side + dpad_down → Ctrl+End
-  - side + knob_cw → Ctrl+= (zoom in)
-  - side + knob_ccw → Ctrl+- (zoom out)
+  - side + top -> Ctrl+C (copy)
+  - side + tall -> Ctrl+V (paste)
+  - side + short -> Ctrl+X (cut)
+  - side + c1 -> Ctrl+Z (undo)
+  - side + c2 -> Ctrl+Shift+Z (redo)
+  - side + tour -> Ctrl+A (select all)
+  - side + dpad_up -> Ctrl+Home
+  - side + dpad_down -> Ctrl+End
+  - side + knob_cw -> Ctrl+= (zoom in)
+  - side + knob_ccw -> Ctrl+- (zoom out)
 
 **Top Button (Regular):**
 - Action: Shift (no combinations)
@@ -713,8 +713,8 @@ Here's a complete example showing how to set up a modifier-heavy workflow:
 1. Verify the combination exists in the Modifier Combinations table
 2. Check that you're holding the modifier button while pressing the other control
 3. Ensure you clicked "Apply" and "Save" after adding the combination
-4. Check driver logs: `journalctl --user -u tourbox -f`
-5. Restart the driver: `systemctl --user restart tourbox`
+4. Check driver logs: `journalctl --user -u tuxbox -f`
+5. Restart the driver: `systemctl --user restart tuxbox`
 
 **Problem:** Base action doesn't work when pressed alone
 
@@ -740,8 +740,8 @@ Here's a complete example showing how to set up a modifier-heavy workflow:
 **Double-press actions** allow you to assign a second action to a button that triggers when you quickly press the button twice (like a double-click). This effectively doubles the number of actions you can assign to each button without using modifiers.
 
 **Example:**
-- Press `Side` button once → Send Super key (open application menu)
-- Double-press `Side` button quickly → Send Ctrl+Alt+T (open terminal)
+- Press `Side` button once -> Send Super key (open application menu)
+- Double-press `Side` button quickly -> Send Ctrl+Alt+T (open terminal)
 
 ### Which Buttons Support Double-Press?
 
@@ -774,7 +774,7 @@ All **14 physical buttons** can have double-press actions:
 6. Click **"Apply"** to save changes to memory
 7. Click **"Save"** (Ctrl+S) to write to config file
 
-**Result:** The Controls Configuration table now shows "Super (2×: Ctrl+Alt+T)" indicating both the single-press and double-press actions!
+**Result:** The Controls Configuration table now shows "Super (2x: Ctrl+Alt+T)" indicating both the single-press and double-press actions!
 
 ### Clearing a Double-Press Action
 
@@ -784,7 +784,7 @@ To remove a double-press action and keep only the single-press:
 2. In the **"Double-Press Action"** section, click **"Clear"**
 3. Click **"Apply"**, then **"Save"**
 
-The "(2×: ...)" suffix disappears from the Current Action column.
+The "(2x: ...)" suffix disappears from the Current Action column.
 
 ### Understanding the Double-Press Timeout
 
@@ -794,7 +794,7 @@ Double-press detection uses a **timeout window** to distinguish between single a
 
 **To change the timeout:**
 1. Select the profile in the Profiles list
-2. Click the **"⚙"** (settings) button
+2. Click the **"settings"** (settings) button
 3. Find the **"Double-Click"** section
 4. Use the **slider** for quick 50ms adjustments, or type an exact value in the **spin box**
 5. Click **"Apply"**, then **"Save"**
@@ -804,10 +804,10 @@ Double-press detection uses a **timeout window** to distinguish between single a
 The driver uses **immediate fire** by default - base actions fire instantly with **zero latency**:
 
 **Example:** Button with Space (pan) + double-press Shift:
-1. **First press** → Space DOWN immediately (pan starts!)
-2. **First release** → Space UP (pan stops)
-3. **Second press within timeout** → Shift DOWN (double-press detected!)
-4. **Second release** → Shift UP
+1. **First press** -> Space DOWN immediately (pan starts!)
+2. **First release** -> Space UP (pan stops)
+3. **Second press within timeout** -> Shift DOWN (double-press detected!)
+4. **Second release** -> Shift UP
 
 **Key benefit:** Hold actions (pan, zoom) work perfectly because the key fires immediately on press.
 
@@ -841,9 +841,9 @@ The driver uses **immediate fire** by default - base actions fire instantly with
 **3. Combine with Modifiers**
 
 Double-press works with modifier buttons! You can have:
-- `Side` alone → Super key
-- `Side` double-press → Ctrl+Alt+T
-- `Side + Top` → Ctrl+C (combo)
+- `Side` alone -> Super key
+- `Side` double-press -> Ctrl+Alt+T
+- `Side + Top` -> Ctrl+C (combo)
 
 All three actions from one button!
 
@@ -864,7 +864,7 @@ Or mode switches:
 **Solutions:**
 1. Press faster - both presses must be within the timeout window
 2. Increase the timeout in Profile Settings
-3. Verify the double-press action is configured (look for "(2×: ...)" in Current Action)
+3. Verify the double-press action is configured (look for "(2x: ...)" in Current Action)
 4. Check that you clicked "Apply" and "Save" after configuring
 
 **Problem:** Accidentally triggering double-press
@@ -909,9 +909,9 @@ Without "Activate on release", the base action fires immediately on press. If yo
 **The Solution:**
 
 With "Activate on release" enabled:
-- Press modifier → nothing fires yet, just tracks modifier state
-- Press combo button while holding → combo fires
-- Release modifier → if no combo was used, base action fires as tap
+- Press modifier -> nothing fires yet, just tracks modifier state
+- Press combo button while holding -> combo fires
+- Release modifier -> if no combo was used, base action fires as tap
 
 This gives you reliable combo detection without accidental base action triggers.
 
@@ -925,9 +925,9 @@ When you add a combo to a button (making it a modifier), the **"Activate on rele
 - You can still disable it if you prefer immediate behavior
 
 **Auto-enable rules:**
-- Adding first combo → checkbox auto-enables
-- User unchecks manually → choice is remembered, won't auto-enable again
-- Removing all combos → checkbox stays as-is (you may want on-release for other reasons)
+- Adding first combo -> checkbox auto-enables
+- User unchecks manually -> choice is remembered, won't auto-enable again
+- Removing all combos -> checkbox stays as-is (you may want on-release for other reasons)
 
 ### Manually Configuring Activate on Release
 
@@ -951,37 +951,37 @@ When you add a combo to a button (making it a modifier), the **"Activate on rele
 "Activate on release" uses **immediate fire** - the base action fires instantly on release:
 
 **Single press:**
-1. Press button → nothing fires (deferred)
-2. Release button → single-press action fires **immediately** as tap
+1. Press button -> nothing fires (deferred)
+2. Release button -> single-press action fires **immediately** as tap
 
 **Double press (dirty input):**
-1. Press button → nothing fires
-2. Release button → single-press action fires immediately as tap
-3. Press button again (within timeout) → double-press action fires as tap
+1. Press button -> nothing fires
+2. Release button -> single-press action fires immediately as tap
+3. Press button again (within timeout) -> double-press action fires as tap
 
 **With combos:**
-1. Hold modifier (with on-release) → nothing fires
-2. Press combo button → combo fires
-3. Release modifier → no base action (combo was used, stays clean!)
+1. Hold modifier (with on-release) -> nothing fires
+2. Press combo button -> combo fires
+3. Release modifier -> no base action (combo was used, stays clean!)
 
 ### Example: Reliable Modifier Setup
 
 **Scenario:** Short button mapped to Space, with combo Short+Tall=T
 
 **Without Activate on Release:**
-- Press Short → Space fires immediately
-- Press Tall while holding Short → T fires
+- Press Short -> Space fires immediately
+- Press Tall while holding Short -> T fires
 - Result: "Space T" (unwanted Space)
 
 **With Activate on Release:**
-- Press Short → nothing fires (modifier tracked)
-- Press Tall while holding Short → T fires
-- Release Short → nothing fires (combo was used)
+- Press Short -> nothing fires (modifier tracked)
+- Press Tall while holding Short -> T fires
+- Release Short -> nothing fires (combo was used)
 - Result: Just "T" (correct!)
 
 **If you just tap Short:**
-- Press Short → nothing fires
-- Release Short → Space fires as tap
+- Press Short -> nothing fires
+- Release Short -> Space fires as tap
 - Result: Just "Space" (correct!)
 
 ### Configuration in Profile Files
@@ -1113,7 +1113,7 @@ Each profile can have its own haptic settings. This is useful if you want differ
 **To set haptic feedback for a profile:**
 
 1. **Select the profile** in the Profiles list
-2. Click the **"⚙"** (settings) button to open Profile Settings
+2. Click the **"settings"** (settings) button to open Profile Settings
 3. Find the **"Haptic Feedback"** section
 4. Select your preferred **Strength** from the dropdown
 5. Select your preferred **Speed** from the dropdown
@@ -1201,7 +1201,7 @@ Haptic settings (both strength and speed) are applied in this priority order (hi
 
 ### What Is Modifier Key Delay?
 
-When the TourBox sends a key combination like Ctrl+Z, it sends the modifier key (Ctrl) and the main key (Z) at nearly the same time. Most applications handle this correctly, but some applications — particularly **GIMP** — can fail to recognize the combination because the modifier key hasn't been fully registered before the main key arrives.
+When the TourBox sends a key combination like Ctrl+Z, it sends the modifier key (Ctrl) and the main key (Z) at nearly the same time. Most applications handle this correctly, but some applications -- particularly **GIMP** -- can fail to recognize the combination because the modifier key hasn't been fully registered before the main key arrives.
 
 **Modifier key delay** adds a small pause (in milliseconds) between sending the modifier keys (Ctrl, Shift, Alt, Super) and the remaining keys in a combination. This gives the application time to register the modifier before the main key arrives.
 
@@ -1209,9 +1209,9 @@ When the TourBox sends a key combination like Ctrl+Z, it sends the modifier key 
 
 You likely need modifier key delay if:
 
-- **Key combinations don't work in specific applications** — e.g., pressing a button mapped to Ctrl+Z does nothing in GIMP, but works fine in other apps
-- **Only the main key registers** — e.g., you get "z" instead of "Ctrl+Z"
-- **Combinations work intermittently** — sometimes the combo registers, sometimes it doesn't
+- **Key combinations don't work in specific applications** -- e.g., pressing a button mapped to Ctrl+Z does nothing in GIMP, but works fine in other apps
+- **Only the main key registers** -- e.g., you get "z" instead of "Ctrl+Z"
+- **Combinations work intermittently** -- sometimes the combo registers, sometimes it doesn't
 
 **Common applications that may need it:**
 - GIMP (image editor)
@@ -1224,16 +1224,16 @@ Most applications (Firefox, VS Code, terminal emulators, etc.) do **not** need t
 
 Modifier key delay can be configured at two levels:
 
-1. **Global setting** — In `~/.config/tourbox/config.conf` under the `[device]` section. Applies to all profiles unless overridden.
-2. **Per-profile setting** — In the profile settings dialog. Overrides the global setting for that specific profile.
+1. **Global setting** -- In `~/.config/tuxbox/config.conf` under the `[device]` section. Applies to all profiles unless overridden.
+2. **Per-profile setting** -- In the profile settings dialog. Overrides the global setting for that specific profile.
 
 **Priority chain:** Per-profile value > Global `[device]` value > 0 (disabled)
 
-This means you can leave the global setting at 0 (disabled) and only enable the delay for profiles that need it — for example, your GIMP profile can have a 30ms delay while all other profiles remain at zero latency.
+This means you can leave the global setting at 0 (disabled) and only enable the delay for profiles that need it -- for example, your GIMP profile can have a 30ms delay while all other profiles remain at zero latency.
 
 ### Setting the Global Modifier Key Delay
 
-Edit `~/.config/tourbox/config.conf`:
+Edit `~/.config/tuxbox/config.conf`:
 
 ```ini
 [device]
@@ -1245,7 +1245,7 @@ This sets a 30ms delay for all profiles (unless a profile overrides it). Set to 
 ### Setting Per-Profile Modifier Key Delay (GUI)
 
 1. **Select the profile** in the Profiles list (e.g., your GIMP profile)
-2. Click the **"⚙"** (settings) button to open Profile Settings
+2. Click the **"settings"** (settings) button to open Profile Settings
 3. Find the **"Modifier Key Delay"** section
 4. **Check** the **"Override global setting"** checkbox
 5. Set the delay value using the spin box (0-100ms)
@@ -1260,11 +1260,11 @@ This sets a 30ms delay for all profiles (unless a profile overrides it). Set to 
 
 | Value | Description |
 |-------|-------------|
-| `0` | Disabled (default) — no delay between modifier and main keys |
-| `20` | Minimal delay — fixes most applications with combo issues |
+| `0` | Disabled (default) -- no delay between modifier and main keys |
+| `20` | Minimal delay -- fixes most applications with combo issues |
 | `30` | Safe default for problematic applications |
-| `50` | Conservative — use if lower values don't work |
-| `>50` | Rarely needed — may feel sluggish |
+| `50` | Conservative -- use if lower values don't work |
+| `>50` | Rarely needed -- may feel sluggish |
 
 **Start with 20-30ms** and increase only if combinations still aren't recognized.
 
@@ -1272,7 +1272,7 @@ This sets a 30ms delay for all profiles (unless a profile overrides it). Set to 
 
 A typical setup where only GIMP needs the delay:
 
-1. **Global setting:** Leave at 0 (or don't set it) — most apps don't need it
+1. **Global setting:** Leave at 0 (or don't set it) -- most apps don't need it
 2. **GIMP profile:** Open profile settings, check "Override global setting", set to 30ms
 3. Click **"Apply"**, then **"Save"** (Ctrl+S) to write changes to config
 4. **Result:** When you switch to GIMP, key combos have a 30ms modifier delay. When you switch to any other app, there's zero delay.
@@ -1312,7 +1312,7 @@ When omitted (not present in the file), the profile uses the global setting. Thi
 
 ### Restarting the Driver
 
-Use **File → Restart Driver** to restart the TourBox driver service and reload all profiles in the GUI.
+Use **File -> Restart Driver** to restart the TuxBox driver service and reload all profiles in the GUI.
 
 **When to use Restart Driver:**
 
@@ -1370,7 +1370,7 @@ Speed up your workflow with keyboard shortcuts:
 1. Keep the GUI open during setup
 2. Apply and Save changes
 3. Switch to your application to test
-4. Switch back to GUI → tweak → save → test again
+4. Switch back to GUI -> tweak -> save -> test again
 5. No need to close the GUI or restart anything
 
 **Bulk editing:**
@@ -1382,32 +1382,32 @@ Speed up your workflow with keyboard shortcuts:
 ### Common Mapping Patterns
 
 **Undo/Redo:**
-- `short` → Ctrl+Z (undo)
-- `tall` → Ctrl+Shift+Z (redo)
+- `short` -> Ctrl+Z (undo)
+- `tall` -> Ctrl+Shift+Z (redo)
 
 **Zoom:**
-- `knob_cw` → Ctrl+= (zoom in)
-- `knob_ccw` → Ctrl+- (zoom out)
+- `knob_cw` -> Ctrl+= (zoom in)
+- `knob_ccw` -> Ctrl+- (zoom out)
 
 **Scrolling:**
-- `dial_cw` → Scroll Up
-- `dial_ccw` → Scroll Down
+- `dial_cw` -> Scroll Up
+- `dial_ccw` -> Scroll Down
 
 **Modifiers:**
-- `side` → Super (start menu)
-- `top` → Shift
-- `tall` → Alt
-- `short` → Ctrl
+- `side` -> Super (start menu)
+- `top` -> Shift
+- `tall` -> Alt
+- `short` -> Ctrl
 
 **Navigation:**
-- `dpad_up/down` → Page Up/Page Down
-- `dpad_left/right` → Home/End
+- `dpad_up/down` -> Page Up/Page Down
+- `dpad_left/right` -> Home/End
 
 ### Visual Feedback
 
 - **Yellow highlight** on controller view shows selected control that has no modifiers or the modifier itself
 - **Turquoise highlight** on controller view shows the control that is the base control (that has combination modifiers defined for it)
-- **Orange ⚠ icon** in profile name indicates conflicting window rules with another active profile
+- **Orange ! icon** in profile name indicates conflicting window rules with another active profile
 - **Asterisk (*)** in window title means unsaved changes
 - **"(unmapped)"** in controls list means no action assigned
 - **Status bar** shows what's happening
@@ -1416,10 +1416,10 @@ Speed up your workflow with keyboard shortcuts:
 
 ## Checking for Updates
 
-To check if a new version of TourBox Linux is available:
+To check if a new version of TuxBox is available:
 
-1. Open the GUI: `tourbox-gui`
-2. Click **Help → Check for Updates**
+1. Open the GUI: `tuxbox-gui`
+2. Click **Help -> Check for Updates**
 3. The GUI will check GitHub for the latest version
 4. If an update is available, follow the instructions in the dialog
 
@@ -1441,25 +1441,25 @@ To check if a new version of TourBox Linux is available:
 
 ### GUI Won't Launch
 
-**Problem:** Error when running `tourbox-gui`
+**Problem:** Error when running `tuxbox-gui`
 
 **Solutions:**
 1. Check that launcher script exists:
    ```bash
-   ls -la /usr/local/bin/tourbox-gui
+   ls -la /usr/local/bin/tuxbox-gui
    ```
 2. If missing, re-run installer or create manually:
    ```bash
-   cd /path/to/tourboxelite
+   cd /path/to/tuxbox
    ./install.sh
    ```
 3. If launcher exists but still fails, check GUI dependencies:
    ```bash
-   /path/to/tourboxelite/venv/bin/pip install -r tourboxelite/gui/requirements.txt
+   /path/to/tuxbox/venv/bin/pip install -r tuxbox/gui/requirements.txt
    ```
 4. Verify Qt installation:
    ```bash
-   /path/to/tourboxelite/venv/bin/python -c "from PySide6 import QtWidgets; print('OK')"
+   /path/to/tuxbox/venv/bin/python -c "from PySide6 import QtWidgets; print('OK')"
    ```
 
 ### Driver Won't Stop/Start
@@ -1469,13 +1469,13 @@ To check if a new version of TourBox Linux is available:
 **Solutions:**
 1. Check if driver is installed as systemd service:
    ```bash
-   systemctl --user status tourbox
+   systemctl --user status tuxbox
    ```
 2. If not installed, see main README.md installation section
 3. Try manual stop/start:
    ```bash
-   systemctl --user stop tourbox
-   systemctl --user start tourbox
+   systemctl --user stop tuxbox
+   systemctl --user start tuxbox
    ```
 
 ### No Profiles Found
@@ -1485,7 +1485,7 @@ To check if a new version of TourBox Linux is available:
 **Solutions:**
 1. Check profiles directory exists:
    ```bash
-   ls -la ~/.config/tourbox/profiles/
+   ls -la ~/.config/tuxbox/profiles/
    ```
 2. If missing, run `./install_config.sh` to create default config
 3. Check file permissions (should be readable)
@@ -1499,7 +1499,7 @@ To check if a new version of TourBox Linux is available:
 1. Check for error dialogs (file permissions, disk space)
 2. Verify profiles directory is writable:
    ```bash
-   ls -la ~/.config/tourbox/profiles/
+   ls -la ~/.config/tuxbox/profiles/
    ```
 3. Check disk space:
    ```bash
@@ -1507,7 +1507,7 @@ To check if a new version of TourBox Linux is available:
    ```
 4. Look for backup files (confirms writes are working):
    ```bash
-   ls -la ~/.config/tourbox/profiles/*.backup.*
+   ls -la ~/.config/tuxbox/profiles/*.backup.*
    ```
 
 ### Button Presses Don't Work in When Testing
@@ -1517,11 +1517,11 @@ To check if a new version of TourBox Linux is available:
 **Solutions:**
 1. Check driver status:
    ```bash
-   systemctl --user status tourbox
+   systemctl --user status tuxbox
    ```
 2. Check driver logs for errors:
    ```bash
-   journalctl --user -u tourbox -n 50
+   journalctl --user -u tuxbox -n 50
    ```
 3. Verify TourBox is powered on and in range
 4. Try reconnecting Bluetooth:
@@ -1546,7 +1546,7 @@ To check if a new version of TourBox Linux is available:
 4. For KDE: Install `kdotool`
 5. Check driver logs to see profile switching:
    ```bash
-   journalctl --user -u tourbox -f
+   journalctl --user -u tuxbox -f
    ```
    Should show: "Switched to profile: [name]"
 
@@ -1577,13 +1577,13 @@ To check if a new version of TourBox Linux is available:
    ```
 2. Kill and restart GUI:
    ```bash
-   pkill -f "tourboxelite.gui"
-   tourbox-gui
+   pkill -f "tuxbox.gui"
+   tuxbox-gui
    ```
 3. Check for Qt/Python errors in terminal output
 4. Restart driver if it was left in stopped state:
    ```bash
-   systemctl --user start tourbox
+   systemctl --user start tuxbox
    ```
 
 ### Config File Corrupted
@@ -1593,16 +1593,16 @@ To check if a new version of TourBox Linux is available:
 **Solutions:**
 1. Restore a specific profile from automatic backup:
    ```bash
-   cd ~/.config/tourbox/profiles/
+   cd ~/.config/tuxbox/profiles/
    ls -la *.backup.*
    cp default.profile.backup.YYYYMMDD_HHMMSS default.profile
    ```
 2. Or reset to defaults (removes all profiles):
    ```bash
-   rm -rf ~/.config/tourbox/profiles ~/.config/tourbox/config.conf
+   rm -rf ~/.config/tuxbox/profiles ~/.config/tuxbox/config.conf
    ./install_config.sh
    ```
-   ⚠️ WARNING: Loses all customizations!
+   WARNING: Loses all customizations!
 
 ### Getting Help
 
@@ -1610,28 +1610,28 @@ If you encounter issues not covered here:
 
 1. **Check logs:**
    ```bash
-   journalctl --user -u tourbox -n 100
+   journalctl --user -u tuxbox -n 100
    ```
 
 2. **Enable verbose logging in GUI:**
-   Edit `tourboxelite/gui/main_window.py` and change:
+   Edit `tuxbox/gui/main_window.py` and change:
    ```python
    logging.basicConfig(level=logging.DEBUG)
    ```
 
 3. **Report issues:**
-   - GitHub: https://github.com/AndyCappDev/tourbox-linux/issues
+   - GitHub: https://github.com/AndyCappDev/tuxbox/issues
    - Include: OS, desktop environment, error messages, logs
 
 ---
 
 ## Appendix: Configuration File Format
 
-The GUI reads and writes profiles to individual files in `~/.config/tourbox/profiles/`.
+The GUI reads and writes profiles to individual files in `~/.config/tuxbox/profiles/`.
 
 **File Structure:**
 ```
-~/.config/tourbox/
+~/.config/tuxbox/
 ├── config.conf              # Device settings (MAC address, USB port)
 └── profiles/
     ├── default.profile      # Default profile
@@ -1699,13 +1699,13 @@ The GUI preserves comments and formatting when saving!
 
 ### Profile Management
 - **"+"** - Create new profile
-- **"⚙"** - Edit profile settings
+- **"settings"** - Edit profile settings
 - **"-"** - Delete profile
 - **Active checkbox** - Enable/disable profile for window matching
 - **Import** - Import a profile from file
 - **Export** - Export selected profile to file
 - **Capture** (in settings) - Auto-detect window info
-- **Orange ⚠** - Profile conflicts with another active profile
+- **Orange !** - Profile conflicts with another active profile
 
 ### Importing and Exporting Profiles
 
@@ -1732,7 +1732,7 @@ The GUI preserves comments and formatting when saving!
 
 ---
 
-**Enjoy your TourBox with the power of a visual configuration tool!** 🎨✨
+**Enjoy your TourBox with the power of a visual configuration tool!**
 
 For technical details, see:
 - [CONFIG_GUIDE.md](CONFIG_GUIDE.md) - Manual config editing

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Configuration loader for TourBox Elite button mappings
+"""Configuration loader for TuxBox button mappings
 
 Loads user-defined button mappings from config file and converts them
 to the internal MAPPING dictionary format used by the driver.
@@ -279,22 +279,27 @@ def get_config_path(config_path: str = None) -> str:
     default_paths = []
 
     # If running under sudo, check the real user's config first
-    # This allows: sudo ./driver -> uses /home/username/.config/tourbox/...
+    # This allows: sudo ./driver -> uses /home/username/.config/tuxbox/...
     sudo_user = os.environ.get('SUDO_USER')
     if sudo_user:
         sudo_home = os.path.expanduser(f'~{sudo_user}')
         # Check new format first
-        sudo_config_new = os.path.join(sudo_home, '.config/tourbox/config.conf')
+        sudo_config_new = os.path.join(sudo_home, '.config/tuxbox/config.conf')
         default_paths.append(sudo_config_new)
         # Then legacy format
-        sudo_config_legacy = os.path.join(sudo_home, '.config/tourbox/mappings.conf')
+        sudo_config_legacy = os.path.join(sudo_home, '.config/tuxbox/mappings.conf')
         default_paths.append(sudo_config_legacy)
+        # Legacy tourbox paths (pre-v3 migration)
+        default_paths.append(os.path.join(sudo_home, '.config/tourbox/config.conf'))
+        default_paths.append(os.path.join(sudo_home, '.config/tourbox/mappings.conf'))
 
     # Then check current user's home (for non-sudo usage)
     default_paths.extend([
-        os.path.expanduser('~/.config/tourbox/config.conf'),  # New format
-        os.path.expanduser('~/.config/tourbox/mappings.conf'),  # Legacy format
-        '/etc/tourbox/mappings.conf',  # System-wide config
+        os.path.expanduser('~/.config/tuxbox/config.conf'),  # New format
+        os.path.expanduser('~/.config/tuxbox/mappings.conf'),  # Legacy format
+        os.path.expanduser('~/.config/tourbox/config.conf'),  # Pre-v3 legacy path
+        os.path.expanduser('~/.config/tourbox/mappings.conf'),  # Pre-v3 legacy path
+        '/etc/tuxbox/mappings.conf',  # System-wide config
         os.path.join(os.path.dirname(__file__), 'default_mappings.conf'),  # Built-in fallback
     ])
 

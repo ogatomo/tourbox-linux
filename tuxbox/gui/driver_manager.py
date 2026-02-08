@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Driver service management for TourBox Elite
+"""Driver service management for TuxBox
 
 Handles starting, stopping, and checking status of the driver service.
 Supports both systemd and non-systemd init systems via configurable commands.
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class DriverManager:
-    """Manages the TourBox Elite driver service
+    """Manages the TuxBox driver service
 
     This class provides init-system-agnostic control of the driver:
     - reload_driver(): Uses direct SIGHUP signal (works on any system)
@@ -24,14 +24,14 @@ class DriverManager:
     - is_running(): Uses pgrep (works on any system)
 
     For non-systemd systems (OpenRC, runit, etc.), users can configure
-    a custom restart_command in ~/.config/tourbox/config.conf:
+    a custom restart_command in ~/.config/tuxbox/config.conf:
 
     [service]
-    restart_command = rc-service tourbox restart
+    restart_command = rc-service tuxbox restart
     """
 
-    SERVICE_NAME = "tourbox"
-    DRIVER_MODULE = "tourboxelite"
+    SERVICE_NAME = "tuxbox"
+    DRIVER_MODULE = "tuxbox"
 
     _restart_command_cache: Optional[str] = None
     _systemctl_available: Optional[bool] = None
@@ -39,7 +39,7 @@ class DriverManager:
     @staticmethod
     def _get_config_path() -> Path:
         """Get path to config.conf"""
-        return Path.home() / '.config' / 'tourbox' / 'config.conf'
+        return Path.home() / '.config' / 'tuxbox' / 'config.conf'
 
     @staticmethod
     def _get_restart_command() -> Optional[str]:
@@ -87,10 +87,10 @@ class DriverManager:
         """Get PIDs of running driver processes
 
         Returns:
-            List of PID strings for running tourboxelite processes
+            List of PID strings for running tuxbox processes
         """
         try:
-            # Use pgrep to find Python processes running tourboxelite
+            # Use pgrep to find Python processes running tuxbox
             # -f matches against full command line
             result = subprocess.run(
                 ['pgrep', '-f', f'python.*-m.*{DriverManager.DRIVER_MODULE}'],
@@ -113,7 +113,7 @@ class DriverManager:
 
     @staticmethod
     def stop_driver() -> Tuple[bool, str]:
-        """Stop the TourBox driver service
+        """Stop the TuxBox driver service
 
         Returns:
             Tuple of (success, message)
@@ -160,7 +160,7 @@ class DriverManager:
 
     @staticmethod
     def start_driver() -> Tuple[bool, str]:
-        """Start the TourBox driver service
+        """Start the TuxBox driver service
 
         Returns:
             Tuple of (success, message)
@@ -198,7 +198,7 @@ class DriverManager:
 
     @staticmethod
     def reload_driver() -> Tuple[bool, str]:
-        """Apply new configuration to the TourBox driver via SIGHUP
+        """Apply new configuration to the TuxBox driver via SIGHUP
 
         Sends SIGHUP signal directly to the driver process to reload its
         configuration without restarting the service. This method works
@@ -238,7 +238,7 @@ class DriverManager:
 
     @staticmethod
     def restart_driver() -> Tuple[bool, str]:
-        """Restart the TourBox driver service
+        """Restart the TuxBox driver service
 
         Uses custom restart_command from config if configured,
         otherwise falls back to systemctl if available.
@@ -307,12 +307,12 @@ class DriverManager:
         # Neither custom command nor systemctl available
         return False, (
             "Cannot restart driver: no restart command configured and systemctl not available.\n\n"
-            "To configure a custom restart command, add to ~/.config/tourbox/config.conf:\n\n"
+            "To configure a custom restart command, add to ~/.config/tuxbox/config.conf:\n\n"
             "[service]\n"
             "restart_command = your-restart-command-here\n\n"
             "Examples:\n"
-            "  OpenRC: rc-service tourbox restart\n"
-            "  Manual: pkill -f 'python.*tourboxelite' ; /path/to/start-tourbox.sh"
+            "  OpenRC: rc-service tuxbox restart\n"
+            "  Manual: pkill -f 'python.*tuxbox' ; /path/to/start-tuxbox.sh"
         )
 
     @staticmethod
@@ -346,10 +346,10 @@ class DriverManager:
         if custom_cmd:
             return f"  {custom_cmd}"
         elif DriverManager._is_systemctl_available():
-            return "  systemctl --user restart tourbox"
+            return "  systemctl --user restart tuxbox"
         else:
             return (
-                "Configure a restart command in ~/.config/tourbox/config.conf:\n"
+                "Configure a restart command in ~/.config/tuxbox/config.conf:\n"
                 "  [service]\n"
                 "  restart_command = your-restart-command-here"
             )

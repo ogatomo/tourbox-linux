@@ -1,5 +1,6 @@
 #!/bin/bash
-# TourBox Elite Driver Uninstallation Script
+# TuxBox TourBox Driver Uninstallation Script
+# Handles both old (tourbox*) and new (tuxbox*) artifact names
 
 set -e
 
@@ -11,12 +12,12 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}TourBox Elite Driver Uninstallation${NC}"
+echo -e "${BLUE}TuxBox TourBox Driver Uninstallation${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
 # Confirm uninstall
-read -p "Are you sure you want to uninstall the TourBox driver? (y/N): " -n 1 -r
+read -p "Are you sure you want to uninstall the TuxBox driver? (y/N): " -n 1 -r
 echo ""
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -31,110 +32,140 @@ if command -v systemctl &> /dev/null && systemctl --user status &> /dev/null; th
 fi
 
 if [ "$HAS_SYSTEMD" = "true" ]; then
-    # Stop service if running
-    if systemctl --user is-active --quiet tourbox 2>/dev/null; then
-        echo "Stopping TourBox service..."
-        systemctl --user stop tourbox
-        echo -e "${GREEN}✓${NC} Service stopped"
-    fi
+    # Stop and disable both old and new service names
+    for SERVICE_NAME in tourbox tuxbox; do
+        if systemctl --user is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
+            echo "Stopping $SERVICE_NAME service..."
+            systemctl --user stop "$SERVICE_NAME"
+            echo -e "${GREEN}✓${NC} $SERVICE_NAME service stopped"
+        fi
 
-    # Disable service if enabled
-    if systemctl --user is-enabled --quiet tourbox 2>/dev/null; then
-        echo "Disabling TourBox service..."
-        systemctl --user disable tourbox
-        echo -e "${GREEN}✓${NC} Service disabled"
-    fi
+        if systemctl --user is-enabled --quiet "$SERVICE_NAME" 2>/dev/null; then
+            echo "Disabling $SERVICE_NAME service..."
+            systemctl --user disable "$SERVICE_NAME"
+            echo -e "${GREEN}✓${NC} $SERVICE_NAME service disabled"
+        fi
 
-    # Remove systemd service file
-    SERVICE_FILE="$HOME/.config/systemd/user/tourbox.service"
-    if [ -f "$SERVICE_FILE" ]; then
-        echo "Removing systemd service..."
-        rm "$SERVICE_FILE"
-        systemctl --user daemon-reload
-        echo -e "${GREEN}✓${NC} Service file removed"
-    fi
+        SERVICE_FILE="$HOME/.config/systemd/user/$SERVICE_NAME.service"
+        if [ -f "$SERVICE_FILE" ]; then
+            echo "Removing $SERVICE_NAME systemd service file..."
+            rm "$SERVICE_FILE"
+            echo -e "${GREEN}✓${NC} $SERVICE_NAME service file removed"
+        fi
+    done
+
+    # Reload daemon once after removing service files
+    systemctl --user daemon-reload
 else
-    # Non-systemd system - try to stop any running driver process
-    if pgrep -f "python.*tourboxelite" > /dev/null 2>&1; then
-        echo "Stopping TourBox driver process..."
-        pkill -f "python.*tourboxelite" 2>/dev/null || true
-        echo -e "${GREEN}✓${NC} Driver process stopped"
-    fi
+    # Non-systemd system - try to stop any running driver process (old and new module names)
+    for PROC_PATTERN in "python.*tourboxelite" "python.*tuxbox"; do
+        if pgrep -f "$PROC_PATTERN" > /dev/null 2>&1; then
+            echo "Stopping driver process matching '$PROC_PATTERN'..."
+            pkill -f "$PROC_PATTERN" 2>/dev/null || true
+            echo -e "${GREEN}✓${NC} Driver process stopped"
+        fi
+    done
     echo -e "${YELLOW}!${NC} Non-systemd system - please remove any init scripts you created manually"
 fi
 
-# Ask about config files
-CONFIG_DIR="$HOME/.config/tourbox"
-PROFILES_DIR="$CONFIG_DIR/profiles"
-CONFIG_FILE="$CONFIG_DIR/config.conf"
-LEGACY_CONFIG_FILE="$CONFIG_DIR/mappings.conf"
-
-if [ -d "$CONFIG_DIR" ]; then
-    echo ""
-    echo "Configuration directory found: $CONFIG_DIR"
-
-    # Show what exists
-    if [ -d "$PROFILES_DIR" ]; then
-        PROFILE_COUNT=$(ls -1 "$PROFILES_DIR"/*.profile 2>/dev/null | wc -l)
-        echo "  - $PROFILE_COUNT profile(s) in profiles/"
+# Ask about config files - handle both old and new config directory names
+CONFIG_DIRS=()
+for DIR_NAME in tourbox tuxbox; do
+    DIR="$HOME/.config/$DIR_NAME"
+    if [ -d "$DIR" ]; then
+        CONFIG_DIRS+=("$DIR")
     fi
-    [ -f "$CONFIG_FILE" ] && echo "  - config.conf (device settings)"
-    [ -f "$LEGACY_CONFIG_FILE" ] && echo "  - mappings.conf (legacy config)"
+done
+
+if [ ${#CONFIG_DIRS[@]} -gt 0 ]; then
+    echo ""
+    echo "Configuration directories found:"
+    for CONFIG_DIR in "${CONFIG_DIRS[@]}"; do
+        echo "  $CONFIG_DIR"
+        PROFILES_DIR="$CONFIG_DIR/profiles"
+        CONFIG_FILE="$CONFIG_DIR/config.conf"
+        LEGACY_CONFIG_FILE="$CONFIG_DIR/mappings.conf"
+
+        if [ -d "$PROFILES_DIR" ]; then
+            PROFILE_COUNT=$(ls -1 "$PROFILES_DIR"/*.profile 2>/dev/null | wc -l)
+            echo "    - $PROFILE_COUNT profile(s) in profiles/"
+        fi
+        [ -f "$CONFIG_FILE" ] && echo "    - config.conf (device settings)"
+        [ -f "$LEGACY_CONFIG_FILE" ] && echo "    - mappings.conf (legacy config)"
+    done
 
     read -p "Remove all configuration files? (y/N): " -n 1 -r
     echo ""
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        # Remove profiles directory
-        if [ -d "$PROFILES_DIR" ]; then
-            rm -rf "$PROFILES_DIR"
-            echo -e "${GREEN}✓${NC} Profiles directory removed"
-        fi
-        # Remove config files
-        [ -f "$CONFIG_FILE" ] && rm "$CONFIG_FILE"
-        [ -f "$LEGACY_CONFIG_FILE" ] && rm "$LEGACY_CONFIG_FILE"
-        # Remove any backup files
-        rm -f "$CONFIG_DIR"/*.backup.* 2>/dev/null
-        rm -f "$CONFIG_DIR"/*.legacy 2>/dev/null
-        # Remove directory if empty
-        rmdir "$CONFIG_DIR" 2>/dev/null || true
+        for CONFIG_DIR in "${CONFIG_DIRS[@]}"; do
+            PROFILES_DIR="$CONFIG_DIR/profiles"
+            CONFIG_FILE="$CONFIG_DIR/config.conf"
+            LEGACY_CONFIG_FILE="$CONFIG_DIR/mappings.conf"
+
+            # Remove profiles directory
+            if [ -d "$PROFILES_DIR" ]; then
+                rm -rf "$PROFILES_DIR"
+                echo -e "${GREEN}✓${NC} Profiles directory removed: $PROFILES_DIR"
+            fi
+            # Remove config files
+            [ -f "$CONFIG_FILE" ] && rm "$CONFIG_FILE"
+            [ -f "$LEGACY_CONFIG_FILE" ] && rm "$LEGACY_CONFIG_FILE"
+            # Remove any backup files
+            rm -f "$CONFIG_DIR"/*.backup.* 2>/dev/null
+            rm -f "$CONFIG_DIR"/*.legacy 2>/dev/null
+            # Remove directory if empty
+            rmdir "$CONFIG_DIR" 2>/dev/null || true
+        done
         echo -e "${GREEN}✓${NC} Configuration removed"
     else
         echo -e "${YELLOW}!${NC} Configuration kept"
     fi
 fi
 
-# Remove PID file
-PID_FILE="${XDG_RUNTIME_DIR:-/tmp}/tourbox.pid"
-if [ -f "$PID_FILE" ]; then
-    rm "$PID_FILE"
-    echo -e "${GREEN}✓${NC} PID file removed"
-fi
+# Remove PID files - both old and new names
+for PID_NAME in tourbox tuxbox; do
+    PID_FILE="${XDG_RUNTIME_DIR:-/tmp}/$PID_NAME.pid"
+    if [ -f "$PID_FILE" ]; then
+        rm "$PID_FILE"
+        echo -e "${GREEN}✓${NC} PID file removed: $PID_FILE"
+    fi
+done
 
-# Remove GUI launcher script
-LAUNCHER_FILE="/usr/local/bin/tourbox-gui"
-if [ -f "$LAUNCHER_FILE" ]; then
-    echo "Removing GUI launcher..."
-    sudo rm "$LAUNCHER_FILE"
-    echo -e "${GREEN}✓${NC} Launcher script removed"
-fi
+# Remove GUI launcher scripts - both old and new names
+for LAUNCHER_NAME in tourbox-gui tuxbox-gui; do
+    LAUNCHER_FILE="/usr/local/bin/$LAUNCHER_NAME"
+    if [ -f "$LAUNCHER_FILE" ]; then
+        echo "Removing GUI launcher: $LAUNCHER_FILE..."
+        sudo rm "$LAUNCHER_FILE"
+        echo -e "${GREEN}✓${NC} Launcher script removed: $LAUNCHER_FILE"
+    fi
+done
 
-# Remove desktop entry
-DESKTOP_FILE="/usr/share/applications/tourbox-gui.desktop"
-if [ -f "$DESKTOP_FILE" ]; then
-    echo "Removing desktop entry..."
-    sudo rm "$DESKTOP_FILE"
+# Remove desktop entries - both old and new names
+DESKTOP_REMOVED=false
+for DESKTOP_NAME in tourbox-gui tuxbox-gui; do
+    DESKTOP_FILE="/usr/share/applications/$DESKTOP_NAME.desktop"
+    if [ -f "$DESKTOP_FILE" ]; then
+        echo "Removing desktop entry: $DESKTOP_FILE..."
+        sudo rm "$DESKTOP_FILE"
+        echo -e "${GREEN}✓${NC} Desktop entry removed: $DESKTOP_FILE"
+        DESKTOP_REMOVED=true
+    fi
+done
+if [ "$DESKTOP_REMOVED" = "true" ]; then
     sudo update-desktop-database /usr/share/applications/ 2>/dev/null || true
-    echo -e "${GREEN}✓${NC} Desktop entry removed"
 fi
 
-# Remove application icon
-ICON_FILE="/usr/share/pixmaps/tourbox-icon.png"
-if [ -f "$ICON_FILE" ]; then
-    echo "Removing application icon..."
-    sudo rm "$ICON_FILE"
-    echo -e "${GREEN}✓${NC} Application icon removed"
-fi
+# Remove application icons - both old and new names
+for ICON_NAME in tourbox-icon tuxbox-icon; do
+    ICON_FILE="/usr/share/pixmaps/$ICON_NAME.png"
+    if [ -f "$ICON_FILE" ]; then
+        echo "Removing application icon: $ICON_FILE..."
+        sudo rm "$ICON_FILE"
+        echo -e "${GREEN}✓${NC} Application icon removed: $ICON_FILE"
+    fi
+done
 
 # Get installation directory
 INSTALL_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

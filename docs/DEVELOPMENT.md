@@ -1,8 +1,8 @@
-# TourBox Linux Driver - Development Guide
+# TuxBox Driver - Development Guide
 
-This guide is for developers who want to work on, debug, or contribute to the TourBox Linux driver.
+This guide is for developers who want to work on, debug, or contribute to the TuxBox driver.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Development Setup](#development-setup)
 - [Running the Driver](#running-the-driver)
@@ -14,7 +14,7 @@ This guide is for developers who want to work on, debug, or contribute to the To
 - [Testing](#testing)
 - [Contributing](#contributing)
 
-## 🛠️ Development Setup
+## Development Setup
 
 ### Installation
 
@@ -33,7 +33,7 @@ For development work, install the package in editable mode:
 
 ```bash
 # Navigate to repository
-cd /path/to/tourboxelite
+cd /path/to/tuxbox
 
 # Install in editable/development mode
 ./venv/bin/pip install -e .
@@ -47,14 +47,14 @@ The GUI requires additional PySide6 (Qt 6) dependencies:
 
 ```bash
 # Install GUI dependencies
-./venv/bin/pip install -r tourboxelite/gui/requirements.txt
+./venv/bin/pip install -r tuxbox/gui/requirements.txt
 ```
 
 GUI dependencies include:
 - `PySide6` - Qt 6 Python bindings
 - `qasync` - Asyncio integration for Qt event loop
 
-## 🚀 Running the Driver
+## Running the Driver
 
 ### Running Directly (Recommended for Development)
 
@@ -62,32 +62,32 @@ Stop the systemd service first to avoid conflicts:
 
 ```bash
 # Stop the service if it's running
-systemctl --user stop tourbox
+systemctl --user stop tuxbox
 ```
 
 Run directly in your terminal:
 
 ```bash
 # Basic run (auto-detects USB if connected, falls back to BLE)
-./venv/bin/python -m tourboxelite
+./venv/bin/python -m tuxbox
 
 # With verbose logging (shows all button events)
-./venv/bin/python -m tourboxelite -v
+./venv/bin/python -m tuxbox -v
 
 # Force USB mode (even if BLE would work)
-./venv/bin/python -m tourboxelite --usb -v
+./venv/bin/python -m tuxbox --usb -v
 
 # Force BLE mode (even if USB is connected)
-./venv/bin/python -m tourboxelite --ble -v
+./venv/bin/python -m tuxbox --ble -v
 
 # Specify MAC address via command line (overrides config, BLE only)
-./venv/bin/python -m tourboxelite --ble D9:BE:1E:CC:40:D7
+./venv/bin/python -m tuxbox --ble D9:BE:1E:CC:40:D7
 
 # Specify custom config file
-./venv/bin/python -m tourboxelite -c /path/to/custom/config.conf
+./venv/bin/python -m tuxbox -c /path/to/custom/config.conf
 
 # Combine options
-./venv/bin/python -m tourboxelite -v -c custom.conf
+./venv/bin/python -m tuxbox -v -c custom.conf
 ```
 
 **Press `Ctrl+C` to stop.**
@@ -96,22 +96,22 @@ Run directly in your terminal:
 
 ```bash
 # Start service
-systemctl --user start tourbox
+systemctl --user start tuxbox
 
 # View live logs
-journalctl --user -u tourbox -f
+journalctl --user -u tuxbox -f
 
 # Stop service
-systemctl --user stop tourbox
+systemctl --user stop tuxbox
 
 # Restart service (after code changes)
-systemctl --user restart tourbox
+systemctl --user restart tuxbox
 ```
 
 ### Command Line Options
 
 ```bash
-./venv/bin/python -m tourboxelite --help
+./venv/bin/python -m tuxbox --help
 ```
 
 Available options:
@@ -122,10 +122,10 @@ Available options:
 - `-v, --verbose` - Enable verbose/debug logging
 
 **Auto-detection:** If neither `--usb` nor `--ble` is specified, the driver automatically detects the connection type:
-- If `/dev/ttyACM0` exists → uses USB
-- Otherwise → uses Bluetooth LE
+- If `/dev/ttyACM0` exists -> uses USB
+- Otherwise -> uses Bluetooth LE
 
-## 🖥️ Running the GUI
+## Running the GUI
 
 ### Running the GUI for Development
 
@@ -133,10 +133,10 @@ The GUI can be run directly from your development directory:
 
 ```bash
 # Run GUI using development virtual environment
-./venv/bin/python -m tourboxelite.gui
+./venv/bin/python -m tuxbox.gui
 
 # Or if you have a development launcher script
-tourbox-gui
+tuxbox-gui
 ```
 
 The GUI provides:
@@ -151,21 +151,21 @@ The GUI provides:
 After installation via `install.sh`, users can launch the GUI with:
 
 ```bash
-tourbox-gui
+tuxbox-gui
 ```
 
-The installation script creates a launcher at `/usr/local/bin/tourbox-gui`.
+The installation script creates a launcher at `/usr/local/bin/tuxbox-gui`.
 
 For complete GUI usage instructions, see [GUI_USER_GUIDE.md](GUI_USER_GUIDE.md).
 
-## 🐛 Debugging
+## Debugging
 
 ### Verbose Logging
 
 Enable verbose logging to see detailed button events:
 
 ```bash
-./venv/bin/python -m tourboxelite -v
+./venv/bin/python -m tuxbox -v
 ```
 
 Output shows:
@@ -177,9 +177,9 @@ Output shows:
 
 Example output:
 ```
-2025-11-01 21:56:19,217 - tourboxelite.config_loader - INFO - Loading profiles from /home/scott/.config/tourbox/mappings.conf
+2025-11-01 21:56:19,217 - tuxbox.config_loader - INFO - Loading profiles from /home/scott/.config/tuxbox/mappings.conf
 2025-11-01 21:56:19,218 - __main__ - INFO - Loaded 4 profiles
-2025-11-01 21:56:19,234 - tourboxelite.window_monitor - INFO - Detected Wayland compositor: kde
+2025-11-01 21:56:19,234 - tuxbox.window_monitor - INFO - Detected Wayland compositor: kde
 2025-11-01 21:56:19,234 - __main__ - INFO - Connecting to TourBox at D9:BE:1E:CC:40:D7...
 
 Button #1: 44 -> 4 events  # Knob CW rotation
@@ -192,20 +192,20 @@ To see raw button codes without mapping them, use the test scripts:
 
 ```bash
 # Stop the service first
-systemctl --user stop tourbox
+systemctl --user stop tuxbox
 
 # Run the USB test script (if connected via USB)
-cd /path/to/tourboxelite
-./venv/bin/python usb_test_tourbox.py
+cd /path/to/tuxbox
+./venv/bin/python usb_test_tuxbox.py
 
 # Or run the BLE test script (if using Bluetooth)
-./venv/bin/python ble_test_tourbox.py
+./venv/bin/python ble_test_tuxbox.py
 
 # Press buttons and observe hex codes
 # Press Ctrl+C when done
 
 # Restart the service
-systemctl --user start tourbox
+systemctl --user start tuxbox
 ```
 
 See the [BUTTON_MAPPING_GUIDE.md](BUTTON_MAPPING_GUIDE.md) for complete instructions on capturing and documenting button codes.
@@ -215,7 +215,7 @@ See the [BUTTON_MAPPING_GUIDE.md](BUTTON_MAPPING_GUIDE.md) for complete instruct
 Test window focus detection without running the full driver:
 
 ```bash
-./venv/bin/python -m tourboxelite.window_monitor
+./venv/bin/python -m tuxbox.window_monitor
 ```
 
 This shows:
@@ -238,24 +238,24 @@ bluetoothctl
 ### Check Input Device
 
 ```bash
-# List input devices (TourBox should appear when driver is running)
+# List input devices (TuxBox should appear when driver is running)
 ls -la /dev/input/by-id/
 
-# Monitor events from TourBox
+# Monitor events from TuxBox
 sudo evtest
-# Select "TourBox" from the list
+# Select "TuxBox" from the list
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-tourboxelite/
-├── tourboxelite/                                   # Main package
+tuxbox/
+├── tuxbox/                                        # Main package
 │   ├── __init__.py                                 # Version info
 │   ├── __main__.py                                 # Unified entry point with auto-detection
 │   ├── device_base.py                              # Abstract base class with shared logic
-│   ├── device_ble.py                               # Bluetooth LE driver (TourBoxBLE class)
-│   ├── device_usb.py                               # USB serial driver (TourBoxUSB class)
+│   ├── device_ble.py                               # Bluetooth LE driver (TuxBoxBLE class)
+│   ├── device_usb.py                               # USB serial driver (TuxBoxUSB class)
 │   ├── config_loader.py                            # Config file parsing and profile management
 │   ├── window_monitor.py                           # Wayland window detection
 │   ├── default_mappings.conf                       # Default configuration template
@@ -290,14 +290,14 @@ tourboxelite/
 │       ├── KDOTOOL_INFO.md                         # KDE window detection info
 │       ├── LOG_MANAGEMENT.md                       # Logging documentation
 │       └── WINDOWS_BLE_CAPTURE_GUIDE.md            # Windows BLE capture guide
-├── ble_test_tourbox.py                             # BLE test script for capturing button codes
-├── usb_test_tourbox.py                             # USB test script for capturing button codes
+├── ble_test_tuxbox.py                             # BLE test script for capturing button codes
+├── usb_test_tuxbox.py                             # USB test script for capturing button codes
 ├── ble_test_events.py                              # Test script to find TourBox input device
 ├── monitor_keys.py                                 # Utility to monitor key events
 ├── install.sh                                      # Installation script (includes GUI deps & launcher)
 ├── uninstall.sh                                    # Uninstallation script (removes GUI launcher)
 ├── install_config.sh                               # Config installer (for manual setup)
-├── tourbox-gui.desktop                             # Desktop integration file for GUI launcher
+├── tuxbox-gui.desktop                              # Desktop integration file for GUI launcher
 ├── setup.py                                        # Python package setup
 ├── setup.cfg                                       # Python package metadata (includes GUI entry point)
 ├── requirements.txt                                # Python dependencies
@@ -317,7 +317,7 @@ tourboxelite/
 - Launches appropriate driver (USB or BLE)
 
 **`device_base.py`** - Abstract base class
-- `TourBoxBase` abstract class with shared logic
+- `TuxBoxBase` abstract class with shared logic
 - Button event processing (`process_button_code()`)
 - Modifier key state machine
 - Profile switching
@@ -325,13 +325,13 @@ tourboxelite/
 - Window monitoring integration
 
 **`device_ble.py`** - Bluetooth LE driver
-- `TourBoxBLE` class (inherits from TourBoxBase)
+- `TuxBoxBLE` class (inherits from TuxBoxBase)
 - BLE connection handling via Bleak
 - GATT characteristic setup
 - BLE-specific unlock sequence
 
 **`device_usb.py`** - USB serial driver
-- `TourBoxUSB` class (inherits from TourBoxBase)
+- `TuxBoxUSB` class (inherits from TuxBoxBase)
 - USB serial connection via pyserial
 - `/dev/ttyACM0` communication
 - USB-specific initialization
@@ -349,12 +349,12 @@ tourboxelite/
 - Sway support
 - Hyprland support
 
-**`ble_test_tourbox.py`** - BLE test script
+**`ble_test_tuxbox.py`** - BLE test script
 - Captures raw button codes via Bluetooth LE
 - Sends unlock and config commands
 - Used for BLE protocol debugging
 
-**`usb_test_tourbox.py`** - USB test script
+**`usb_test_tuxbox.py`** - USB test script
 - Captures raw button codes via USB serial
 - Sends unlock and config commands
 - Used for USB protocol debugging
@@ -420,20 +420,20 @@ tourboxelite/
 - Delete profiles
 - Keeps 5 backup files (.bak.1 through .bak.5)
 
-## 🔄 Development Workflow
+## Development Workflow
 
 ### Making Changes
 
 1. **Stop the service** to avoid conflicts:
    ```bash
-   systemctl --user stop tourbox
+   systemctl --user stop tuxbox
    ```
 
 2. **Make your changes** to the code
 
 3. **Test directly** with verbose logging:
    ```bash
-   ./venv/bin/python -m tourboxelite -v
+   ./venv/bin/python -m tuxbox -v
    ```
 
 4. **Test your changes** by pressing buttons on the TourBox
@@ -442,30 +442,30 @@ tourboxelite/
 
 6. **Restart service** when done testing:
    ```bash
-   systemctl --user restart tourbox
+   systemctl --user restart tuxbox
    ```
 
 ### Editing Configuration
 
 ```bash
 # Edit a profile (new format)
-nano ~/.config/tourbox/profiles/default.profile
+nano ~/.config/tuxbox/profiles/default.profile
 
 # Or edit device settings
-nano ~/.config/tourbox/config.conf
+nano ~/.config/tuxbox/config.conf
 
 # Test changes immediately
-./venv/bin/python -m tourboxelite -v
+./venv/bin/python -m tuxbox -v
 
 # Or restart service
-systemctl --user restart tourbox
+systemctl --user restart tuxbox
 ```
 
 ### Adding New Button Mappings
 
 1. **Find the button code** - Run with verbose mode and press the button:
    ```bash
-   ./venv/bin/python -m tourboxelite -v
+   ./venv/bin/python -m tuxbox -v
    # Press the button
    # Look for: "Unknown button code: XX" or "Button #N: XX -> Y events"
    ```
@@ -537,7 +537,7 @@ Edit `window_monitor.py`:
        await self.monitor_your_compositor()
    ```
 
-## 🎨 GUI Development
+## GUI Development
 
 ### GUI Architecture
 
@@ -558,7 +558,7 @@ The GUI uses a signal-based architecture built with PySide6 (Qt 6):
 
 - **Atomic Saves**: Config writer implements atomic writes with backup rotation
   - Writes to temporary file first
-  - Rotates existing backups (.bak.1 → .bak.2, etc.)
+  - Rotates existing backups (.bak.1 -> .bak.2, etc.)
   - Moves temp file to final location
   - Keeps 5 backup files
 
@@ -570,7 +570,7 @@ The GUI uses a signal-based architecture built with PySide6 (Qt 6):
 
 3. **Test directly**:
    ```bash
-   ./venv/bin/python -m tourboxelite.gui
+   ./venv/bin/python -m tuxbox.gui
    ```
 
 4. **Check for errors** in terminal output (Qt errors, Python exceptions)
@@ -688,7 +688,7 @@ self.widget.blockSignals(False)
 **Test unsaved changes handling:**
 1. Create new profile
 2. Edit a button mapping
-3. Click another profile → should prompt to save
+3. Click another profile -> should prompt to save
 4. Test all three options: Save, Discard, Cancel
 
 **Test profile operations:**
@@ -708,7 +708,7 @@ self.widget.blockSignals(False)
 2. Check status updates
 3. Verify driver uses saved config
 
-## 🧪 Testing
+## Testing
 
 ### Manual Testing Checklist
 
@@ -723,7 +723,7 @@ self.widget.blockSignals(False)
 - [ ] Driver reconnects after TourBox power cycle
 
 #### GUI Testing
-- [ ] GUI launches successfully (`tourbox-gui`)
+- [ ] GUI launches successfully (`tuxbox-gui`)
 - [ ] All profiles load and display correctly
 - [ ] Profile creation works (both copy and empty)
 - [ ] Profile editing (name, window matching) works
@@ -747,22 +747,22 @@ self.widget.blockSignals(False)
 
 ```bash
 # Run with verbose logging
-./venv/bin/python -m tourboxelite -v
+./venv/bin/python -m tuxbox -v
 
 # Switch between applications (VSCode, Firefox, etc.)
 # Watch console for profile switch messages:
-# "🎮 Switched to profile: vscode"
+# "Switched to profile: vscode"
 ```
 
 ### Test Button Events
 
 ```bash
 # Run driver
-./venv/bin/python -m tourboxelite -v
+./venv/bin/python -m tuxbox -v
 
 # In another terminal, monitor input events
 sudo evtest
-# Select "TourBox"
+# Select "TuxBox"
 # Press buttons and verify events are generated
 ```
 
@@ -770,7 +770,7 @@ sudo evtest
 
 ```python
 # Quick test in Python
-from tourboxelite.config_loader import load_profiles
+from tuxbox.config_loader import load_profiles
 
 profiles = load_profiles()  # Automatically finds config location
 for p in profiles:
@@ -782,7 +782,7 @@ for p in profiles:
 
 ```bash
 # Launch GUI
-./venv/bin/python -m tourboxelite.gui
+./venv/bin/python -m tuxbox.gui
 
 # Check terminal for any errors or warnings
 ```
@@ -791,12 +791,12 @@ for p in profiles:
 1. Create a new profile (test both copy and empty options)
 2. Edit the new profile's name and window matching
 3. Select a control and change its mapping
-4. Click another profile → should prompt about unsaved changes
+4. Click another profile -> should prompt about unsaved changes
 5. Test "Save", "Discard", and "Cancel" options
 6. Use Test button to test mappings live
 7. Verify changes persist after closing and reopening GUI
 8. Delete the test profile
-9. Check that config backups were created in `~/.config/tourbox/`
+9. Check that config backups were created in `~/.config/tuxbox/`
 
 **Test edge cases:**
 - Try to delete default profile (should be prevented)
@@ -805,7 +805,7 @@ for p in profiles:
 - Create profile, change mappings, test (should auto-save)
 - Rapidly switch between profiles (check for race conditions)
 
-## 🔬 Reverse Engineering & Protocol Work
+## Reverse Engineering & Protocol Work
 
 ### Button Mapping Guide
 
@@ -823,7 +823,7 @@ This guide explains how to:
 
 See [TOURBOX_ELITE_PROTOCOL_SOLVED.md](technical/TOURBOX_ELITE_PROTOCOL_SOLVED.md) for complete BLE protocol documentation.
 
-## 🔍 Common Development Tasks
+## Common Development Tasks
 
 ### Capture Raw Button Data
 
@@ -856,14 +856,14 @@ asyncio.run(test_connection())
 
 ```bash
 # See profiles directory
-ls -la ~/.config/tourbox/profiles/
+ls -la ~/.config/tuxbox/profiles/
 
 # View a specific profile
-cat ~/.config/tourbox/profiles/default.profile
+cat ~/.config/tuxbox/profiles/default.profile
 
 # Or parse it programmatically
 ./venv/bin/python -c "
-from tourboxelite.config_loader import load_profiles
+from tuxbox.config_loader import load_profiles
 import pprint
 profiles = load_profiles()
 for p in profiles:
@@ -882,7 +882,7 @@ for p in profiles:
 ./venv/bin/pip show bleak
 ```
 
-## 📝 Code Style
+## Code Style
 
 - Follow PEP 8 style guidelines
 - Use type hints where appropriate
@@ -902,7 +902,7 @@ async def handle_button_event(self, sender: int, data: bytearray):
     # Implementation
 ```
 
-## 🤝 Contributing
+## Contributing
 
 ### Before Submitting
 
@@ -938,7 +938,7 @@ Bad:
 - "changes"
 ```
 
-## 🆘 Getting Help
+## Getting Help
 
 ### Enable Maximum Logging
 
@@ -952,17 +952,17 @@ logging.basicConfig(
 
 ### Common Issues
 
-**"No module named 'tourboxelite'"**
+**"No module named 'tuxbox'"**
 ```bash
 # Install in editable mode
 ./venv/bin/pip install -e .
 ```
 
-**"Permission denied: /run/tourbox.pid"**
+**"Permission denied: /run/tuxbox.pid"**
 ```bash
 # Use user runtime directory (already fixed in code)
 # Or set manually:
-pidfile=/tmp/tourbox.pid ./venv/bin/python -m tourboxelite
+pidfile=/tmp/tuxbox.pid ./venv/bin/python -m tuxbox
 ```
 
 **"Connection failed"**
@@ -978,7 +978,7 @@ pidfile=/tmp/tourbox.pid ./venv/bin/python -m tourboxelite
 **GUI won't launch / "No module named 'PySide6'"**
 ```bash
 # Install GUI dependencies
-./venv/bin/pip install -r tourboxelite/gui/requirements.txt
+./venv/bin/pip install -r tuxbox/gui/requirements.txt
 ```
 
 **GUI crashes on startup**
@@ -986,32 +986,32 @@ pidfile=/tmp/tourbox.pid ./venv/bin/python -m tourboxelite
 - Verify PySide6 is compatible with your Python version
 - Try: `./venv/bin/python -m PySide6.QtCore` to test Qt installation
 
-**"tourbox-gui: command not found"**
+**"tuxbox-gui: command not found"**
 ```bash
 # Check if launcher exists
-ls -la /usr/local/bin/tourbox-gui
+ls -la /usr/local/bin/tuxbox-gui
 
 # If not, reinstall or create manually:
 # See install.sh for launcher script creation
 ```
 
 **GUI shows empty profile list**
-- Check profiles directory exists: `ls ~/.config/tourbox/profiles/`
-- Check config file permissions: `ls -la ~/.config/tourbox/`
+- Check profiles directory exists: `ls ~/.config/tuxbox/profiles/`
+- Check config file permissions: `ls -la ~/.config/tuxbox/`
 - Try loading profiles manually:
   ```python
-  from tourboxelite.config_loader import load_profiles
+  from tuxbox.config_loader import load_profiles
   profiles = load_profiles()
   print(profiles)
   ```
 
 **Changes not saving in GUI**
 - Check terminal output for save errors
-- Verify config directory is writable: `ls -la ~/.config/tourbox/`
-- Check profile backups exist: `ls ~/.config/tourbox/profiles/*.backup.*`
-- Look for errors in profile files in `~/.config/tourbox/profiles/`
+- Verify config directory is writable: `ls -la ~/.config/tuxbox/`
+- Check profile backups exist: `ls ~/.config/tuxbox/profiles/*.backup.*`
+- Look for errors in profile files in `~/.config/tuxbox/profiles/`
 
-## 📚 Additional Resources
+## Additional Resources
 
 ### Core Driver Resources
 - [Bleak Documentation](https://bleak.readthedocs.io/) - Python BLE library
@@ -1025,6 +1025,6 @@ ls -la /usr/local/bin/tourbox-gui
 - [qasync Documentation](https://github.com/CabbageDevelopment/qasync) - Asyncio integration for Qt
 - [Qt Signals & Slots](https://doc.qt.io/qt-6/signalsandslots.html) - Signal/slot mechanism
 
-## 📄 License
+## License
 
 MIT License - See [LICENSE.txt](../LICENSE.txt) file for details.

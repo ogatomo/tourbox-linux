@@ -1,8 +1,8 @@
-# TourBox Linux - Log Management
+# TuxBox - Log Management
 
 ## Understanding systemd Logs
 
-The TourBox service logs are managed by systemd's journal (journald), which handles automatic rotation and cleanup.
+The TuxBox service logs are managed by systemd's journal (journald), which handles automatic rotation and cleanup.
 
 ## Default Behavior
 
@@ -20,41 +20,41 @@ The TourBox service logs are managed by systemd's journal (journald), which hand
 
 ```bash
 # View live logs (follow mode)
-journalctl --user -u tourbox -f
+journalctl --user -u tuxbox -f
 
 # View last 50 lines
-journalctl --user -u tourbox -n 50
+journalctl --user -u tuxbox -n 50
 
 # View last 100 lines
-journalctl --user -u tourbox -n 100
+journalctl --user -u tuxbox -n 100
 
 # View all logs for today
-journalctl --user -u tourbox --since today
+journalctl --user -u tuxbox --since today
 
 # View logs from last 24 hours
-journalctl --user -u tourbox --since "24 hours ago"
+journalctl --user -u tuxbox --since "24 hours ago"
 
 # View logs from specific date
-journalctl --user -u tourbox --since "2025-11-01"
+journalctl --user -u tuxbox --since "2025-11-01"
 
 # View logs between dates
-journalctl --user -u tourbox --since "2025-11-01" --until "2025-11-02"
+journalctl --user -u tuxbox --since "2025-11-01" --until "2025-11-02"
 ```
 
 ### Filtering Logs
 
 ```bash
 # Show only errors and warnings
-journalctl --user -u tourbox -p err
+journalctl --user -u tuxbox -p err
 
 # Show only warnings and above
-journalctl --user -u tourbox -p warning
+journalctl --user -u tuxbox -p warning
 
 # Grep for specific text
-journalctl --user -u tourbox | grep "Button"
+journalctl --user -u tuxbox | grep "Button"
 
 # Show logs with timestamps
-journalctl --user -u tourbox -o short-precise
+journalctl --user -u tuxbox -o short-precise
 ```
 
 ## Check Disk Usage
@@ -146,9 +146,9 @@ For user services specifically, create `~/.config/systemd/user.conf` (not common
 # User service logs follow system journal settings
 ```
 
-## Recommended Settings for TourBox
+## Recommended Settings for TuxBox
 
-For most users, **the defaults are fine**. The TourBox driver doesn't log excessively unless you run it with `-v` (verbose) mode.
+For most users, **the defaults are fine**. The TuxBox driver doesn't log excessively unless you run it with `-v` (verbose) mode.
 
 ### If you run with verbose logging often:
 
@@ -172,18 +172,18 @@ crontab -e
 
 ## Log Verbosity Control
 
-The TourBox service has different log levels:
+The TuxBox service has different log levels:
 
 ### Normal Mode (Production)
 ```bash
-systemctl --user start tourbox
+systemctl --user start tuxbox
 # Logs: INFO level - connection status, profile switches, errors
 # Typical size: ~1-2KB per day
 ```
 
 ### Verbose Mode (Development)
 ```bash
-./venv/bin/python -m tourboxelite.device_ble -v
+./venv/bin/python -m tuxbox.device_ble -v
 # Logs: DEBUG level - every button press, all events
 # Typical size: ~100-500KB per day depending on usage
 ```
@@ -196,7 +196,7 @@ If you really don't want any logs:
 
 ```bash
 # Edit service file
-nano ~/.config/systemd/user/tourbox.service
+nano ~/.config/systemd/user/tuxbox.service
 
 # Add to [Service] section:
 StandardOutput=null
@@ -204,7 +204,7 @@ StandardError=null
 
 # Reload and restart
 systemctl --user daemon-reload
-systemctl --user restart tourbox
+systemctl --user restart tuxbox
 ```
 
 **Warning:** This makes debugging issues much harder!
@@ -214,27 +214,27 @@ systemctl --user restart tourbox
 ### Save current logs to file
 
 ```bash
-# Save all TourBox logs to file
-journalctl --user -u tourbox > tourbox-logs.txt
+# Save all TuxBox logs to file
+journalctl --user -u tuxbox > tuxbox-logs.txt
 
 # Save last 1000 lines
-journalctl --user -u tourbox -n 1000 > tourbox-recent.txt
+journalctl --user -u tuxbox -n 1000 > tuxbox-recent.txt
 
 # Save logs from today
-journalctl --user -u tourbox --since today > tourbox-today.txt
+journalctl --user -u tuxbox --since today > tuxbox-today.txt
 
 # Save with timestamps
-journalctl --user -u tourbox -o short-precise > tourbox-detailed.txt
+journalctl --user -u tuxbox -o short-precise > tuxbox-detailed.txt
 ```
 
 ### Export for bug reports
 
 ```bash
 # Full logs with all metadata
-journalctl --user -u tourbox -o export > tourbox-export.bin
+journalctl --user -u tuxbox -o export > tuxbox-export.bin
 
 # Or as JSON
-journalctl --user -u tourbox -o json > tourbox-logs.json
+journalctl --user -u tuxbox -o json > tuxbox-logs.json
 ```
 
 ## Monitor Log Growth
@@ -255,18 +255,18 @@ ls -lh /run/log/journal/*/user-*.journal*
 
 ```bash
 #!/bin/bash
-# Save as ~/check-tourbox-logs.sh
+# Save as ~/check-tuxbox-logs.sh
 
-echo "TourBox Log Statistics"
+echo "TuxBox Log Statistics"
 echo "====================="
 echo ""
 
 # Total log entries
-TOTAL=$(journalctl --user -u tourbox | wc -l)
+TOTAL=$(journalctl --user -u tuxbox | wc -l)
 echo "Total log entries: $TOTAL"
 
 # Logs from last 24h
-TODAY=$(journalctl --user -u tourbox --since "24 hours ago" | wc -l)
+TODAY=$(journalctl --user -u tuxbox --since "24 hours ago" | wc -l)
 echo "Last 24h entries: $TODAY"
 
 # Disk usage
@@ -275,8 +275,8 @@ echo "Disk usage:"
 journalctl --user --disk-usage
 
 # Errors and warnings
-ERRORS=$(journalctl --user -u tourbox -p err --since today | wc -l)
-WARNINGS=$(journalctl --user -u tourbox -p warning --since today | wc -l)
+ERRORS=$(journalctl --user -u tuxbox -p err --since today | wc -l)
+WARNINGS=$(journalctl --user -u tuxbox -p warning --since today | wc -l)
 echo ""
 echo "Today's errors: $ERRORS"
 echo "Today's warnings: $WARNINGS"
@@ -284,8 +284,8 @@ echo "Today's warnings: $WARNINGS"
 
 Make it executable:
 ```bash
-chmod +x ~/check-tourbox-logs.sh
-./check-tourbox-logs.sh
+chmod +x ~/check-tuxbox-logs.sh
+./check-tuxbox-logs.sh
 ```
 
 ## Summary
@@ -303,4 +303,4 @@ chmod +x ~/check-tourbox-logs.sh
 **For development:**
 - Use `-v` flag only when debugging
 - Normal operation logs minimally
-- Check logs with: `journalctl --user -u tourbox -f`
+- Check logs with: `journalctl --user -u tuxbox -f`

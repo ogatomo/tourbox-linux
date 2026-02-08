@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Entry point for TourBox Elite Configuration GUI
+"""Entry point for TuxBox Configuration GUI
 
-Run with: python -m tourboxelite.gui
+Run with: python -m tuxbox.gui
 """
 
 import sys

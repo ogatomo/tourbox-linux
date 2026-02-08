@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test the discovered unlock command from Windows BLE capture"""
+"""TuxBox BLE test - test the discovered unlock command from Windows BLE capture"""
 
 import asyncio
 import sys
@@ -20,8 +20,8 @@ def get_mac_address():
 
     # 3. Try to read from config files (new format first, then legacy)
     config_paths = [
-        Path.home() / '.config' / 'tourbox' / 'config.conf',      # New format
-        Path.home() / '.config' / 'tourbox' / 'mappings.conf',    # Legacy format
+        Path.home() / '.config' / 'tuxbox' / 'config.conf',      # New format
+        Path.home() / '.config' / 'tuxbox' / 'mappings.conf',    # Legacy format
     ]
     for config_path in config_paths:
         if config_path.exists():
@@ -39,9 +39,9 @@ def get_mac_address():
     # 4. No MAC address found
     print("Error: No TourBox MAC address provided!")
     print("\nProvide MAC address using one of these methods:")
-    print("  1. Command line:   ./ble_test_tourbox.py XX:XX:XX:XX:XX:XX")
-    print("  2. Environment:    TOURBOX_MAC=XX:XX:XX:XX:XX:XX ./ble_test_tourbox.py")
-    print("  3. Config file:    Set mac_address in ~/.config/tourbox/config.conf")
+    print("  1. Command line:   ./ble_test_tuxbox.py XX:XX:XX:XX:XX:XX")
+    print("  2. Environment:    TOURBOX_MAC=XX:XX:XX:XX:XX:XX ./ble_test_tuxbox.py")
+    print("  3. Config file:    Set mac_address in ~/.config/tuxbox/config.conf")
     print("\nFind your MAC address with: bluetoothctl devices")
     sys.exit(1)
 
@@ -77,7 +77,7 @@ def notification_handler(sender, data):
 
 async def main():
     print("="*60)
-    print("TourBox Elite Unlock Test")
+    print("TuxBox BLE Unlock Test")
     print("Using command discovered from Windows BLE capture")
     print("="*60)
     print(f"\nConnecting to {TOURBOX_MAC}...\n")

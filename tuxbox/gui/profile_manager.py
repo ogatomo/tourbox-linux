@@ -15,8 +15,8 @@ from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QFont
 
 # Import from existing driver code
-from tourboxelite.config_loader import Profile
-from tourboxelite.haptic import HapticConfig
+from tuxbox.config_loader import Profile
+from tuxbox.haptic import HapticConfig
 
 # Import GUI dialog
 from .profile_settings_dialog import ProfileSettingsDialog
@@ -28,20 +28,20 @@ from .config_writer import (
 )
 
 # Import profile I/O for saving and driver manager for reloading
-from tourboxelite.profile_io import save_profile_to_file, get_profile_filepath
+from tuxbox.profile_io import save_profile_to_file, get_profile_filepath
 from .driver_manager import DriverManager
 
 # Import conflict dialog
 from .import_conflict_dialog import ImportConflictDialog
 
 # Import UI constants
-from tourboxelite.gui.ui_constants import TABLE_ROW_HEIGHT_MULTIPLIER
+from tuxbox.gui.ui_constants import TABLE_ROW_HEIGHT_MULTIPLIER
 
 logger = logging.getLogger(__name__)
 
 
 class ProfileManager(QWidget):
-    """Widget for managing TourBox profiles"""
+    """Widget for managing TuxBox profiles"""
 
     # Signals
     profile_selected = Signal(Profile)  # Emitted when user selects a profile
@@ -125,9 +125,9 @@ class ProfileManager(QWidget):
         self.profiles = profiles
         self.profile_table.setRowCount(0)
 
-        # Filter out the TourBox GUI meta-configuration profile
+        # Filter out the TuxBox GUI meta-configuration profile
         # (it's for internal use and shouldn't be edited by users)
-        displayed_profiles = [p for p in profiles if p.name != 'TourBox GUI']
+        displayed_profiles = [p for p in profiles if p.name != 'TuxBox GUI']
 
         for row, profile in enumerate(displayed_profiles):
             self.profile_table.insertRow(row)
@@ -206,8 +206,8 @@ class ProfileManager(QWidget):
 
         # Clear and rebuild table
         self.profile_table.setRowCount(0)
-        # Filter out the TourBox GUI meta-configuration profile
-        displayed_profiles = [p for p in self.profiles if p.name != 'TourBox GUI']
+        # Filter out the TuxBox GUI meta-configuration profile
+        displayed_profiles = [p for p in self.profiles if p.name != 'TuxBox GUI']
         for row, profile in enumerate(displayed_profiles):
             self.profile_table.insertRow(row)
 
@@ -477,7 +477,7 @@ class ProfileManager(QWidget):
                         self.profiles_reset.emit(default_profile)
                 else:
                     # Profile was never saved - reload from config to reset state
-                    from tourboxelite.config_loader import load_profiles
+                    from tuxbox.config_loader import load_profiles
                     self.profiles = load_profiles()
 
                     # Select default profile
@@ -721,7 +721,7 @@ class ProfileManager(QWidget):
         # Install the profile
         if install_imported_profile(profile):
             # Reload profiles
-            from tourboxelite.config_loader import load_profiles
+            from tuxbox.config_loader import load_profiles
             self.profiles = load_profiles()
             self._reload_profile_list()
 
@@ -753,7 +753,7 @@ class ProfileManager(QWidget):
             return
 
         # Suggest a filename based on profile name
-        from tourboxelite.profile_io import sanitize_profile_filename
+        from tuxbox.profile_io import sanitize_profile_filename
         suggested_name = f"{sanitize_profile_filename(self.current_profile.name)}.profile"
 
         # Open file dialog

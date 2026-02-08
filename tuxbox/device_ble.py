@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""TourBox Elite BLE Driver - Linux Input Device
+"""TuxBox BLE Driver - Linux Input Device
 
-Implements Bluetooth Low Energy (BLE) transport for TourBox Elite.
+Implements Bluetooth Low Energy (BLE) transport for TourBox controllers.
 Uses the reverse-engineered BLE protocol with evdev virtual input device.
 """
 
@@ -17,7 +17,7 @@ from dbus_fast.aio import MessageBus
 from dbus_fast import BusType, Message
 from evdev import UInput
 
-from .device_base import TourBoxBase
+from .device_base import TuxBoxBase
 from .config_loader import load_profiles
 from .window_monitor import WindowMonitor
 from .haptic import build_config_commands, HapticConfig
@@ -99,7 +99,7 @@ async def disconnect_existing_device(timeout: float = 10.0):
         return
 
 
-async def scan_for_tourbox(timeout: float = 10.0) -> Optional[BLEDevice]:
+async def scan_for_tuxbox(timeout: float = 10.0) -> Optional[BLEDevice]:
     """Scan for TourBox devices by name prefix.
 
     Scans for BLE devices whose name starts with "TourBox" (e.g., TourBox Elite,
@@ -145,11 +145,11 @@ async def scan_for_tourbox(timeout: float = 10.0) -> Optional[BLEDevice]:
     return found_device
 
 
-class TourBoxBLE(TourBoxBase):
-    """TourBox Elite BLE Driver
+class TuxBoxBLE(TuxBoxBase):
+"""TuxBox BLE Driver
 
     Implements BLE transport using Bleak library. Inherits common functionality
-    from TourBoxBase including button processing, modifier state machine,
+    from TuxBoxBase including button processing, modifier state machine,
     profile management, and virtual input device handling.
     """
 
@@ -253,7 +253,7 @@ class TourBoxBLE(TourBoxBase):
         """
         try:
             # Scan for TourBox device
-            self.device = await scan_for_tourbox(timeout=10.0)
+            self.device = await scan_for_tuxbox(timeout=10.0)
             if not self.device:
                 logger.error("No TourBox device found")
                 return True  # Retry (will scan again)
@@ -335,7 +335,7 @@ class TourBoxBLE(TourBoxBase):
             print("# ... (all buttons and rotary controls)")
             print("")
             print("See the default config for a complete example:")
-            print("  cat tourboxelite/default_mappings.conf")
+            print("  cat tuxbox/default_mappings.conf")
             print("")
             print("Or see the config guide:")
             print("  https://github.com/your-repo/docs/CONFIG_GUIDE.md")
@@ -410,7 +410,7 @@ class TourBoxBLE(TourBoxBase):
 
             # Cleanup
             self.cleanup()
-            logger.info("TourBox Elite driver stopped")
+            logger.info("TuxBox BLE driver stopped")
 
 
 def main():
@@ -424,7 +424,7 @@ def main():
     )
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='TourBox BLE Driver')
+    parser = argparse.ArgumentParser(description='TuxBox BLE Driver')
     parser.add_argument('-c', '--config', help='Path to custom config file')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose logging')
 
@@ -435,7 +435,7 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     # Create and start driver (will scan for device)
-    driver = TourBoxBLE(config_path=args.config)
+    driver = TuxBoxBLE(config_path=args.config)
 
     try:
         asyncio.run(driver.start())

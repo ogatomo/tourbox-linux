@@ -6,7 +6,7 @@
 
 ## Why is it needed?
 
-The TourBox Linux driver uses window detection to enable **Profile Mode** - automatic switching of button mappings based on which application you're using.
+The TuxBox driver uses window detection to enable **Profile Mode** - automatic switching of button mappings based on which application you're using.
 
 Different Wayland compositors provide different APIs for window information:
 - **GNOME (Mutter)** - Uses D-Bus API (built-in)
@@ -17,14 +17,14 @@ Different Wayland compositors provide different APIs for window information:
 ## Do I need kdotool?
 
 **You need kdotool ONLY if:**
-- ✅ You're using KDE Plasma
-- ✅ You're running Wayland (not X11)
-- ✅ You want to use Profile Mode (app-specific button mappings)
+- You're using KDE Plasma
+- You're running Wayland (not X11)
+- You want to use Profile Mode (app-specific button mappings)
 
 **You DON'T need kdotool if:**
-- ❌ You're using GNOME, Sway, or Hyprland
-- ❌ You're running X11
-- ❌ You only use the default profile (no app-specific profiles)
+- You're using GNOME, Sway, or Hyprland
+- You're running X11
+- You only use the default profile (no app-specific profiles)
 
 ## Installation
 
@@ -42,7 +42,7 @@ sudo apt install build-essential pkg-config libdbus-1-dev libxcb1-dev
 - `libdbus-1-dev` - D-Bus development headers (kdotool uses D-Bus internally to talk to KWin)
 - `libxcb1-dev` - X C Bindings development headers (for X11/Wayland window management)
 
-**Note:** Our TourBox driver doesn't use D-Bus directly - it calls `kdotool` as a command-line tool. But kdotool itself needs these libraries to compile because it uses D-Bus to communicate with KWin.
+**Note:** The TuxBox driver doesn't use D-Bus directly - it calls `kdotool` as a command-line tool. But kdotool itself needs these libraries to compile because it uses D-Bus to communicate with KWin.
 
 ### 2. Install Rust (if not already installed)
 
@@ -83,10 +83,10 @@ source ~/.bashrc
 ### Architecture
 
 ```
-TourBox Driver (Python)
-    ↓ subprocess.run()
+TuxBox Driver (Python)
+    | subprocess.run()
 kdotool (Rust binary)
-    ↓ D-Bus
+    | D-Bus
 KWin (KDE Window Manager)
 ```
 
@@ -103,18 +103,18 @@ KWin (KDE Window Manager)
 
 Different Wayland compositors provide different APIs for window detection:
 
-| Compositor | Method | What TourBox Driver Uses |
+| Compositor | Method | What TuxBox Driver Uses |
 |------------|--------|--------------------------|
 | **GNOME** | D-Bus API | Python D-Bus library directly |
 | **Sway** | IPC Socket | Python socket connection directly |
 | **Hyprland** | IPC Socket | Python socket connection directly |
-| **KDE Plasma** | D-Bus (complex) | `kdotool` command-line tool → D-Bus |
+| **KDE Plasma** | D-Bus (complex) | `kdotool` command-line tool -> D-Bus |
 
 **Why KDE is different:** KDE Plasma 6's D-Bus API for window management is complex and poorly documented. Using `kdotool` as an abstraction layer makes the implementation much simpler and more reliable.
 
 ### Commands Used
 
-The TourBox driver uses `kdotool` to query window information:
+The TuxBox driver uses `kdotool` to query window information:
 
 ```bash
 # Get active window class
@@ -186,7 +186,7 @@ If it returns nothing or errors, kdotool might not be compatible with your KDE P
 
 ```bash
 # Test window detection directly
-./venv/bin/python -m tourboxelite.window_monitor
+./venv/bin/python -m tuxbox.window_monitor
 
 # This will show:
 # - Detected compositor
@@ -207,7 +207,7 @@ If kdotool doesn't work or you don't want to install it, you can use only the de
 - License: MIT
 - Platform: Linux (KDE Plasma/Wayland)
 
-### How TourBox finds kdotool
+### How TuxBox finds kdotool
 
 The driver searches for `kdotool` in these locations (in order):
 
@@ -216,7 +216,7 @@ The driver searches for `kdotool` in these locations (in order):
 3. `/usr/local/bin/kdotool` (system-wide)
 4. `/usr/bin/kdotool` (package manager)
 
-See `tourboxelite/window_monitor.py` function `_find_kdotool()` for implementation.
+See `tuxbox/window_monitor.py` function `_find_kdotool()` for implementation.
 
 ### Polling Interval
 

@@ -1,4 +1,4 @@
-# Why TourBox Linux Doesn't Have Overlay Features
+# Why TuxBox Doesn't Have Overlay Features
 
 ## Features That Won't Be Implemented
 

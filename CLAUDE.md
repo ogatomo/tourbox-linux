@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TourBox Linux is a Python driver for TourBox input devices (Elite, Elite Plus, Neo, Lite) on Linux. It supports USB serial and Bluetooth LE connections, includes a PySide6-based GUI for configuration, and runs as a user service (systemd or other init systems like OpenRC, runit, s6).
+TuxBox is a Python driver for TourBox input devices (Elite, Elite Plus, Neo, Lite) on Linux. It supports USB serial and Bluetooth LE connections, includes a PySide6-based GUI for configuration, and runs as a user service (systemd or other init systems like OpenRC, runit, s6).
 
 ## Build & Development Commands
 
@@ -15,26 +15,26 @@ TourBox Linux is a Python driver for TourBox input devices (Elite, Elite Plus, N
 # Manual development setup
 python3 -m venv venv
 ./venv/bin/pip install -e .
-./venv/bin/pip install -r tourboxelite/gui/requirements.txt
+./venv/bin/pip install -r tuxbox/gui/requirements.txt
 
 # Run driver directly (verbose mode)
-./venv/bin/python -m tourboxelite -v
-./venv/bin/python -m tourboxelite --usb -v   # Force USB
-./venv/bin/python -m tourboxelite --ble -v   # Force BLE
+./venv/bin/python -m tuxbox -v
+./venv/bin/python -m tuxbox --usb -v   # Force USB
+./venv/bin/python -m tuxbox --ble -v   # Force BLE
 
 # Run GUI
-./venv/bin/python -m tourboxelite.gui
+./venv/bin/python -m tuxbox.gui
 
 # Service management
-systemctl --user start tourbox
-systemctl --user stop tourbox
-systemctl --user restart tourbox
-journalctl --user -u tourbox -f
+systemctl --user start tuxbox
+systemctl --user stop tuxbox
+systemctl --user restart tuxbox
+journalctl --user -u tuxbox -f
 
 # Test scripts
-./venv/bin/python usb_test_tourbox.py    # Test USB button codes
-./venv/bin/python ble_test_tourbox.py    # Test BLE button codes
-./venv/bin/python -m tourboxelite.window_monitor  # Test window detection
+./venv/bin/python usb_test_tuxbox.py    # Test USB button codes
+./venv/bin/python ble_test_tuxbox.py    # Test BLE button codes
+./venv/bin/python -m tuxbox.window_monitor  # Test window detection
 ```
 
 ## Architecture
@@ -42,9 +42,9 @@ journalctl --user -u tourbox -f
 The driver uses an abstract base class pattern with transport-specific implementations:
 
 ```
-TourBoxBase (device_base.py)     - Abstract base with shared logic
-├── TourBoxUSB (device_usb.py)   - USB serial via pyserial
-└── TourBoxBLE (device_ble.py)   - Bluetooth LE via bleak
+TuxBoxBase (device_base.py)     - Abstract base with shared logic
+├── TuxBoxUSB (device_usb.py)   - USB serial via pyserial
+└── TuxBoxBLE (device_ble.py)   - Bluetooth LE via bleak
 ```
 
 **Data Flow:**
@@ -62,7 +62,7 @@ TourBoxBase (device_base.py)     - Abstract base with shared logic
 - `window_monitor.py` - Wayland compositor detection (GNOME, KDE, Sway, Hyprland)
 - `haptic.py` - Haptic feedback strength/speed configuration
 
-**GUI Package (`tourboxelite/gui/`):**
+**GUI Package (`tuxbox/gui/`):**
 - `main_window.py` - Central coordinator
 - `profile_manager.py` - Profile list CRUD operations
 - `control_editor.py` - Key capture and mapping editor
@@ -72,16 +72,16 @@ TourBoxBase (device_base.py)     - Abstract base with shared logic
 
 ## Configuration
 
-User config location: `~/.config/tourbox/`
+User config location: `~/.config/tuxbox/`
 - `config.conf` - Device settings and optional `[service]` section for non-systemd systems
 - `profiles/` - Individual `.profile` files
 
-Template: `tourboxelite/default_mappings.conf`
+Template: `tuxbox/default_mappings.conf`
 
 For non-systemd systems, users can configure a custom restart command in `config.conf`:
 ```ini
 [service]
-restart_command = rc-service tourbox restart
+restart_command = rc-service tuxbox restart
 ```
 
 ## Dependencies
@@ -94,7 +94,7 @@ System: Python 3.9+, bluez (BLE), user in `dialout` and `input` groups, udev rul
 ## Version Numbers
 
 When bumping the version, update these files:
-- `tourboxelite/__init__.py` - VERSION constant
-- `tourboxelite/gui/__init__.py` - __version__ constant
+- `tuxbox/__init__.py` - VERSION constant
+- `tuxbox/gui/__init__.py` - __version__ constant
 - `README.md` - Version badge at top, image cache-bust parameter
 - `docs/GUI_USER_GUIDE.md` - Image cache-bust parameter

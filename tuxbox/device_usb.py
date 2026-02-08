@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""TourBox Elite USB Driver - Linux Input Device
+"""TuxBox USB Driver - Linux Input Device
 
-Implements USB serial communication for TourBox Elite.
+Implements USB serial communication for TourBox controllers.
 Uses the same button code protocol as BLE, but over USB CDC ACM serial.
 """
 
@@ -14,7 +14,7 @@ from typing import Optional
 
 import serial
 
-from .device_base import TourBoxBase
+from .device_base import TuxBoxBase
 from .config_loader import load_profiles, load_device_config
 from .window_monitor import WindowMonitor
 from .haptic import build_config_message_usb, HapticConfig
@@ -37,11 +37,11 @@ USB_PID_ELITE = 0x5741  # Confirmed Elite
 USB_PID_AMBIGUOUS = 0x5740  # Could be Neo or early Elite firmware
 
 
-class TourBoxUSB(TourBoxBase):
-    """TourBox Elite USB Driver
+class TuxBoxUSB(TuxBoxBase):
+    """TuxBox USB Driver
 
     Implements USB serial transport. Inherits common functionality
-    from TourBoxBase including button processing, modifier state machine,
+    from TuxBoxBase including button processing, modifier state machine,
     profile management, and virtual input device handling.
 
     The USB protocol uses the same single-byte button codes as BLE.
@@ -275,7 +275,7 @@ class TourBoxUSB(TourBoxBase):
             print("# ... (all buttons and rotary controls)")
             print("")
             print("See the default config for a complete example:")
-            print("  cat tourboxelite/default_mappings.conf")
+            print("  cat tuxbox/default_mappings.conf")
             sys.exit(1)
 
         self.use_profiles = True
@@ -355,7 +355,7 @@ class TourBoxUSB(TourBoxBase):
             # Cleanup
             await self.disconnect()
             self.cleanup()
-            logger.info("TourBox Elite USB driver stopped")
+            logger.info("TuxBox USB driver stopped")
 
 
 def main():
@@ -369,7 +369,7 @@ def main():
     )
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='TourBox Elite USB Driver')
+    parser = argparse.ArgumentParser(description='TuxBox USB Driver')
     parser.add_argument('--port', '-p', default=None,
                         help=f'USB serial port (default: {DEFAULT_USB_PORT})')
     parser.add_argument('-c', '--config', help='Path to custom config file')
@@ -382,7 +382,7 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     # Get port and settings from: 1) command line, 2) environment, 3) config file, 4) default
-    port = args.port or os.getenv('TOURBOX_USB_PORT')
+    port = args.port or os.getenv('TUXBOX_USB_PORT')
 
     # Load device config for port and haptics settings
     device_config = load_device_config(args.config)
@@ -398,7 +398,7 @@ def main():
         logger.info("force_haptics enabled in config")
 
     # Create and start driver
-    driver = TourBoxUSB(port=port, config_path=args.config, force_haptics=force_haptics)
+    driver = TuxBoxUSB(port=port, config_path=args.config, force_haptics=force_haptics)
 
     try:
         asyncio.run(driver.start())

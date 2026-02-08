@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TourBox Elite Base Driver - Abstract base class for transport implementations
+"""TuxBox Base Driver - Abstract base class for transport implementations
 
 This module contains the shared logic for both BLE and USB transport implementations.
 It handles button code processing, modifier state machine, profile management,
@@ -58,7 +58,7 @@ class GracefulKiller:
         logger.info("Received SIGHUP - will reload config")
 
 
-class TourBoxBase(ABC):
+class TuxBoxBase(ABC):
     """Abstract base class for TourBox Elite transport implementations
 
     This class contains all transport-agnostic logic including:
@@ -75,14 +75,14 @@ class TourBoxBase(ABC):
     """
 
     def __init__(self, pidfile: Optional[str] = None, config_path: Optional[str] = None):
-        """Initialize the TourBox driver base
+        """Initialize the TuxBox driver base
 
         Args:
-            pidfile: Path to PID file (default: $XDG_RUNTIME_DIR/tourbox.pid)
+            pidfile: Path to PID file (default: $XDG_RUNTIME_DIR/tuxbox.pid)
             config_path: Path to configuration file (default: auto-detect)
         """
         # Default to user runtime dir, fallback to /tmp for user access
-        default_pidfile = os.path.join(os.getenv('XDG_RUNTIME_DIR', '/tmp'), 'tourbox.pid')
+        default_pidfile = os.path.join(os.getenv('XDG_RUNTIME_DIR', '/tmp'), 'tuxbox.pid')
         self.pidfile = pidfile or os.getenv('pidfile') or default_pidfile
         self.config_path = config_path
         self.controller: Optional[UInput] = None

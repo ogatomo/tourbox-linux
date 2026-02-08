@@ -18,6 +18,63 @@ from .haptic import HapticConfig, HapticStrength, HapticSpeed
 logger = logging.getLogger(__name__)
 
 
+def _migrate_config_dir_if_needed():
+    """Migrate config directory from ~/.config/tourbox/ to ~/.config/tuxbox/
+
+    Called automatically on first access to config paths. Handles:
+    - Copying the entire config tree from tourbox/ to tuxbox/
+    - Renaming tourbox_gui.profile to tuxbox_gui.profile
+    - Updating window_class/app_id inside the GUI profile
+    - Leaving the old directory intact as a backup
+
+    If ~/.config/tuxbox/ already exists, does nothing (already migrated or fresh).
+    """
+    sudo_user = os.environ.get('SUDO_USER')
+    if sudo_user:
+        home = os.path.expanduser(f'~{sudo_user}')
+    else:
+        home = os.path.expanduser('~')
+
+    new_dir = Path(home) / '.config' / 'tuxbox'
+    old_dir = Path(home) / '.config' / 'tourbox'
+
+    # Already migrated or fresh install
+    if new_dir.exists():
+        return
+
+    # Nothing to migrate
+    if not old_dir.exists():
+        return
+
+    # Copy entire tree
+    try:
+        shutil.copytree(str(old_dir), str(new_dir))
+        logger.info(f"Migrated config directory: {old_dir} -> {new_dir}")
+    except Exception as ex:
+        logger.error(f"Failed to migrate config directory: {ex}")
+        return
+
+    # Migrate the GUI profile if it exists
+    profiles_dir = new_dir / 'profiles'
+    old_gui_profile = profiles_dir / 'tourbox_gui.profile'
+    new_gui_profile = profiles_dir / 'tuxbox_gui.profile'
+
+    if old_gui_profile.exists():
+        try:
+            # Read and update content
+            content = old_gui_profile.read_text()
+            content = content.replace('name = TourBox GUI', 'name = TuxBox GUI')
+            content = content.replace('window_class = tourbox-gui', 'window_class = tuxbox-gui')
+            content = content.replace('app_id = tourbox-gui', 'app_id = tuxbox-gui')
+
+            # Write to new filename
+            new_gui_profile.write_text(content)
+            old_gui_profile.unlink()
+            logger.info(f"Migrated GUI profile: {old_gui_profile.name} -> {new_gui_profile.name}")
+        except Exception as ex:
+            logger.error(f"Failed to migrate GUI profile: {ex}")
+
+
 def get_profiles_dir(config_dir: str = None) -> Path:
     """Get the profiles directory path
 
@@ -37,22 +94,26 @@ def get_profiles_dir(config_dir: str = None) -> Path:
     else:
         home = os.path.expanduser('~')
 
-    return Path(home) / '.config' / 'tourbox' / 'profiles'
+    return Path(home) / '.config' / 'tuxbox' / 'profiles'
 
 
 def get_config_dir() -> Path:
     """Get the main config directory path
 
+    Automatically migrates from ~/.config/tourbox/ on first access.
+
     Returns:
-        Path to the config directory (~/.config/tourbox/)
+        Path to the config directory (~/.config/tuxbox/)
     """
+    _migrate_config_dir_if_needed()
+
     sudo_user = os.environ.get('SUDO_USER')
     if sudo_user:
         home = os.path.expanduser(f'~{sudo_user}')
     else:
         home = os.path.expanduser('~')
 
-    return Path(home) / '.config' / 'tourbox'
+    return Path(home) / '.config' / 'tuxbox'
 
 
 def sanitize_profile_filename(name: str) -> str:
@@ -513,7 +574,7 @@ def save_profile_to_file(profile, filepath: Path) -> bool:
         lines = []
 
         # Header comment
-        lines.append(f"# TourBox Elite Profile")
+        lines.append(f"# TuxBox Profile")
         lines.append(f"# Profile: {profile.name}")
         lines.append(f"# Exported: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         lines.append("")
@@ -860,7 +921,7 @@ def _write_device_config(filepath: Path, device_config: Dict) -> bool:
     """
     try:
         lines = []
-        lines.append("# TourBox Elite Configuration")
+        lines.append("# TuxBox Configuration")
         lines.append("# Profile mappings are stored in the profiles/ directory")
         lines.append("")
         lines.append("[device]")
@@ -1046,11 +1107,11 @@ def create_initial_config(mac_address: str = None) -> Tuple[bool, str]:
         return False, f"Error: {ex}"
 
 
-def ensure_tourbox_gui_profile() -> Tuple[bool, str]:
-    """Ensure the TourBox GUI profile exists
+def ensure_tuxbox_gui_profile() -> Tuple[bool, str]:
+    """Ensure the TuxBox GUI profile exists
 
     This is called during reinstall to ensure the meta-configuration profile
-    is present even if other profiles exist. The TourBox GUI profile allows
+    is present even if other profiles exist. The TuxBox GUI profile allows
     the TourBox to control its own configuration GUI.
 
     Returns:
@@ -1059,11 +1120,11 @@ def ensure_tourbox_gui_profile() -> Tuple[bool, str]:
     from .config_loader import load_profiles_from_legacy_file
 
     profiles_dir = get_profiles_dir()
-    gui_profile_path = profiles_dir / 'tourbox_gui.profile'
+    gui_profile_path = profiles_dir / 'tuxbox_gui.profile'
 
     # Already exists
     if gui_profile_path.exists():
-        return True, "TourBox GUI profile already exists"
+        return True, "TuxBox GUI profile already exists"
 
     # Find default_mappings.conf
     default_config = Path(__file__).parent / 'default_mappings.conf'
@@ -1074,28 +1135,28 @@ def ensure_tourbox_gui_profile() -> Tuple[bool, str]:
         # Load all profiles from default config
         profiles = load_profiles_from_legacy_file(str(default_config))
 
-        # Find the TourBox GUI profile
+        # Find the TuxBox GUI profile
         gui_profile = None
         for profile in profiles:
-            if profile.name == 'TourBox GUI':
+            if profile.name == 'TuxBox GUI':
                 gui_profile = profile
                 break
 
         if gui_profile is None:
-            return False, "TourBox GUI profile not found in default config"
+            return False, "TuxBox GUI profile not found in default config"
 
         # Ensure profiles directory exists
         profiles_dir.mkdir(parents=True, exist_ok=True)
 
         # Save the profile
         if save_profile_to_file(gui_profile, gui_profile_path):
-            logger.info(f"Created TourBox GUI profile: {gui_profile_path}")
-            return True, f"Created TourBox GUI profile"
+            logger.info(f"Created TuxBox GUI profile: {gui_profile_path}")
+            return True, f"Created TuxBox GUI profile"
         else:
-            return False, "Failed to save TourBox GUI profile"
+            return False, "Failed to save TuxBox GUI profile"
 
     except Exception as ex:
-        logger.error(f"Error ensuring TourBox GUI profile: {ex}")
+        logger.error(f"Error ensuring TuxBox GUI profile: {ex}")
         return False, f"Error: {ex}"
 
 

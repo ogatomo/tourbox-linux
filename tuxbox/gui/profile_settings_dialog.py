@@ -15,9 +15,9 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
 # Import from existing driver code
-from tourboxelite.config_loader import Profile
-from tourboxelite.window_monitor import WindowMonitor, WindowInfo
-from tourboxelite.haptic import HapticStrength, HapticSpeed
+from tuxbox.config_loader import Profile
+from tuxbox.window_monitor import WindowMonitor, WindowInfo
+from tuxbox.haptic import HapticStrength, HapticSpeed
 
 logger = logging.getLogger(__name__)
 

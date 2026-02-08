@@ -1,22 +1,22 @@
-# Understanding Button Behavior in TourBox Linux
+# Understanding Button Behavior in TuxBox
 
 ## Immediate Fire (Default Behavior)
 
-The TourBox Linux driver uses **immediate fire** - base actions fire instantly when you press a button, with **zero latency**. This mimics the feel of a physical keyboard.
+The TuxBox driver uses **immediate fire** - base actions fire instantly when you press a button, with **zero latency**. This mimics the feel of a physical keyboard.
 
 ### How Double-Press Works
 
 When you configure a double-press action on a button:
 
-1. **First press** → Base action fires immediately (no delay!)
-2. **First release** → Base action releases
-3. **Second press within timeout** → Double-press action fires
-4. **Second release** → Double-press action releases
+1. **First press** -> Base action fires immediately (no delay!)
+2. **First release** -> Base action releases
+3. **Second press within timeout** -> Double-press action fires
+4. **Second release** -> Double-press action releases
 
 **Example:** Button with Space (pan) + double-press Shift:
-- Quick tap → Space tap
-- Hold → Space held (pan works!)
-- Double-tap → Space tap, then Shift
+- Quick tap -> Space tap
+- Hold -> Space held (pan works!)
+- Double-tap -> Space tap, then Shift
 
 The "dirty" part: If you double-press, you get a quick tap of the base action before the double-press action. For most workflows, this is acceptable and preferable to having latency on every press.
 
@@ -28,7 +28,7 @@ The timeout (default 300ms) determines how quickly you must tap twice:
 - **300ms** (default): Safe default, reliable double-press detection
 - **400-500ms**: More forgiving, easier to hit double-press
 
-Adjust this in Profile Settings → Double-Click → Timeout.
+Adjust this in Profile Settings -> Double-Click -> Timeout.
 
 ---
 
@@ -56,7 +56,7 @@ The official TourBox driver on Windows:
 - Can use overlay menus and application-specific hooks
 - Has deeper system integration that allows "smart" behavior
 
-The Linux driver:
+The TuxBox Linux driver:
 - Emulates a standard keyboard/mouse input device (via uinput)
 - Sends keystrokes just like a physical keyboard would
 - Works within keyboard emulation constraints

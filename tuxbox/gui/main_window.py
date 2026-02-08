@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Main window for TourBox Configuration GUI"""
+"""Main window for TuxBox Configuration GUI"""
 
 import sys
 import logging
@@ -21,17 +21,17 @@ from .config_writer import (save_profile, save_profile_metadata, create_new_prof
                             save_modifier_config, save_mapping_comments, save_haptic_config)
 
 # Import from existing driver code
-from tourboxelite.config_loader import load_profiles
+from tuxbox.config_loader import load_profiles
 
 logger = logging.getLogger(__name__)
 
 
-class TourBoxConfigWindow(QMainWindow):
-    """Main configuration window for TourBox"""
+class TuxBoxConfigWindow(QMainWindow):
+    """Main configuration window for TuxBox"""
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("TourBox Configuration")
+        self.setWindowTitle("TuxBox Configuration")
         self.setMinimumSize(1000, 940)  # Increased to ensure all controls including buttons are fully visible
         self.resize(1280, 1024)
 
@@ -152,7 +152,7 @@ class TourBoxConfigWindow(QMainWindow):
 
         # Restart Driver action
         restart_driver_action = QAction("&Restart Driver", self)
-        restart_driver_action.setStatusTip("Restart the TourBox driver service and reload profiles")
+        restart_driver_action.setStatusTip("Restart the TuxBox driver service and reload profiles")
         restart_driver_action.triggered.connect(self._on_restart_driver)
         file_menu.addAction(restart_driver_action)
 
@@ -184,7 +184,7 @@ class TourBoxConfigWindow(QMainWindow):
 
         # About action
         about_action = QAction("&About", self)
-        about_action.setStatusTip("About TourBox Linux Driver")
+        about_action.setStatusTip("About TuxBox")
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
 
@@ -204,7 +204,7 @@ class TourBoxConfigWindow(QMainWindow):
         # Get the path to the icon file
         # __file__ is the path to this module (main_window.py)
         assets_dir = Path(__file__).parent / "assets"
-        icon_path = assets_dir / "tourbox-icon.png"
+        icon_path = assets_dir / "tuxbox-icon.png"
 
         if icon_path.exists():
             icon = QIcon(str(icon_path))
@@ -242,7 +242,7 @@ class TourBoxConfigWindow(QMainWindow):
                     self,
                     "No Profiles Found",
                     "No profiles found in configuration.\n"
-                    "Please check your configuration at ~/.config/tourbox/"
+                    "Please check your configuration at ~/.config/tuxbox/"
                 )
                 self.statusBar().showMessage("No profiles found")
                 return
@@ -345,7 +345,7 @@ class TourBoxConfigWindow(QMainWindow):
                 # This will automatically select the first control
                 self.controls_list.load_profile(self.current_profile)
                 # Also need to reload profile list to revert any name/window matching changes
-                from tourboxelite.config_loader import load_profiles
+                from tuxbox.config_loader import load_profiles
                 profiles = load_profiles()
                 # Reset original names tracking
                 self.profile_original_names = {id(profile): profile.name for profile in profiles}
@@ -811,7 +811,7 @@ class TourBoxConfigWindow(QMainWindow):
 
     def _update_window_title(self):
         """Update window title to show modified state"""
-        title = "TourBox Configuration"
+        title = "TuxBox Configuration"
         if self.current_profile:
             title += f" - {self.current_profile.name}"
         if self.is_modified:
@@ -1162,7 +1162,7 @@ class TourBoxConfigWindow(QMainWindow):
 
     def _check_migration(self):
         """Check if config migration is needed and perform it automatically"""
-        from tourboxelite.profile_io import needs_migration, migrate_legacy_config
+        from tuxbox.profile_io import needs_migration, migrate_legacy_config
 
         if not needs_migration():
             return
@@ -1171,7 +1171,7 @@ class TourBoxConfigWindow(QMainWindow):
         QMessageBox.information(
             self,
             "Configuration Migration",
-            "TourBox Linux now stores profiles in individual files for easier sharing.\n\n"
+            "TuxBox now stores profiles in individual files for easier sharing.\n\n"
             "All your existing profiles and settings will be preserved.\n"
             "A backup of your current configuration will also be created."
         )
@@ -1222,7 +1222,7 @@ class TourBoxConfigWindow(QMainWindow):
             QMessageBox.information(
                 self,
                 "Driver Restarted",
-                "The TourBox driver has been restarted and profiles have been reloaded."
+                "The TuxBox driver has been restarted and profiles have been reloaded."
             )
         else:
             self.statusBar().showMessage(f"Failed to restart driver: {message}")
@@ -1267,7 +1267,7 @@ class TourBoxConfigWindow(QMainWindow):
     def _open_user_guide(self):
         """Open the GUI User Guide documentation on GitHub"""
         QDesktopServices.openUrl(
-            QUrl("https://github.com/AndyCappDev/tourbox-linux/blob/master/docs/GUI_USER_GUIDE.md")
+            QUrl("https://github.com/AndyCappDev/tuxbox/blob/master/docs/GUI_USER_GUIDE.md")
         )
 
     def _show_about(self):
@@ -1275,19 +1275,19 @@ class TourBoxConfigWindow(QMainWindow):
         from . import __version__
 
         about_text = f"""
-<h2>TourBox Linux Driver</h2>
+<h2>TuxBox</h2>
 <p>Version {__version__}</p>
-<p>A Linux driver for the TourBox Lite, Neo, Elite and Elite Plus controllers,<br>
+<p>A Linux driver for TourBox Lite, Neo, Elite and Elite Plus controllers,<br>
 with full GUI configuration support.</p>
 <p><b>Author:</b> Scott Bowman (<a href="https://github.com/AndyCappDev">AndyCappDev</a>)</p>
-<p><a href="https://github.com/AndyCappDev/tourbox-linux">Project Homepage</a></p>
+<p><a href="https://github.com/AndyCappDev/tuxbox">Project Homepage</a></p>
 <hr>
 <p>If you find this software useful, please consider giving it a ⭐ on GitHub<br>
-(click the Star button in the top right of the <a href="https://github.com/AndyCappDev/tourbox-linux">project page</a>).</p>
+(click the Star button in the top right of the <a href="https://github.com/AndyCappDev/tuxbox">project page</a>).</p>
 """
 
         msg = QMessageBox(self)
-        msg.setWindowTitle("About TourBox Linux Driver")
+        msg.setWindowTitle("About TuxBox")
         msg.setTextFormat(Qt.RichText)
         msg.setText(about_text)
         msg.setIcon(QMessageBox.Information)
@@ -1353,7 +1353,7 @@ with full GUI configuration support.</p>
 
         # Handle button click
         if msg.clickedButton() == view_btn:
-            webbrowser.open("https://github.com/AndyCappDev/tourbox-linux/releases")
+            webbrowser.open("https://github.com/AndyCappDev/tuxbox/releases")
 
     def _on_no_update(self, current_version: str):
         """Handle no update available signal"""
@@ -1634,12 +1634,12 @@ def main():
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
 
-    logger.info("Starting TourBox Configuration GUI")
+    logger.info("Starting TuxBox Configuration GUI")
 
     # Create Qt application
     app = QApplication(sys.argv)
-    app.setApplicationName("TourBox Configuration")
-    app.setDesktopFileName("tourbox-gui.desktop")
+    app.setApplicationName("TuxBox Configuration")
+    app.setDesktopFileName("tuxbox-gui.desktop")
 
     # Detect and fix bogus font metrics. Some system fonts (e.g., "Courier Prime
     # Code") have wildly incorrect metrics (descent of 500+ pixels) which causes
@@ -1657,7 +1657,7 @@ def main():
         app.setFont(QFont("Sans Serif", 10))
 
     # Create and show main window
-    window = TourBoxConfigWindow()
+    window = TuxBoxConfigWindow()
     window.show()
 
     # Run application event loop

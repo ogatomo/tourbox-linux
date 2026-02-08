@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install TourBox Elite configuration file
+# Install TuxBox configuration file
 #
 # NOTE: If you used install.sh, you already have a config file!
 #       This script is only needed if:
@@ -13,12 +13,12 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-CONFIG_DIR="$HOME/.config/tourbox"
+CONFIG_DIR="$HOME/.config/tuxbox"
 PROFILES_DIR="$CONFIG_DIR/profiles"
 CONFIG_FILE="$CONFIG_DIR/mappings.conf"
-DEFAULT_CONFIG="tourboxelite/default_mappings.conf"
+DEFAULT_CONFIG="tuxbox/default_mappings.conf"
 
-echo "TourBox Elite Configuration Installer"
+echo "TuxBox Configuration Installer"
 echo "======================================"
 echo ""
 
@@ -29,7 +29,7 @@ if [ -d "$PROFILES_DIR" ] && [ "$(ls -A "$PROFILES_DIR"/*.profile 2>/dev/null)" 
     echo "Your profiles are stored in: $PROFILES_DIR"
     echo ""
     echo "To manage profiles, use the GUI:"
-    echo "  tourbox-gui"
+    echo "  tuxbox-gui"
     echo ""
     echo "To reset to defaults, first remove the profiles directory:"
     echo "  rm -rf $PROFILES_DIR $CONFIG_DIR/config.conf"
@@ -81,7 +81,7 @@ cp "$DEFAULT_CONFIG" "$CONFIG_FILE"
 if [ $SKIP_MAC_PROMPT -eq 0 ]; then
     echo ""
     echo "===================================="
-    echo "TourBox Elite MAC Address Setup"
+    echo "TourBox MAC Address Setup"
     echo "===================================="
     echo ""
     echo "To find your TourBox MAC address:"
@@ -89,7 +89,7 @@ if [ $SKIP_MAC_PROMPT -eq 0 ]; then
     echo "  2. Run: bluetoothctl devices"
     echo "  3. Look for 'TourBox Elite' in the output"
     echo ""
-    read -p "Enter your TourBox Elite MAC address (XX:XX:XX:XX:XX:XX) or press Enter to skip: " MAC_ADDRESS
+    read -p "Enter your TourBox MAC address (XX:XX:XX:XX:XX:XX) or press Enter to skip: " MAC_ADDRESS
 
     if [ -n "$MAC_ADDRESS" ]; then
         # Validate MAC address format
@@ -113,7 +113,7 @@ echo "===================================="
 echo "Configuration Mode Selection"
 echo "===================================="
 echo ""
-echo "The TourBox driver supports two configuration modes:"
+echo "The TuxBox driver supports two configuration modes:"
 echo ""
 echo "1. SIMPLE MODE"
 echo "   - Single mapping for all applications"
@@ -170,7 +170,7 @@ if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
 
         echo ""
         echo "To find window_class for your apps:"
-        echo "  python3 -m tourboxelite.window_monitor"
+        echo "  python3 -m tuxbox.window_monitor"
         echo ""
     else
         echo ""
@@ -189,16 +189,16 @@ echo ""
 echo "Configuration file: $CONFIG_FILE"
 echo ""
 echo "Next steps:"
-echo "  1. Run the driver: sudo ./venv/bin/python -m tourboxelite.device_ble"
+echo "  1. Run the driver: sudo ./venv/bin/python -m tuxbox.device_ble"
 echo "  2. Test your TourBox buttons"
 echo ""
 echo "To customize button mappings:"
 echo "  nano $CONFIG_FILE"
 echo ""
 echo "For profile mode tips:"
-echo "  - Test window detection: python3 -m tourboxelite.window_monitor"
+echo "  - Test window detection: python3 -m tuxbox.window_monitor"
 echo "  - See examples in config file (commented out)"
 echo "  - Read CONFIG_GUIDE.md for full documentation"
 echo ""
-echo "After editing config, restart the TourBox driver."
+echo "After editing config, restart the TuxBox driver."
 echo ""

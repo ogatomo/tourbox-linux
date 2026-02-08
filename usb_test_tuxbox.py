@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test the USB serial connection to TourBox Elite"""
+"""TuxBox USB test - test the USB serial connection to TourBox Elite"""
 
 import sys
 import time
@@ -29,7 +29,7 @@ CONFIG_COMMANDS = [
 
 def main():
     print("=" * 60)
-    print("TourBox Elite USB Test")
+    print("TuxBox USB Test")
     print("Using same unlock command as BLE")
     print("=" * 60)
     print(f"\nConnecting to {USB_PORT}...\n")
