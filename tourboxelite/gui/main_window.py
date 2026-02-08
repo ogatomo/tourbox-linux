@@ -1648,6 +1648,23 @@ def main():
     app.setApplicationName("TourBox Configuration")
     app.setDesktopFileName("tourbox-gui.desktop")
 
+    # Detect and fix bogus font metrics. Some systems (e.g., Linux Mint/Cinnamon)
+    # report wildly incorrect font metrics (lineSpacing 500+) even with QT_FONT_DPI
+    # set. Override the application font to force sane metrics for ALL widgets
+    # (menu bars, toolbars, etc.), not just those using safe_line_spacing().
+    _MAX_SANE_LINE_SPACING = 50
+    fm = app.fontMetrics()
+    if fm.lineSpacing() > _MAX_SANE_LINE_SPACING:
+        logger.warning(
+            "Bogus font metrics detected (lineSpacing=%d), "
+            "overriding application font to force sane metrics",
+            fm.lineSpacing()
+        )
+        from PySide6.QtGui import QFont
+        font = app.font()
+        font.setPixelSize(13)
+        app.setFont(font)
+
     # Create and show main window
     window = TourBoxConfigWindow()
     window.show()
