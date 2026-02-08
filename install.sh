@@ -300,7 +300,9 @@ OLD_CONFIG_DIR="$HOME/.config/tourbox"
 NEW_CONFIG_DIR="$HOME/.config/tuxbox"
 if [ -d "$OLD_CONFIG_DIR" ] && [ ! -d "$NEW_CONFIG_DIR" ]; then
     cp -a "$OLD_CONFIG_DIR" "$NEW_CONFIG_DIR"
-    echo -e "${GREEN}✓${NC} Copied config from ~/.config/tourbox/ to ~/.config/tuxbox/"
+    mv "$OLD_CONFIG_DIR" "$HOME/.config/tourbox.pre-v3-backup"
+    echo -e "${GREEN}✓${NC} Migrated config from ~/.config/tourbox/ to ~/.config/tuxbox/"
+    echo -e "${GREEN}✓${NC} Old config backed up to ~/.config/tourbox.pre-v3-backup/"
     MIGRATED_SOMETHING=true
 fi
 

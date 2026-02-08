@@ -146,7 +146,7 @@ async def scan_for_tuxbox(timeout: float = 10.0) -> Optional[BLEDevice]:
 
 
 class TuxBoxBLE(TuxBoxBase):
-"""TuxBox BLE Driver
+    """TuxBox BLE Driver
 
     Implements BLE transport using Bleak library. Inherits common functionality
     from TuxBoxBase including button processing, modifier state machine,

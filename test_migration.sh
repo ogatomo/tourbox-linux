@@ -116,11 +116,18 @@ else
     fail "New config dir NOT created after migration"
 fi
 
-# Check old dir preserved
-if [ -d "$TEMP_HOME/.config/tourbox" ]; then
-    pass "Old config dir preserved (not deleted)"
+# Check old dir renamed to backup
+if [ -d "$TEMP_HOME/.config/tourbox.pre-v3-backup" ]; then
+    pass "Old config dir renamed to tourbox.pre-v3-backup"
 else
-    fail "Old config dir was deleted (should be preserved)"
+    fail "Old config dir NOT renamed to backup"
+fi
+
+# Check old dir no longer exists under original name
+if [ ! -d "$TEMP_HOME/.config/tourbox" ]; then
+    pass "Old ~/.config/tourbox/ removed"
+else
+    fail "Old ~/.config/tourbox/ still exists (should be renamed)"
 fi
 
 # Check config.conf was copied
@@ -185,7 +192,7 @@ fi
 echo ""
 
 # --- Clean up for Test 3 ---
-rm -rf "$TEMP_HOME/.config/tuxbox" "$TEMP_HOME/.config/tourbox"
+rm -rf "$TEMP_HOME/.config/tuxbox" "$TEMP_HOME/.config/tourbox" "$TEMP_HOME/.config/tourbox.pre-v3-backup"
 
 # --- Test 3: No migration when new dir already exists ---
 echo "--- Test 3: No migration when new dir already exists ---"

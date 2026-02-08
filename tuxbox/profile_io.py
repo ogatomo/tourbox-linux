@@ -25,7 +25,7 @@ def _migrate_config_dir_if_needed():
     - Copying the entire config tree from tourbox/ to tuxbox/
     - Renaming tourbox_gui.profile to tuxbox_gui.profile
     - Updating window_class/app_id inside the GUI profile
-    - Leaving the old directory intact as a backup
+    - Renaming the old directory to tourbox.pre-v3-backup
 
     If ~/.config/tuxbox/ already exists, does nothing (already migrated or fresh).
     """
@@ -73,6 +73,14 @@ def _migrate_config_dir_if_needed():
             logger.info(f"Migrated GUI profile: {old_gui_profile.name} -> {new_gui_profile.name}")
         except Exception as ex:
             logger.error(f"Failed to migrate GUI profile: {ex}")
+
+    # Rename old directory so users don't confuse it with the active config
+    backup_dir = Path(home) / '.config' / 'tourbox.pre-v3-backup'
+    try:
+        old_dir.rename(backup_dir)
+        logger.info(f"Renamed old config dir: {old_dir} -> {backup_dir}")
+    except Exception as ex:
+        logger.warning(f"Could not rename old config dir: {ex}")
 
 
 def get_profiles_dir(config_dir: str = None) -> Path:
