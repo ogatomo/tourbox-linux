@@ -66,7 +66,7 @@ tuxbox-gui
 
 ## Understanding the Interface
 
-![TuxBox Configuration GUI](images/gui-screenshot.png?v=2.10.0)
+![TuxBox Configuration GUI](images/gui-screenshot.png?v=3.0.1)
 
 The GUI has a 4-panel layout:
 

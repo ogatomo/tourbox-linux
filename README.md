@@ -34,7 +34,7 @@ Linux driver for the TourBox Lite, Neo, Elite and Elite Plus by TourBox Tech Inc
 - ✅ **Systemd Integration** - Runs as a user service, starts on login
 - ✅ **Non-Systemd Support** - Works with OpenRC, runit, s6, and other init systems
 
-![TuxBox Configuration GUI](docs/images/gui-screenshot.png?v=3.0.0)
+![TuxBox Configuration GUI](docs/images/gui-screenshot.png?v=3.0.1)
 
 ## Requirements
 
